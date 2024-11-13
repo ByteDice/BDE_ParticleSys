@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "bde_particles",
+  "version": "${version}",
+  "name": "BDE Particle System",
+  "description": "A server-side particle system ",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/bde_particles/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.bytedice.bde_particles.Bde_particles"
+    ]
+  },
+  "mixins": [
+    "bde_particles.mixins.json",
+    {
+      "config": "bde_particles.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-language-kotlin": ">=${kotlin_loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
