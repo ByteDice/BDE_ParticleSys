@@ -27,12 +27,10 @@ class ParticleEmitter {
     val displayName = Text.literal(name)
       .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true))
 
-    val loreLines = listOf(
-      Text.literal("BPS").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true)),
-      Text.literal("Bound to id \"$particleId\"").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true))
-    )
+    val loreLines = Text.literal("BPS - Bound to id \"$particleId\"")
+      .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true))
 
-    val lore = LoreComponent(loreLines)
+    val lore = LoreComponent(listOf(loreLines))
 
     i.set(DataComponentTypes.ITEM_NAME, displayName)
     i.set(DataComponentTypes.CUSTOM_DATA, component)
@@ -44,6 +42,6 @@ class ParticleEmitter {
   fun onRightCLick(player: ServerPlayerEntity) {
     val hitResult = raycastFromPlayer(player, 4.5) ?: return
 
-    // spawn particle at hitresult
+    // spawn particle at hitResult
   }
 }
