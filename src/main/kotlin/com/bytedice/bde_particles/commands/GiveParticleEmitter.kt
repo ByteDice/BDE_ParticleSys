@@ -4,6 +4,7 @@ import com.bytedice.bde_particles.items.ParticleEmitter
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
+import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.command.argument.ItemStackArgumentType
 import net.minecraft.item.Items
 import net.minecraft.server.command.CommandManager
@@ -14,12 +15,12 @@ import net.minecraft.text.TextColor
 import java.awt.Color
 
 object GiveParticleEmitter {
-  fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
+  fun register(dispatcher: CommandDispatcher<ServerCommandSource>, registryAccess: CommandRegistryAccess) {
     dispatcher.register(
       CommandManager.literal("giveParticleEmitter")
         .requires {  source -> source.hasPermissionLevel(2) }
         .then(CommandManager.argument("item name", StringArgumentType.string()))
-        .then(CommandManager.argument("item type", /*ItemStackArgumentType.itemStack()*/ StringArgumentType.string()))
+        .then(CommandManager.argument("item type", ItemStackArgumentType.itemStack(registryAccess)))
         .then(CommandManager.argument("particle id", StringArgumentType.string()))
 
         .executes { context ->
