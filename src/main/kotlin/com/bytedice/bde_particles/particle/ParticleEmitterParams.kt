@@ -1,12 +1,11 @@
 package com.bytedice.bde_particles.particle
 
-class ParticleEmitterParams {
-  data class init (
-    val maxCount:      Int             = 20,
-    val spawnDur:      Int             = 20,
-    val particleTypes: Array<Particle> = emptyArray(),
-    val loop:          Boolean         = false,
-    val loopDelay:     Int             = 10,
-    val loopCount:     Int             = 2,
-  )
-}
+data class ParticleEmitterParams (
+  val maxCount:      Int             = 100,
+  val spawnsPerTick: Int             = 1,
+  val particleTypes: Array<Particle> = emptyArray(),
+  val loop:          Boolean         = false,
+  val loopDur:       Int             = 1,
+  val loopDelay:     Int             = 10,
+  val loopCount:     Int             = 2,
+)

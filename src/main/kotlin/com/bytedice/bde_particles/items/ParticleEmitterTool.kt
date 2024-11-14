@@ -42,7 +42,11 @@ fun getToolDetails(item: ItemStack) : Pair<Boolean, String> {
   val isParticleEmitterTool = customData?.nbt?.getByte("BPS_particleTool") == 1.toByte()
   val particleId = customData?.nbt?.getString("BPS_particleId")
 
-  if (particleId == null) { return Pair(isParticleEmitterTool, "") }
+  return if (particleId == null) {
+    Pair(isParticleEmitterTool, "")
+  }
 
-  else { return Pair(isParticleEmitterTool, particleId) }
+  else {
+    Pair(isParticleEmitterTool, particleId)
+  }
 }

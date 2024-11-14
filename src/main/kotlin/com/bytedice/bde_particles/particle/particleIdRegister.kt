@@ -14,3 +14,8 @@ fun returnParticleFunction(id: String) : ParticleEmitterParams? {
 fun addToParticleRegister(id: String, params: ParticleEmitterParams) {
   particleIdRegister[id] = params
 }
+
+
+fun getParticleEmitterParams(id: String) : ParticleEmitterParams? {
+  return particleIdRegister[id]
+}
