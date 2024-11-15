@@ -48,10 +48,8 @@ class Bde_particles : ModInitializer {
       onRightClick(player, world as ServerWorld, hand)
     })
 
-    ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { server: MinecraftServer ->
-
-      server.playerManager.broadcast(Text.of("BDAT - Loaded"), false)
-      print("BDAT - Loaded")
+    ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { _ ->
+      println("BDE_ParticleSys - Progress bar filled :3")
     })
   }
 }

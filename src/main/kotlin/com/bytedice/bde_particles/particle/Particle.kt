@@ -28,6 +28,8 @@ class Particle(particleParams: ParticleParams) {
   var blockDisplay: DisplayEntity? = null
   val params = particleParams
 
+  var isInit = false
+
   fun init(pos: Vec3d) {
     val properties = DisplayEntityProperties(
       pos          = pos,
@@ -37,11 +39,14 @@ class Particle(particleParams: ParticleParams) {
     )
     
     blockDisplay = DisplayEntity(properties)
+
+    isInit = true
   }
 
 
   fun spawn(world: ServerWorld) {
-    blockDisplay?.spawn(world)
+    if (isInit) { blockDisplay?.spawn(world) }
+    else { error("Particle is not initialized before being spawned. Please use Particle.init() to initialize it") }
   }
 
 

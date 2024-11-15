@@ -24,7 +24,7 @@ class DisplayEntity(val properties: DisplayEntityProperties?) {
     val e = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
 
     val nbt = NbtCompound().apply {
-      putString("Name", properties.blockType)
+      put("block_state", NbtCompound().apply { putString("Name", properties.blockType) })
       put("transformation", NbtCompound().apply {
         val offsetList = NbtList().apply {
           add(NbtFloat.of(properties.translation.x))
