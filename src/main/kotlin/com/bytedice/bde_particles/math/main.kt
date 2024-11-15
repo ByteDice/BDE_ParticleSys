@@ -5,12 +5,10 @@ import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.World
+import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector4f
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 import kotlin.random.Random
 
 
@@ -89,4 +87,62 @@ fun quatToEuler(quat: Vector4f): Vector3f {
   val yaw = atan2(siny_cosp, cosy_cosp)
 
   return Vector3f(roll, pitch, yaw)
+}
+
+
+fun randomInCircle(r: Float) : Vector2f {
+  val randRadius = r * sqrt(randomFloatBetween(0.0f, 1.0f))
+  val randAngle  = randomFloatBetween(0.0f, Math.PI.toFloat() * 2)
+
+  val randomPos = Vector2f(randRadius * cos(randAngle), randRadius * sin(randAngle))
+  return randomPos
+}
+
+
+fun randomInSphere(r: Float) : Vec3d {
+  val randRadius = r * Random.nextDouble().pow(1.0 / 3.0)
+
+  val phi = Random.nextDouble(0.0, 2 * Math.PI)
+
+  val cosTheta = Random.nextDouble(-1.0, 1.0)
+  val theta = acos(cosTheta)
+
+  val x = randRadius * sin(theta) * cos(phi)
+  val y = randRadius * sin(theta) * sin(phi)
+  val z = randRadius * cos(theta)
+
+  return Vec3d(x, y, z)
+}
+
+
+fun randomInRect(w: Float, h: Float) : Vector2f {
+  return Vector2f(randomFloatBetween(0.0f, w), randomFloatBetween(0.0f, h))
+}
+
+
+fun transformOffsetByQuat(offset: Vector3f, rotation: Vector4f): Vector3f {
+  val x = offset.x
+  val y = offset.y
+  val z = offset.z
+
+  val qx = rotation.x.toDouble()
+  val qy = rotation.y.toDouble()
+  val qz = rotation.z.toDouble()
+  val qw = rotation.w.toDouble()
+
+  val t2 = qw * x + qy * z - qz * y
+  val t3 = qw * y + qz * x - qx * z
+  val t4 = qw * z + qx * y - qy * x
+  val t5 = -qx * x - qy * y - qz * z
+
+  val newX = t2 * qw + t5 * -qx + t3 * -qz - t4 * -qy
+  val newY = t3 * qw + t5 * -qy + t4 * -qx - t2 * -qz
+  val newZ = t4 * qw + t5 * -qz + t2 * -qy - t3 * -qx
+
+  return Vector3f(newX.toFloat(), newY.toFloat(), newZ.toFloat())
+}
+
+
+fun transformOffsetByScale(offset: Vector3f, scale: Vector3f): Vector3f {
+  return offset.mul(scale)
 }
