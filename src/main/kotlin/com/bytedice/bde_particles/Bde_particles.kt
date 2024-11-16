@@ -9,18 +9,18 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
-import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtElement
-import net.minecraft.nbt.NbtString
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
+
+
+// TODO: finish the particle ticking
+// TODO: save particle emitters in world file (so they don't linger forever)
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
@@ -36,7 +36,7 @@ val cfg = Config()
 class Bde_particles : ModInitializer {
 
   override fun onInitialize() {
-    ServerLifecycleEvents.SERVER_STARTED.register { server ->
+    ServerLifecycleEvents.SERVER_STARTED.register { _ ->
       init()
     }
 
