@@ -5,15 +5,17 @@ import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtFloat
 import net.minecraft.nbt.NbtList
+import net.minecraft.nbt.NbtString
 import net.minecraft.server.world.ServerWorld
 
 class DisplayEntity(val properties: DisplayEntityProperties?) {
   private var hasSpawned = false
+  private var entity: BlockDisplayEntity? = null
 
   fun spawn(world: ServerWorld) : BlockDisplayEntity? {
-    if (this.hasSpawned || properties == null) { return null }
+    if (hasSpawned || properties == null) { return null }
 
-    val e = updateProperties(world, this.properties)
+    val e = updateProperties(world, properties)
     world.spawnEntity(e)
 
     this.hasSpawned = true
@@ -23,8 +25,18 @@ class DisplayEntity(val properties: DisplayEntityProperties?) {
   fun updateProperties(world: ServerWorld, properties: DisplayEntityProperties) : BlockDisplayEntity {
     val e = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
 
+    // TODO: add tag nbt and kill all particles when server starts
     val nbt = NbtCompound().apply {
+      val tagList = NbtList()
+
+      properties.tags.forEach { tag ->
+        tagList.add(NbtString.of(tag))
+      }
+
+      put("Tags", tagList)
+
       put("block_state", NbtCompound().apply { putString("Name", properties.blockType) })
+
       put("transformation", NbtCompound().apply {
         val offsetList = NbtList().apply {
           add(NbtFloat.of(properties.translation.x))
@@ -60,6 +72,11 @@ class DisplayEntity(val properties: DisplayEntityProperties?) {
 
     e.refreshPositionAndAngles(properties.pos.x, properties.pos.y, properties.pos.z, properties.rot.x, properties.rot.y)
 
+    entity = e
     return e
+  }
+
+  fun kill() {
+    entity?.kill()
   }
 }

@@ -11,17 +11,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
-import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
 
 
-// const val ALL_PARTICLE_EMITTERS: Array<> // ParticleEmitter
+var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 
 data class Config(
   val cooldown: Int = 1
@@ -56,12 +54,17 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToParticleRegister("DEBUG", ParticleEmitterParams())
+  addToParticleRegister("DEBUG", ParticleEmitterParams(loopDur = 20))
 }
 
 
 fun tick() {
-
+  for (emitter in ALL_PARTICLE_EMITTERS) {
+    if (emitter.isDead) {
+      ALL_PARTICLE_EMITTERS = ALL_PARTICLE_EMITTERS.toMutableList().apply { remove(emitter) }.toTypedArray()
+    }
+    else { emitter.tick() }
+  }
 }
 
 
@@ -80,7 +83,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
   }
 
   val emitter = ParticleEmitter(hitResult.pos, world, emitterParams)
-  emitter.tick()
+  ALL_PARTICLE_EMITTERS += emitter
 
   return TypedActionResult(ActionResult.PASS, handItem)
 }

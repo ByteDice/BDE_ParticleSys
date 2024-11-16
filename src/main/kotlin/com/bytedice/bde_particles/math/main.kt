@@ -67,24 +67,20 @@ fun quatToEuler(quat: Vector4f): Vector3f {
   val z = quat.z
   val w = quat.w
 
-  // Roll (X-axis rotation)
-  val sinr_cosp = 2 * (w * x + y * z)
-  val cosr_cosp = 1 - 2 * (x * x + y * y)
-  val roll = atan2(sinr_cosp, cosr_cosp)
+  val sinRCosP = 2 * (w * x + y * z)
+  val cosRCosP = 1 - 2 * (x * x + y * y)
+  val roll = atan2(sinRCosP, cosRCosP)
 
-  // Pitch (Y-axis rotation)
-  val sinp = 2 * (w * y - z * x)
-  val pitch = if (kotlin.math.abs(sinp) >= 1) {
-    // Use 90 degrees if out of range
-    kotlin.math.sign(sinp) * (Math.PI.toFloat() / 2)
+  val sinP = 2 * (w * y - z * x)
+  val pitch = if (abs(sinP) >= 1) {
+    sign(sinP) * (Math.PI.toFloat() / 2)
   } else {
-    asin(sinp)
+    asin(sinP)
   }
 
-  // Yaw (Z-axis rotation)
-  val siny_cosp = 2 * (w * z + x * y)
-  val cosy_cosp = 1 - 2 * (y * y + z * z)
-  val yaw = atan2(siny_cosp, cosy_cosp)
+  val sinYCosP = 2 * (w * z + x * y)
+  val cosYCosP = 1 - 2 * (y * y + z * z)
+  val yaw = atan2(sinYCosP, cosYCosP)
 
   return Vector3f(roll, pitch, yaw)
 }
@@ -145,4 +141,9 @@ fun transformOffsetByQuat(offset: Vector3f, rotation: Vector4f): Vector3f {
 
 fun transformOffsetByScale(offset: Vector3f, scale: Vector3f): Vector3f {
   return offset.mul(scale)
+}
+
+
+fun lerp(x: Float, y: Float, t: Float) : Float {
+  return x + (y - x) * t
 }
