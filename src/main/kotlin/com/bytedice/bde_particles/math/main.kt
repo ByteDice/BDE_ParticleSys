@@ -41,6 +41,15 @@ fun randomFloatBetween(min: Float, max: Float) : Float {
 }
 
 
+fun randomBetweenVector3f(min: Vector3f, max: Vector3f) : Vector3f {
+  return Vector3f(
+    randomFloatBetween(min.x, max.x),
+    randomFloatBetween(min.y, max.y),
+    randomFloatBetween(min.z, max.z)
+  )
+}
+
+
 fun eulerToQuat(euler: Vector3f): Vector4f {
   val roll  = euler.x
   val pitch = euler.y

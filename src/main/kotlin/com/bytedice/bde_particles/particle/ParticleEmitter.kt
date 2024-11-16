@@ -16,11 +16,14 @@ class ParticleEmitter(emitterPos: Vec3d, emitterWorld: ServerWorld, emitterParam
   private var loopDur   = 0
   private var loopDelayActive = false
 
+  private var isCounting = true
+
   var isDead = false
 
 
   fun tick() {
-    count()
+    if (isCounting) { count() }
+    if (!isCounting && allParticles.isEmpty()) { isDead = true }
 
     if (!loopDelayActive) {
       repeat(this.params.spawnsPerTick) {
@@ -33,7 +36,7 @@ class ParticleEmitter(emitterPos: Vec3d, emitterWorld: ServerWorld, emitterParam
 
     for (particle in allParticles) {
       if (particle.isDead) { allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray() }
-      else { particle.tick(world) }
+      else { particle.tick() }
     }
   }
 
@@ -43,7 +46,7 @@ class ParticleEmitter(emitterPos: Vec3d, emitterWorld: ServerWorld, emitterParam
       loopCount += 1
       loopDur = 0
       loopDelayActive = true
-      if (!params.loop) { isDead = true }
+      if (!params.loop) { isCounting = false }
     }
     else if (loopDelay >= params.loopDelay) {
       loopDelay = 0

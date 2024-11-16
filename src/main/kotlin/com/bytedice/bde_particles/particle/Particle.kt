@@ -10,37 +10,32 @@ import kotlin.math.round
 
 
 class Particle(private val particleParams: ParticleParams) {
-  private val rot = Vector3f(
-    randomFloatBetween(particleParams.rotRandom.first.x, particleParams.rotRandom.second.x),
-    randomFloatBetween(particleParams.rotRandom.first.y, particleParams.rotRandom.second.x),
-    randomFloatBetween(particleParams.rotRandom.first.z, particleParams.rotRandom.second.z)
-  )
-  private val rotVel = Vector3f(
-    randomFloatBetween(particleParams.rotVelRandom.first.x, particleParams.rotVelRandom.second.x),
-    randomFloatBetween(particleParams.rotVelRandom.first.y, particleParams.rotVelRandom.second.x),
-    randomFloatBetween(particleParams.rotVelRandom.first.z, particleParams.rotVelRandom.second.z)
-  )
-  private val scale = Vector3f(
-    randomFloatBetween(particleParams.sizeRandom.first.x, particleParams.sizeRandom.second.x),
-    randomFloatBetween(particleParams.sizeRandom.first.y, particleParams.sizeRandom.second.x),
-    randomFloatBetween(particleParams.sizeRandom.first.z, particleParams.sizeRandom.second.z)
-  )
+  private val initOffset = Vector3f(-0.5f, -0.5f, -0.5f)
+  private var offset     = Vector3f(0.0f, 0.0f, 0.0f)
+  private var pos        = Vec3d(0.0, 0.0, 0.0)
+
+  private val rot    = randomBetweenVector3f(particleParams.rotRandom.first, particleParams.rotRandom.second)
+  private val rotVel = randomBetweenVector3f(particleParams.rotVelRandom.first, particleParams.rotVelRandom.second)
+  private val scale  = randomBetweenVector3f(particleParams.sizeRandom.first, particleParams.sizeRandom.second)
+  private var vel    = randomBetweenVector3f(particleParams.velRandom.first, particleParams.velRandom.second)
+
   private var blockDisplay: DisplayEntity? = null
+
+  private val quatRot     = eulerToQuat(rot)
+  private val scaleOffset = transformOffsetByScale(initOffset, scale)
+  private val rotOffset   = transformOffsetByQuat(scaleOffset, quatRot)
 
   var isDead = false
   private var timeAlive = 0
 
   private var isInit = false
 
-  fun init(pos: Vec3d) {
-    val offset = Vector3f(-0.5f, -0.5f, -0.5f)
-    val quatRot = eulerToQuat(rot)
 
-    val scaleOffset = transformOffsetByScale(offset, scale)
-    val rotOffset = transformOffsetByQuat(scaleOffset, quatRot)
+  fun init(pos: Vec3d) {
+    this.pos = pos
 
     val properties = DisplayEntityProperties(
-      pos          = pos,
+      pos          = this.pos,
       blockType    = particleParams.blockCurve[0],
       translation  = rotOffset,
       leftRotation = quatRot,
@@ -60,14 +55,12 @@ class Particle(private val particleParams: ParticleParams) {
   }
 
 
-  fun tick(world: ServerWorld) {
+  fun tick() {
     if (!isInit) { error("Particle is not initialized before being ticked. Please use Particle.init() to initialize it.") }
-
-    val properties = blockDisplay?.properties ?: return
 
     val newProperties = calculateNewProperties()
 
-    blockDisplay?.updateProperties(world, newProperties)
+    blockDisplay?.updateProperties(newProperties)
 
     if (timeAlive > particleParams.lifeTime) { isDead = true; blockDisplay?.kill() }
 
@@ -76,17 +69,37 @@ class Particle(private val particleParams: ParticleParams) {
 
 
   private fun calculateNewProperties() : DisplayEntityProperties {
-    val newBlockIdx = round(lerp(
-      0.0f,
-      particleParams.blockCurve.lastIndex.toFloat(),
-      (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
-    )).toInt()
+    fun calculateBlockCurve() : String {
+      val newBlockIdx = round(
+        lerp(
+          0.0f,
+          particleParams.blockCurve.lastIndex.toFloat(),
+          (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
+        )
+      ).toInt()
 
-    val newBlock = particleParams.blockCurve[newBlockIdx]
+      return particleParams.blockCurve[newBlockIdx]
+    }
 
+    fun calculateOffset() : Vector3f {
+      vel = vel.add(particleParams.gravity)
+      vel = vel.mul(1.0f - particleParams.drag)
+
+      offset = offset.add(vel)
+      return rotOffset.add(offset)
+    }
+
+
+    val newBlock  = calculateBlockCurve()
+    val newOffset = calculateOffset()
 
     val newProperties = DisplayEntityProperties(
-      blockType = newBlock
+      pos          = pos,
+      blockType    = newBlock,
+      translation  = newOffset,
+      leftRotation = quatRot,
+      scale        = scale,
+      tags         = arrayOf("BPS_Particle")
     )
 
     return newProperties

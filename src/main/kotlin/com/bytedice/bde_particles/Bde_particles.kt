@@ -60,9 +60,7 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToParticleRegister("DEBUG", ParticleEmitterParams(loopDur = 20))
-
-
+  addToParticleRegister("DEBUG", ParticleEmitterParams(loopDur = 1, particleTypes = arrayOf(Particle(ParticleParams(lifeTime = 60)))))
 }
 
 

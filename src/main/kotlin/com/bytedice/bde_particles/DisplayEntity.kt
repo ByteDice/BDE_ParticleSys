@@ -8,23 +8,22 @@ import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
 import net.minecraft.server.world.ServerWorld
 
-class DisplayEntity(var properties: DisplayEntityProperties?) {
+class DisplayEntity(private var properties: DisplayEntityProperties?) {
   private var hasSpawned = false
   private var entity: BlockDisplayEntity? = null
 
-  fun spawn(world: ServerWorld) : BlockDisplayEntity? {
-    if (hasSpawned || properties == null) { return null }
+  fun spawn(world: ServerWorld) {
+    if (hasSpawned || properties == null) { return }
 
-    val e = updateProperties(world, properties!!)
-    world.spawnEntity(e)
+    entity = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
+    updateProperties(properties!!)
+
+    world.spawnEntity(entity)
 
     this.hasSpawned = true
-    return e
   }
 
-  fun updateProperties(world: ServerWorld, properties: DisplayEntityProperties) : BlockDisplayEntity {
-    val e = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
-
+  fun updateProperties(properties: DisplayEntityProperties) {
     val nbt = NbtCompound().apply {
       val tagList = NbtList()
 
@@ -60,24 +59,21 @@ class DisplayEntity(var properties: DisplayEntityProperties?) {
           add(NbtFloat.of(properties.rightRotation.w))
         }
 
-        put("translation",    offsetList)
-        put("left_rotation",  rotList)
-        put("scale",          scaleList)
+        put("translation", offsetList)
+        put("left_rotation", rotList)
+        put("scale", scaleList)
         put("right_rotation", rightRotList)
       })
     }
 
-    e.readNbt(nbt)
+    entity?.readNbt(nbt)
+    entity?.refreshPositionAndAngles(properties.pos.x, properties.pos.y, properties.pos.z, properties.rot.x, properties.rot.y)
 
-    e.refreshPositionAndAngles(properties.pos.x, properties.pos.y, properties.pos.z, properties.rot.x, properties.rot.y)
-
-    entity = e
     this.properties = properties
-
-    return e
   }
 
   fun kill() {
+    if (entity == null) { println("BPS - Particle entity is null!"); return }
     entity?.kill()
   }
 }
