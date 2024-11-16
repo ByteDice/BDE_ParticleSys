@@ -25,7 +25,6 @@ class DisplayEntity(val properties: DisplayEntityProperties?) {
   fun updateProperties(world: ServerWorld, properties: DisplayEntityProperties) : BlockDisplayEntity {
     val e = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
 
-    // TODO: add tag nbt and kill all particles when server starts
     val nbt = NbtCompound().apply {
       val tagList = NbtList()
 

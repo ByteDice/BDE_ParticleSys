@@ -9,8 +9,12 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
+import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtElement
+import net.minecraft.nbt.NbtString
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.ActionResult
@@ -32,7 +36,9 @@ val cfg = Config()
 class Bde_particles : ModInitializer {
 
   override fun onInitialize() {
-    init()
+    ServerLifecycleEvents.SERVER_STARTED.register { server ->
+      init()
+    }
 
     ServerTickEvents.START_SERVER_TICK.register { _ ->
       tick()
@@ -55,6 +61,8 @@ class Bde_particles : ModInitializer {
 
 fun init() {
   addToParticleRegister("DEBUG", ParticleEmitterParams(loopDur = 20))
+
+
 }
 
 
