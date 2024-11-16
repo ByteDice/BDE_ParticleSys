@@ -8,14 +8,14 @@ import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
 import net.minecraft.server.world.ServerWorld
 
-class DisplayEntity(val properties: DisplayEntityProperties?) {
+class DisplayEntity(var properties: DisplayEntityProperties?) {
   private var hasSpawned = false
   private var entity: BlockDisplayEntity? = null
 
   fun spawn(world: ServerWorld) : BlockDisplayEntity? {
     if (hasSpawned || properties == null) { return null }
 
-    val e = updateProperties(world, properties)
+    val e = updateProperties(world, properties!!)
     world.spawnEntity(e)
 
     this.hasSpawned = true
@@ -72,6 +72,8 @@ class DisplayEntity(val properties: DisplayEntityProperties?) {
     e.refreshPositionAndAngles(properties.pos.x, properties.pos.y, properties.pos.z, properties.rot.x, properties.rot.y)
 
     entity = e
+    this.properties = properties
+
     return e
   }
 

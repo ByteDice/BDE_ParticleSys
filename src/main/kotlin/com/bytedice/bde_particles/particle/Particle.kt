@@ -65,7 +65,7 @@ class Particle(private val particleParams: ParticleParams) {
 
     val properties = blockDisplay?.properties ?: return
 
-    val newProperties = calculateNewProperties(properties, particleParams)
+    val newProperties = calculateNewProperties()
 
     blockDisplay?.updateProperties(world, newProperties)
 
@@ -75,14 +75,14 @@ class Particle(private val particleParams: ParticleParams) {
   }
 
 
-  private fun calculateNewProperties(propetries: DisplayEntityProperties, params: ParticleParams) : DisplayEntityProperties {
+  private fun calculateNewProperties() : DisplayEntityProperties {
     val newBlockIdx = round(lerp(
       0.0f,
-      params.blockCurve.lastIndex.toFloat(),
-      (timeAlive.toFloat() / params.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
+      particleParams.blockCurve.lastIndex.toFloat(),
+      (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
     )).toInt()
 
-    val newBlock = params.blockCurve[newBlockIdx]
+    val newBlock = particleParams.blockCurve[newBlockIdx]
 
 
     val newProperties = DisplayEntityProperties(
