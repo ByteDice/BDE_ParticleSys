@@ -18,8 +18,8 @@ class Particle(private val particleParams: ParticleParams) {
 
   private var rot    = randomBetweenVector3f(particleParams.rotRandom.first, particleParams.rotRandom.second)
   private val rotVel = randomBetweenVector3f(particleParams.rotVelRandom.first, particleParams.rotVelRandom.second)
-  private val scale  = randomBetweenVector3f(particleParams.sizeRandom.first, particleParams.sizeRandom.second)
   private var vel    = randomBetweenVector3f(particleParams.velRandom.first, particleParams.velRandom.second)
+  private var scale  = randomBetweenVector3f(particleParams.sizeRandom.first, particleParams.sizeRandom.second)
 
   private var blockDisplay: DisplayEntity? = null
 
@@ -31,6 +31,13 @@ class Particle(private val particleParams: ParticleParams) {
 
   fun init(pos: Vec3d) {
     this.pos = pos
+
+    if ( particleParams.uniformSize ) {
+      val randomUniform = randomFloatBetween(particleParams.sizeRandom.first.x, particleParams.sizeRandom.second.x)
+      scale.x = randomUniform
+      scale.y = randomUniform
+      scale.z = randomUniform
+    }
 
     val (quatRot, newOffset) = calcTransformOffset(rot, initOffset, scale)
 
@@ -81,23 +88,20 @@ class Particle(private val particleParams: ParticleParams) {
   }
 
 
-  // TODO: rotVelRandom, rotVelCurve, sizeCurve, forceFields
+  // TODO: forceFields, shape
   private fun calcNewProperties() : DisplayEntityProperties {
-    fun calcBlockCurve() : String {
-      val newBlockIdx = round(
-        lerp(
-          0.0f,
-          particleParams.blockCurve.lastIndex.toFloat(),
-          (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
-        )
-      ).toInt()
 
+    fun calcBlockCurve(timeAliveClamped: Float) : String {
+      val newBlockIdx = round(lerp(0.0f, particleParams.blockCurve.lastIndex.toFloat(), timeAliveClamped)).toInt()
       return particleParams.blockCurve[newBlockIdx]
     }
 
-    fun calcRot() : Vector3f {
+    fun calcRot(timeAliveClamped: Float) : Vector3f {
       val newRot = Vector3f(rot)
-      newRot.add(rotVel)
+      val newVel = Vector3f(rotVel)
+
+      newVel.mul(interpolateCurve(particleParams.sizeCurve, timeAliveClamped))
+      newRot.add(newVel)
       return newRot
     }
 
@@ -115,17 +119,24 @@ class Particle(private val particleParams: ParticleParams) {
       return Pair(vel, newOffset)
     }
 
+    fun calcSize(timeAliveClamped: Float) : Vector3f {
+      val scale = Vector3f(scale)
+      scale.mul(interpolateCurve(particleParams.sizeCurve, timeAliveClamped))
+      return scale
+    }
 
+    val timeAliveClamped = (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
 
-    val newBlock            = calcBlockCurve()
+    val newBlock            = calcBlockCurve(timeAliveClamped)
     val (newVel, newOffset) = calcOffset()
-    val newRot              = calcRot()
+    val newRot              = calcRot(timeAliveClamped)
+    val newScale            = calcSize(timeAliveClamped)
 
     vel    = newVel
     offset = newOffset
     rot    = newRot
 
-    val (quatRot, transformOffset) = calcTransformOffset(newRot, initOffset, scale /* newScale */)
+    val (quatRot, transformOffset) = calcTransformOffset(newRot, initOffset, newScale)
     val combinedOffset = transformOffset.add(newOffset)
 
     val newProperties = DisplayEntityProperties(
@@ -133,7 +144,7 @@ class Particle(private val particleParams: ParticleParams) {
       blockType    = newBlock,
       translation  = combinedOffset,
       leftRotation = quatRot,
-      scale        = scale, //fix
+      scale        = newScale,
       tags         = arrayOf("BPS_Particle")
     )
 

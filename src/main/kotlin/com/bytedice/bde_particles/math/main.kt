@@ -156,3 +156,23 @@ fun transformOffsetByScale(offset: Vector3f, scale: Vector3f): Vector3f {
 fun lerp(x: Float, y: Float, t: Float) : Float {
   return x + (y - x) * t
 }
+
+
+fun interpolateCurve(curve: Array<Vector3f>, t: Float): Vector3f {
+  if (curve.size < 2) { return curve[0] }
+
+  val clampedT = t.coerceIn(0.0f, 1.0f)
+
+  val scaledT = clampedT * (curve.size - 1)
+  val segmentIndex = scaledT.toInt()
+  val segmentT = scaledT - segmentIndex
+
+  val start = curve[segmentIndex]
+  val end = curve[(segmentIndex + 1).coerceAtMost(curve.size - 1)] // Ensure bounds
+
+  return Vector3f(
+    start.x + (end.x - start.x) * segmentT,
+    start.y + (end.y - start.y) * segmentT,
+    start.z + (end.z - start.z) * segmentT
+  )
+}
