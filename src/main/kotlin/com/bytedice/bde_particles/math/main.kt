@@ -149,7 +149,7 @@ fun transformOffsetByQuat(offset: Vector3f, rotation: Vector4f): Vector3f {
 
 
 fun transformOffsetByScale(offset: Vector3f, scale: Vector3f): Vector3f {
-  return offset.mul(scale)
+  return Vector3f(offset).mul(scale)
 }
 
 
