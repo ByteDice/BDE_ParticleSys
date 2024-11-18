@@ -1,6 +1,8 @@
 package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveParticleEmitter
+import com.bytedice.bde_particles.commands.MakeEmitter2
+import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.getToolDetails
 import com.bytedice.bde_particles.math.raycastFromPlayer
 import com.bytedice.bde_particles.particle.*
@@ -47,6 +49,7 @@ class Bde_particles : ModInitializer {
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveParticleEmitter.register(dispatcher, registryAccess)
+      ManageEmitters     .register(dispatcher)
     }
 
     UseItemCallback.EVENT.register(UseItemCallback { player: PlayerEntity, world: World, hand: Hand ->

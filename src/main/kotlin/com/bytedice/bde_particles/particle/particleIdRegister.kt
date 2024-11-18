@@ -11,8 +11,19 @@ fun returnParticleFunction(id: String) : ParticleEmitterParams? {
 }
 
 
-fun addToParticleRegister(id: String, params: ParticleEmitterParams) {
-  particleIdRegister[id] = params
+fun addToParticleRegister(id: String, params: ParticleEmitterParams) : String {
+  if (!particleIdRegister.containsKey(id)) {
+    particleIdRegister[id] = params
+
+    val msg = "Successfully added particle id \"$id\" to register"
+    println(msg)
+    return msg
+  }
+  else {
+    val msg = "Particle id \"$id\" is already registered, please choose another id!"
+    println(msg)
+    return msg
+  }
 }
 
 

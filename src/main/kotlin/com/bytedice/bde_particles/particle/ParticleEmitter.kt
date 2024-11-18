@@ -49,6 +49,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
 
 
   private fun count() {
+    // TODO: this is broken or something, no particles are spawning
     // this is the only section I have comments
     // because im so damn good at cooking spaghetti
 
