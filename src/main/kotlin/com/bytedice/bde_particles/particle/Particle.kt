@@ -22,6 +22,7 @@ class Particle(private val particleParams: ParticleParams) {
   private var scale  = randomBetweenVector3f(particleParams.sizeRandom.first, particleParams.sizeRandom.second)
 
   private var blockDisplay: DisplayEntity? = null
+  private var lifeTime = randomIntBetween(particleParams.lifeTime.first, particleParams.lifeTime.second)
 
   var isDead = false
   private var timeAlive = 0
@@ -39,12 +40,41 @@ class Particle(private val particleParams: ParticleParams) {
       scale.z = randomUniform
     }
 
+    val shape = particleParams.shape
+    val newSpawnPos: Vector3f
+
+    when (shape) {
+      is SpawningShape.Circle -> {
+        val posInCircle = randomInCircle(shape.radius)
+        newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y)
+      }
+
+      is SpawningShape.Sphere -> {
+        newSpawnPos = randomInSphere(shape.radius)
+      }
+
+      is SpawningShape.Rect -> {
+        val posInRect = randomInRect(shape.size)
+        newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y)
+      }
+
+      is SpawningShape.Cube -> {
+        newSpawnPos = randomInCube(shape.size)
+      }
+
+      null -> {
+        newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f)
+      }
+    }
+
+    offset = newSpawnPos
+
     val (quatRot, newOffset) = calcTransformOffset(rot, initOffset, scale)
 
     val properties = DisplayEntityProperties(
       pos          = this.pos,
       blockType    = particleParams.blockCurve[0],
-      translation  = newOffset,
+      translation  = newOffset.add(offset),
       leftRotation = quatRot,
       scale        = scale,
       tags         = arrayOf("BPS_Particle")
@@ -69,7 +99,7 @@ class Particle(private val particleParams: ParticleParams) {
 
     blockDisplay?.updateProperties(newProperties)
 
-    if (timeAlive > particleParams.lifeTime) { isDead = true; blockDisplay?.kill() }
+    if (timeAlive > lifeTime) { isDead = true; blockDisplay?.kill() }
 
     timeAlive += 1
   }
@@ -88,13 +118,21 @@ class Particle(private val particleParams: ParticleParams) {
   }
 
 
-  // TODO: forceFields, shape
+  // TODO: forceFields
   private fun calcNewProperties() : DisplayEntityProperties {
 
     fun calcBlockCurve(timeAliveClamped: Float) : String {
       val newBlockIdx = round(lerp(0.0f, particleParams.blockCurve.lastIndex.toFloat(), timeAliveClamped)).toInt()
       return particleParams.blockCurve[newBlockIdx]
     }
+
+    /*fun calcVel() {
+      for (forceField in particleParams.forceFields) {
+        if (forceField.shape::class == ForceFieldShape.Sphere::class) {
+
+        }
+      }
+    }*/
 
     fun calcRot(timeAliveClamped: Float) : Vector3f {
       val newRot = Vector3f(rot)
@@ -125,7 +163,7 @@ class Particle(private val particleParams: ParticleParams) {
       return scale
     }
 
-    val timeAliveClamped = (timeAlive.toFloat() / particleParams.lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
+    val timeAliveClamped = (timeAlive.toFloat() / lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
 
     val newBlock            = calcBlockCurve(timeAliveClamped)
     val (newVel, newOffset) = calcOffset()
@@ -149,5 +187,10 @@ class Particle(private val particleParams: ParticleParams) {
     )
 
     return newProperties
+  }
+
+
+  fun kill() {
+    blockDisplay?.kill()
   }
 }

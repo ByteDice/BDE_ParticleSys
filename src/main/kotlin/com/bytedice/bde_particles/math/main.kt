@@ -41,6 +41,11 @@ fun randomFloatBetween(min: Float, max: Float) : Float {
 }
 
 
+fun randomIntBetween(min: Int, max: Int) : Int {
+  return Random.nextInt(min, max)
+}
+
+
 fun randomBetweenVector3f(min: Vector3f, max: Vector3f) : Vector3f {
   return Vector3f(
     randomFloatBetween(min.x, max.x),
@@ -69,6 +74,7 @@ fun eulerToQuat(euler: Vector3f): Vector4f {
 
   return Vector4f(x.toFloat(), y.toFloat(), z.toFloat(), w.toFloat())
 }
+
 
 fun quatToEuler(quat: Vector4f): Vector3f {
   val x = quat.x
@@ -104,7 +110,7 @@ fun randomInCircle(r: Float) : Vector2f {
 }
 
 
-fun randomInSphere(r: Float) : Vec3d {
+fun randomInSphere(r: Float) : Vector3f {
   val randRadius = r * Random.nextDouble().pow(1.0 / 3.0)
 
   val phi = Random.nextDouble(0.0, 2 * Math.PI)
@@ -116,12 +122,21 @@ fun randomInSphere(r: Float) : Vec3d {
   val y = randRadius * sin(theta) * sin(phi)
   val z = randRadius * cos(theta)
 
-  return Vec3d(x, y, z)
+  return Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
 }
 
 
-fun randomInRect(w: Float, h: Float) : Vector2f {
-  return Vector2f(randomFloatBetween(0.0f, w), randomFloatBetween(0.0f, h))
+fun randomInRect(size: Vector2f) : Vector2f {
+  return Vector2f(randomFloatBetween(0.0f, size.x), randomFloatBetween(0.0f, size.y))
+}
+
+
+fun randomInCube(size: Vector3f) : Vector3f {
+  return Vector3f(
+    randomFloatBetween(0.0f, size.x),
+    randomFloatBetween(0.0f, size.y),
+    randomFloatBetween(0.0f, size.z)
+  )
 }
 
 
@@ -175,4 +190,40 @@ fun interpolateCurve(curve: Array<Vector3f>, t: Float): Vector3f {
     start.y + (end.y - start.y) * segmentT,
     start.z + (end.z - start.z) * segmentT
   )
+}
+
+
+fun sdfSphere(point: Vec3d, radius: Double): Double {
+  val x = point.x
+  val y = point.y
+  val z = point.z
+
+  val distanceFromCenter = sqrt(x * x + y * y + z * z)
+  return distanceFromCenter - radius
+}
+
+
+fun sdfCube(point: Vec3d, size: Vec3d): Double {
+  val px = point.x
+  val py = point.y
+  val pz = point.z
+
+  val sx = size.x
+  val sy = size.y
+  val sz = size.z
+
+  val halfSize = Triple(sx / 2, sy / 2, sz / 2)
+
+  val absPoint = Triple(abs(px), abs(py), abs(pz))
+
+  val dx = absPoint.first - halfSize.first
+  val dy = absPoint.second - halfSize.second
+  val dz = absPoint.third - halfSize.third
+
+  val outside = Triple(max(dx, 0.0), max(dy, 0.0), max(dz, 0.0))
+  val outsideDistance = sqrt(outside.first * outside.first + outside.second * outside.second + outside.third * outside.third)
+
+  val insideDistance = min(max(dx, max(dy, dz)), 0.0)
+
+  return outsideDistance + insideDistance
 }

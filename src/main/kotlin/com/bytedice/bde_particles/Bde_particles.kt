@@ -20,7 +20,8 @@ import net.minecraft.world.World
 
 
 // TODO: finish the particle ticking
-// TODO: save particle emitters in world file (so they don't linger forever)
+// TODO: save particle emitters in world file, or kill them on server restart (so they don't linger forever)
+// TODO: make custom commands to create particles easier (only temporarily saved)
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
