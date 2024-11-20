@@ -12,20 +12,20 @@ import net.minecraft.text.TextColor
 import java.awt.Color
 
 
-fun makeData(itemId: Item, name: String, particleId: String): ItemStack {
+fun makeData(itemId: Item, name: String, emitterId: String): ItemStack {
   val i = ItemStack(itemId)
 
   val nbt = NbtCompound()
   nbt.putByte("BPS_particleTool", 1)
-  nbt.putString("BPS_particleId", particleId)
+  nbt.putString("BPS_emitterID", emitterId)
 
   val component: NbtComponent = NbtComponent.of(nbt)
 
   val displayName = Text.literal(name)
-    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true))
+    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)).withItalic(true))
 
-  val loreLines = Text.literal("BPS - Bound to id \"$particleId\"")
-    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 125, 0).rgb)).withItalic(true))
+  val loreLines = Text.literal("BPS - Bound to ID \"$emitterId\"")
+    .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)).withItalic(true))
 
   val lore = LoreComponent(listOf(loreLines))
 
@@ -40,13 +40,13 @@ fun makeData(itemId: Item, name: String, particleId: String): ItemStack {
 fun getToolDetails(item: ItemStack) : Pair<Boolean, String> {
   val customData = item.get(DataComponentTypes.CUSTOM_DATA)
   val isParticleEmitterTool = customData?.nbt?.getByte("BPS_particleTool") == 1.toByte()
-  val particleId = customData?.nbt?.getString("BPS_particleId")
+  val emitterId = customData?.nbt?.getString("BPS_emitterID")
 
-  return if (particleId == null) {
+  return if (emitterId == null) {
     Pair(isParticleEmitterTool, "")
   }
 
   else {
-    Pair(isParticleEmitterTool, particleId)
+    Pair(isParticleEmitterTool, emitterId)
   }
 }

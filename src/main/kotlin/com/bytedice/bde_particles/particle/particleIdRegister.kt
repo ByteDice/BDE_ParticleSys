@@ -1,32 +1,34 @@
 package com.bytedice.bde_particles.particle
 
-val particleIdRegister: MutableMap<String, ParticleEmitterParams> = mutableMapOf()
+val emitterIdRegister: MutableMap<String, ParticleEmitterParams> = mutableMapOf()
 
 fun returnParticleFunction(id: String) : ParticleEmitterParams? {
-  if (particleIdRegister.containsKey(id)) {
-    return particleIdRegister[id]
+  if (emitterIdRegister.containsKey(id)) {
+    return emitterIdRegister[id]
   }
 
   return null
 }
 
 
-fun addToParticleRegister(id: String, params: ParticleEmitterParams) : String {
-  if (!particleIdRegister.containsKey(id)) {
-    particleIdRegister[id] = params
+fun addToEmitterRegister(id: String, params: ParticleEmitterParams) : Pair<String, String> {
+  val newId = id.replace(" ", "_")
 
-    val msg = "Successfully added particle id \"$id\" to register"
+  if (!emitterIdRegister.containsKey(id)) {
+    emitterIdRegister[id] = params
+
+    val msg = "BPS - Successfully added Emitter ID \"$newId\" to register"
     println(msg)
-    return msg
+    return Pair(msg, newId)
   }
   else {
-    val msg = "Particle id \"$id\" is already registered, please choose another id!"
+    val msg = "BPS - Emitter ID \"$newId\" is already registered, please choose another ID!"
     println(msg)
-    return msg
+    return Pair(msg, newId)
   }
 }
 
 
 fun getParticleEmitterParams(id: String) : ParticleEmitterParams? {
-  return particleIdRegister[id]
+  return emitterIdRegister[id]
 }

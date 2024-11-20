@@ -1,7 +1,6 @@
 package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveParticleEmitter
-import com.bytedice.bde_particles.commands.MakeEmitter2
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.getToolDetails
 import com.bytedice.bde_particles.math.raycastFromPlayer
@@ -24,6 +23,8 @@ import net.minecraft.world.World
 // TODO: finish the particle ticking
 // TODO: save particle emitters in world file, or kill them on server restart (so they don't linger forever)
 // TODO: make custom commands to create particles easier (only temporarily saved)
+// TODO: add interpolation curves (easing)
+// TODO: kill all particles command
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
@@ -64,7 +65,8 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToParticleRegister("DEBUG", ParticleEmitterParams())
+  addToEmitterRegister("DEFAULT", ParticleEmitterParams.DEFAULT)
+  addToEmitterRegister("FIRE_GEYSER", ParticleEmitterParams.FIRE_GEYSER)
 }
 
 
@@ -80,9 +82,9 @@ fun tick() {
 
 fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedActionResult<ItemStack> {
   val handItem = player.getStackInHand(hand)
-  val (isEmitterTool, particleId) = getToolDetails(handItem)
+  val (isEmitterTool, emitterId) = getToolDetails(handItem)
   val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 50.0)
-  val emitterParams = getParticleEmitterParams(particleId)
+  val emitterParams = getParticleEmitterParams(emitterId)
 
   if (
     !isEmitterTool

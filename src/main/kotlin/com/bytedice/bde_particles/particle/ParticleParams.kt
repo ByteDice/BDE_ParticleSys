@@ -6,7 +6,7 @@ import org.joml.Vector3f
  * ParticleParams defines the parameters for particle behavior, including shape, size, velocity, and other physics properties.
  *
  * @param shape The shape of the particle's spawning area, `null` is a single point.
- * @param blockCurve An array of block names that gets cycled through during the particle's lifetime.
+ * @param blockCurve An array of block names that gets cycled through during the particle's lifetime. Empty defaults to "minecraft:air".
  * @param rotRandom The random ***initial*** rotation range for the particle's rotation in X, Y, and Z axes.
  * @param rotVelRandom The random velocity for particle rotation in the X, Y, and Z axes.
  * @param rotVelCurve A curve which the rotation velocity gets multiplied by during the particle's lifetime.
@@ -21,7 +21,7 @@ import org.joml.Vector3f
  * @param lifeTime A range for the particle's lifetime in ticks. A value below 1 will result in the particle not spawning.
  */
 data class ParticleParams (
-  val shape:        SpawningShape?           = SpawningShape.Circle(1.0f),
+  val shape:        SpawningShape?           = SpawningShape.Circle(3.0f),
   val blockCurve:   Array<String>            = arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
   val rotRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
   val rotVelRandom: Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),

@@ -19,10 +19,8 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
 
 
   fun tick() {
-    if (isCounting) { count() }
+    if (isCounting) { count(); addParticle() }
     if (!isCounting && allParticles.isEmpty()) { isDead = true }
-
-    addParticle()
 
     for (particle in allParticles) {
       if (particle.isDead) { allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray() }
@@ -36,7 +34,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
 
     for (i in emitterParams.particleTypes.indices) {
       repeat(this.emitterParams.spawnsPerTick) {
-        if (allParticles.size < emitterParams.maxCount) { return }
+        if (allParticles.size >= emitterParams.maxCount) { return }
 
         val particle = Particle(emitterParams.particleTypes[i])
         particle.init(this.emitterPos)
@@ -49,7 +47,6 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
 
 
   private fun count() {
-    // TODO: this is broken or something, no particles are spawning
     // this is the only section I have comments
     // because im so damn good at cooking spaghetti
 
@@ -57,8 +54,13 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
     if (emitterParams.loopDur <= 0) { return }
 
     // if the duration is greater than max duration, add 1 loopCount
+    // return if max loopCount is 0
     // if the delay is greater than 0 then enable it
     if (loopDur > emitterParams.loopDur) {
+      if (loopCount == 0) {
+        isCounting = false
+        return
+      }
       loopCount += 1
       loopDur = 0
       if (emitterParams.loopDelay > 0) { loopDelayActive = true }
@@ -71,9 +73,8 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
     }
 
     // if loopCount is greater than max loopCount then stop immediately
-    // only loops once if max loopCount is 0
     // if max loopCount is below 0 then don't do anything, loop infinitely
-    if (emitterParams.loopCount in 0..<loopCount) {
+    if (loopCount > 0 && emitterParams.loopCount >= loopCount) {
       isCounting = false
       return
     }
