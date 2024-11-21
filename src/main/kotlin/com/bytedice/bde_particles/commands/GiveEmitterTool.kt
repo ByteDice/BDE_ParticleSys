@@ -1,6 +1,6 @@
 package com.bytedice.bde_particles.commands
 
-import com.bytedice.bde_particles.items.makeData
+import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particle.emitterIdRegister
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
@@ -44,10 +44,10 @@ object GiveEmitterTool {
               val item = ItemStackArgumentType.getItemStackArgument(context, "Item Type")
               val emitterId = StringArgumentType.getString(context, "Emitter ID")
 
-              val feedback = Text.literal("BPS - You like fancy particles. Don't you?\nBPS - gave particle emitter, bound to ID: \"${emitterId}\"")
+              val feedback = Text.literal("BPS - You like fancy particles. Don't you?\nBPS - gave particle emitter, bound to ID: \"${emitterId}\".")
                 .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)).withItalic(true))
 
-              context.source.player?.inventory?.insertStack(makeData(item.item, name, emitterId))
+              context.source.player?.inventory?.insertStack(ParticleEmitterTool.makeData(item.item, name, emitterId))
               context.source.sendFeedback({ feedback }, false)
               Command.SINGLE_SUCCESS
             }

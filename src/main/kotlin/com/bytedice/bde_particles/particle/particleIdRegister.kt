@@ -1,31 +1,26 @@
 package com.bytedice.bde_particles.particle
 
 val emitterIdRegister: MutableMap<String, ParticleEmitterParams> = mutableMapOf()
+val forbiddenIds = arrayOf("", "DEFAULT", "NULL")
 
-fun returnParticleFunction(id: String) : ParticleEmitterParams? {
-  if (emitterIdRegister.containsKey(id)) {
-    return emitterIdRegister[id]
-  }
 
-  return null
+fun addToEmitterRegister(id: String, params: ParticleEmitterParams) : Pair<String, Boolean> {
+  val newId = id.replace(" ", "_")
+
+  if (newId in forbiddenIds && newId != "DEFAULT") {return Pair(newId, false) }
+  if (emitterIdRegister.containsKey(newId))        {return Pair(newId, false) }
+
+  emitterIdRegister[id] = params
+  return Pair(newId, true)
 }
 
 
-fun addToEmitterRegister(id: String, params: ParticleEmitterParams) : Pair<String, String> {
-  val newId = id.replace(" ", "_")
+fun removeFromEmitterRegister(id: String) : Boolean {
+  if (id in forbiddenIds)                 { return false }
+  if (!emitterIdRegister.containsKey(id)) { return false }
 
-  if (!emitterIdRegister.containsKey(id)) {
-    emitterIdRegister[id] = params
-
-    val msg = "BPS - Successfully added Emitter ID \"$newId\" to register"
-    println(msg)
-    return Pair(msg, newId)
-  }
-  else {
-    val msg = "BPS - Emitter ID \"$newId\" is already registered, please choose another ID!"
-    println(msg)
-    return Pair(msg, newId)
-  }
+  emitterIdRegister.remove(id)
+  return true
 }
 
 

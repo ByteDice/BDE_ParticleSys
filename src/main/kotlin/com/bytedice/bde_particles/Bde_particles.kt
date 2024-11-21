@@ -2,7 +2,7 @@ package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.ManageEmitters
-import com.bytedice.bde_particles.items.getToolDetails
+import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.math.raycastFromPlayer
 import com.bytedice.bde_particles.particle.*
 import net.fabricmc.api.ModInitializer
@@ -75,7 +75,7 @@ fun tick() {
 
 fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedActionResult<ItemStack> {
   val handItem = player.getStackInHand(hand)
-  val (isEmitterTool, emitterId) = getToolDetails(handItem)
+  val (isEmitterTool, emitterId) = ParticleEmitterTool.getToolDetails(handItem)
   val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 50.0)
   val emitterParams = getParticleEmitterParams(emitterId)
 
@@ -91,4 +91,41 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
   ALL_PARTICLE_EMITTERS += emitter
 
   return TypedActionResult(ActionResult.PASS, handItem)
+}
+
+
+fun emitterParamsToJSON(params: ParticleEmitterParams) : Map<String, Any> {
+  val allParticleParamsJSON: MutableList<Map<String, Any?>> = mutableListOf()
+
+  for (particle in params.particleTypes) {
+    val particleParamsJSON = mapOf(
+      "shape"        to particle.shape,
+      "blockCurve"   to particle.blockCurve,
+      "rotRandom"    to particle.rotRandom,
+      "rotVelRandom" to particle.rotVelRandom,
+      "rotVelCurve"  to particle.rotVelCurve,
+      "sizeRandom"   to particle.sizeRandom,
+      "uniformSize"  to particle.uniformSize,
+      "sizeCurve"    to particle.sizeCurve,
+      "velRandom"    to particle.velRandom,
+      "forceFields"  to particle.forceFields,
+      "gravity"      to particle.gravity,
+      "drag"         to particle.drag,
+      "minVel"       to particle.minVel,
+      "lifeTime"     to particle.lifeTime
+    )
+
+    allParticleParamsJSON.add(particleParamsJSON)
+  }
+
+  val emitterParamsJSON = mapOf(
+    "maxCount"      to params.maxCount,
+    "spawnsPerTick" to params.spawnsPerTick,
+    "loopDur"       to params.loopDur,
+    "loopDelay"     to params.loopDelay,
+    "loopCount"     to params.loopCount,
+    "particleTypes" to allParticleParamsJSON
+  )
+
+  return emitterParamsJSON
 }
