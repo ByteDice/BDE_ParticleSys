@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture
 
 object GiveParticleEmitter {
   fun register(dispatcher: CommandDispatcher<ServerCommandSource>, registryAccess: CommandRegistryAccess) {
-    val command = CommandManager.literal("giveParticleEmitter")
+    val command = CommandManager.literal("GiveParticleEmitter")
       .requires { source -> source.hasPermissionLevel(4) }
 
     val allEmitterIds = emitterIdRegister.keys
