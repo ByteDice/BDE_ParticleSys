@@ -1,10 +1,10 @@
 package com.bytedice.bde_particles.particle
 
-val emitterIdRegister: MutableMap<String, ParticleEmitterParams> = mutableMapOf()
+val emitterIdRegister: MutableMap<String, EmitterParams> = mutableMapOf()
 val forbiddenIds = arrayOf("", "DEFAULT", "NULL")
 
 
-fun addToEmitterRegister(id: String, params: ParticleEmitterParams) : Pair<String, Boolean> {
+fun addToEmitterRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
   val newId = id.replace(" ", "_")
 
   if (newId in forbiddenIds && newId != "DEFAULT") {return Pair(newId, false) }
@@ -24,11 +24,11 @@ fun removeFromEmitterRegister(id: String) : Boolean {
 }
 
 
-fun getEmitterParams(id: String) : ParticleEmitterParams? {
+fun getEmitterParams(id: String) : EmitterParams? {
   return emitterIdRegister[id]
 }
 
 
-fun updateEmitterParams(id: String, newParams: ParticleEmitterParams) {
+fun updateEmitterParams(id: String, newParams: EmitterParams) {
   emitterIdRegister[id] = newParams
 }

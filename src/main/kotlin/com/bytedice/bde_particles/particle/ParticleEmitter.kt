@@ -3,7 +3,7 @@ package com.bytedice.bde_particles.particle
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 
-class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: ServerWorld, private val emitterParams: ParticleEmitterParams) {
+class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: ServerWorld, private val emitterParams: EmitterParams) {
 
   private var allParticles: Array<Particle> = emptyArray()
 

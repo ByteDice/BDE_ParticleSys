@@ -59,8 +59,8 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToEmitterRegister("DEFAULT", ParticleEmitterParams.DEFAULT)
-  addToEmitterRegister("FIRE_GEYSER", ParticleEmitterParams.FIRE_GEYSER)
+  addToEmitterRegister("DEFAULT", EmitterParams.DEFAULT)
+  addToEmitterRegister("FIRE_GEYSER", EmitterParams.FIRE_GEYSER)
 }
 
 
@@ -95,7 +95,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
 }
 
 
-fun emitterParamsToJson(params: ParticleEmitterParams) : Map<String, Any> {
+fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> {
   val allParticleParamsJSON: MutableList<Map<String, Any?>> = mutableListOf()
 
   for (particle in params.particleTypes) {
@@ -132,7 +132,7 @@ fun emitterParamsToJson(params: ParticleEmitterParams) : Map<String, Any> {
 }
 
 
-fun jsonToEmitterParams(json: Map<String, Any>): ParticleEmitterParams {
+fun jsonToEmitterParams(json: Map<String, Any>): EmitterParams {
   val particleTypes = json["particleTypes"] as? List<*>
     ?: throw IllegalArgumentException("particleTypes must be a list of ParticleParams")
 
@@ -161,12 +161,12 @@ fun jsonToEmitterParams(json: Map<String, Any>): ParticleEmitterParams {
     allParticleTypes.add(updatedParticle)
   }
 
-  val params = ParticleEmitterParams(
-    maxCount = (json["maxCount"] as? Int) ?: ParticleEmitterParams.DEFAULT.maxCount,
-    spawnsPerTick = (json["spawnsPerTick"] as? Int) ?: ParticleEmitterParams.DEFAULT.spawnsPerTick,
-    loopDur = (json["loopDur"] as? Int) ?: ParticleEmitterParams.DEFAULT.loopDur,
-    loopDelay = (json["loopDelay"] as? Int) ?: ParticleEmitterParams.DEFAULT.loopDelay,
-    loopCount = (json["loopCount"] as? Int) ?: ParticleEmitterParams.DEFAULT.loopCount,
+  val params = EmitterParams(
+    maxCount = (json["maxCount"] as? Int) ?: EmitterParams.DEFAULT.maxCount,
+    spawnsPerTick = (json["spawnsPerTick"] as? Int) ?: EmitterParams.DEFAULT.spawnsPerTick,
+    loopDur = (json["loopDur"] as? Int) ?: EmitterParams.DEFAULT.loopDur,
+    loopDelay = (json["loopDelay"] as? Int) ?: EmitterParams.DEFAULT.loopDelay,
+    loopCount = (json["loopCount"] as? Int) ?: EmitterParams.DEFAULT.loopCount,
     particleTypes = allParticleTypes.toTypedArray()
   )
 

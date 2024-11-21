@@ -1,9 +1,7 @@
 package com.bytedice.bde_particles.particle
 
-import org.joml.Vector3f
-
 /**
- * ParticleEmitterParams defines the parameters for controlling how particles are emitted,
+ * EmitterParams defines the parameters for controlling how particles are emitted,
  * including settings for looping, spawn frequency, and maximum particle count.
  *
  * @param maxCount The maximum number of particles that can exist. If set to 0 or below, no particles will spawn.
@@ -13,7 +11,7 @@ import org.joml.Vector3f
  * @param loopCount The number of times the loop will repeat. 0 means it will shoot a single burst of particles. A value below 0 means it will repeat indefinitely.
  * @param particleTypes An array of `ParticleParams` defining the types of particles to spawn. If empty, no particles will spawn.
  */
-data class ParticleEmitterParams (
+data class EmitterParams (
   val maxCount:      Int                   = 200,
   val spawnsPerTick: Int                   = 2,
   val loopDur:       Int                   = 25,
@@ -23,8 +21,8 @@ data class ParticleEmitterParams (
 )
 {
   companion object Presets {
-    val DEFAULT = ParticleEmitterParams()
-    val FIRE_GEYSER = ParticleEmitterParams(
+    val DEFAULT = EmitterParams()
+    val FIRE_GEYSER = EmitterParams(
       200,
       1,
       25,

@@ -6,6 +6,11 @@ import com.bytedice.bde_particles.particle.*
 import com.bytedice.bde_particles.stringToMap
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.StringReader
+import com.mojang.brigadier.arguments.ArgumentType
+import com.mojang.brigadier.arguments.BoolArgumentType
+import com.mojang.brigadier.arguments.FloatArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
@@ -21,8 +26,13 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextColor
+import org.joml.Vector2f
+import org.joml.Vector3f
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.full.memberProperties
 
 
 // ManageEmitters
@@ -36,19 +46,14 @@ import java.util.concurrent.CompletableFuture
     // [emitter id]
     // output -> removes the particle with that id
 
-  // config
+  // config // TODO: find a way to make this remotely feasible
     // [emitter id]
     // <[particle index] / EMITTER>
 
-    // <single param / JSON>
-      // single param (if EMITTER, use emitter params instead) // TODO
-        // [param key]
-        // [new param value]
-        // output -> update the selected parameter of the selected emitter id to the new value
-
-      // JSON
-        // [new params] (unspecified values is treated as current)
-        // output -> parse the JSON and update all params
+    // single param (if EMITTER, use emitter params instead)
+      // [param key]
+      // [new param value]
+      // output -> update the selected parameter of the selected emitter id to the new value
 
   // list
     // output -> all registered emitters
@@ -68,7 +73,6 @@ object ManageEmitters {
         // <create / remove / config / list / copy>
         .then(argCreate())
         .then(argRemove())
-        .then(argConfig())
         .then(argList())
         .then(argCopy())
       )
@@ -155,68 +159,6 @@ fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
 }
 
 
-// config
-  // [emitter id]
-  // <[particle index] / EMITTER>
-
-  // <single param / JSON>
-    // single param (if EMITTER, use emitter params instead)
-      // [param key]
-      // [new param value]
-      // output -> update the selected parameter of the selected emitter id to the new value
-
-    // JSON
-      // [new params] (unspecified values is treated as current)
-      // output -> parse the JSON and update all params
-
-
-fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
-  return CommandManager.literal("config")
-    .then(
-      // [emitter id]
-      emitterIdSuggestion
-        .then(
-          // <[particle index] / EMITTER>
-          makeIndexSuggestion()
-            // <single param / JSON>
-            //.then(argSingleParam())
-            .then(argJson())
-        )
-    )
-}
-
-/*
-fun argSingleParam() {
-  CommandManager.literal("SingleParam")
-    .then(
-      // [param key]
-    )
-}
-*/
-
-fun argJson() : LiteralArgumentBuilder<ServerCommandSource> {
-  return CommandManager.literal("JSON")
-    .then(
-      // [new params]
-      CommandManager.argument("JSON Value", StringArgumentType.string())
-        .executes { context ->
-          val jsonString = StringArgumentType.getString(context, "JSON Value")
-          val jsonMap = stringToMap(jsonString)
-          val jsonParams = jsonToEmitterParams(jsonMap)
-
-          val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
-
-          updateEmitterParams(emitterIdVal, jsonParams)
-
-          val feedback = Text.literal("BPS - Updated parameters of Emitter ID \"$emitterIdVal\"!\n")
-            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
-
-          Command.SINGLE_SUCCESS
-        }
-    )
-}
-
-
 fun argList() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("list")
     .executes { context ->
@@ -293,60 +235,3 @@ fun makeCommandBlock(emitterData: Map<String, Any>): ItemStack {
 
   return i
 }
-
-
-fun makeIndexSuggestion() : RequiredArgumentBuilder<ServerCommandSource, String> {
-  return CommandManager.argument("Particle Index", StringArgumentType.string())
-    .suggests { context, builder ->
-      val emitterParams = getEmitterParams(StringArgumentType.getString(context, "Registered Emitter ID"))!!
-      val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
-
-      emitterParams.particleTypes.indices.forEach { i ->
-        suggestionsBuilder.suggest(i.toString())
-      }
-
-      suggestionsBuilder.suggest("EMITTER")
-
-      CompletableFuture.completedFuture(suggestionsBuilder.build())
-    }
-}
-
-
-/*
-fun paramSuggestion(particleIndex: Int, emitterId: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
-  val emitterParams = getParticleEmitterParams(emitterId)
-
-  val particleParams = if (emitterParams?.particleTypes!!.isNotEmpty()) {
-    emitterParams.particleTypes[particleIndex]
-  }
-  else { null }
-
-  val emitterProperties = emitterParams::class.memberProperties
-  val emitterPropertyNames: MutableList<String> = mutableListOf()
-  val emitterPropertyTypes: MutableList<KType> = mutableListOf()
-
-  var particleProperties: Collection<KProperty1<out ParticleParams, *>>? = null
-
-  if (particleParams != null) {
-    particleProperties = particleParams::class.memberProperties
-  }
-
-  if (particleIndex != -1) {
-    for (property in emitterProperties) {
-      emitterPropertyNames.add(property.name)
-      emitterPropertyTypes.add(property.returnType)
-    }
-  }
-  else if (particleProperties != null) {
-    for (property in particleProperties) {}
-  }
-
-  //
-  return CommandManager.argument("Param Key", StringArgumentType.string())
-    .suggests { context, builder ->
-      val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
-
-      CompletableFuture.completedFuture(suggestionsBuilder.build())
-    }
-}
-*/
