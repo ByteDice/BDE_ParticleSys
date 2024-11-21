@@ -1,6 +1,6 @@
 package com.bytedice.bde_particles
 
-import com.bytedice.bde_particles.commands.GiveParticleEmitter
+import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.getToolDetails
 import com.bytedice.bde_particles.math.raycastFromPlayer
@@ -29,13 +29,6 @@ import net.minecraft.world.World
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 
-data class Config(
-  val cooldown: Int = 1
-)
-
-
-val cfg = Config()
-
 
 class Bde_particles : ModInitializer {
 
@@ -49,7 +42,7 @@ class Bde_particles : ModInitializer {
     }
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
-      GiveParticleEmitter.register(dispatcher, registryAccess)
+      GiveEmitterTool.register(dispatcher, registryAccess)
       ManageEmitters     .register(dispatcher)
     }
 

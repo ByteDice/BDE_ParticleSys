@@ -16,9 +16,9 @@ import net.minecraft.text.TextColor
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
-object GiveParticleEmitter {
+object GiveEmitterTool {
   fun register(dispatcher: CommandDispatcher<ServerCommandSource>, registryAccess: CommandRegistryAccess) {
-    val command = CommandManager.literal("GiveParticleEmitter")
+    val command = CommandManager.literal("GiveEmitterTool")
       .requires { source -> source.hasPermissionLevel(4) }
 
     val allEmitterIds = emitterIdRegister.keys
