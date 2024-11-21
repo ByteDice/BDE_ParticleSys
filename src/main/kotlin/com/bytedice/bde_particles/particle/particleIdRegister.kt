@@ -24,6 +24,11 @@ fun removeFromEmitterRegister(id: String) : Boolean {
 }
 
 
-fun getParticleEmitterParams(id: String) : ParticleEmitterParams? {
+fun getEmitterParams(id: String) : ParticleEmitterParams? {
   return emitterIdRegister[id]
+}
+
+
+fun updateEmitterParams(id: String, newParams: ParticleEmitterParams) {
+  emitterIdRegister[id] = newParams
 }

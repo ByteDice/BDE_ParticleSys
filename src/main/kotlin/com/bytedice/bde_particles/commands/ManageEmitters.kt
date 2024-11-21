@@ -1,7 +1,9 @@
 package com.bytedice.bde_particles.commands
 
-import com.bytedice.bde_particles.emitterParamsToJSON
+import com.bytedice.bde_particles.emitterParamsToJson
+import com.bytedice.bde_particles.jsonToEmitterParams
 import com.bytedice.bde_particles.particle.*
+import com.bytedice.bde_particles.stringToMap
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -34,12 +36,12 @@ import java.util.concurrent.CompletableFuture
     // [emitter id]
     // output -> removes the particle with that id
 
-  // config // TODO
+  // config
     // [emitter id]
     // <[particle index] / EMITTER>
 
     // <single param / JSON>
-      // single param (if EMITTER, use emitter params instead)
+      // single param (if EMITTER, use emitter params instead) // TODO
         // [param key]
         // [new param value]
         // output -> update the selected parameter of the selected emitter id to the new value
@@ -97,7 +99,7 @@ fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
             .executes { context ->
               val emitterIdVal = StringArgumentType.getString(context, "Emitter ID")
               val emitterPresetVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "DEFAULT"
-              val emitterPresetParams = getParticleEmitterParams(emitterPresetVal)
+              val emitterPresetParams = getEmitterParams(emitterPresetVal)
 
               var newEmitterId = "NULL"
               val emitterRegisterData: Pair<String, Boolean>
@@ -130,6 +132,7 @@ fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
 fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("remove")
     .then(
+      // [emitter id]
       emitterIdSuggestion
         .executes { context ->
           val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "NULL"
@@ -152,13 +155,65 @@ fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
 }
 
 
+// config
+  // [emitter id]
+  // <[particle index] / EMITTER>
+
+  // <single param / JSON>
+    // single param (if EMITTER, use emitter params instead)
+      // [param key]
+      // [new param value]
+      // output -> update the selected parameter of the selected emitter id to the new value
+
+    // JSON
+      // [new params] (unspecified values is treated as current)
+      // output -> parse the JSON and update all params
+
+
 fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("config")
-    .executes { context ->
-      val feedback = Text.literal("remove")
-      context.source.sendFeedback({ feedback }, false)
-      Command.SINGLE_SUCCESS
-    }
+    .then(
+      // [emitter id]
+      emitterIdSuggestion
+        .then(
+          // <[particle index] / EMITTER>
+          makeIndexSuggestion()
+            // <single param / JSON>
+            //.then(argSingleParam())
+            .then(argJson())
+        )
+    )
+}
+
+/*
+fun argSingleParam() {
+  CommandManager.literal("SingleParam")
+    .then(
+      // [param key]
+    )
+}
+*/
+
+fun argJson() : LiteralArgumentBuilder<ServerCommandSource> {
+  return CommandManager.literal("JSON")
+    .then(
+      // [new params]
+      CommandManager.argument("JSON Value", StringArgumentType.string())
+        .executes { context ->
+          val jsonString = StringArgumentType.getString(context, "JSON Value")
+          val jsonMap = stringToMap(jsonString)
+          val jsonParams = jsonToEmitterParams(jsonMap)
+
+          val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
+
+          updateEmitterParams(emitterIdVal, jsonParams)
+
+          val feedback = Text.literal("BPS - Updated parameters of Emitter ID \"$emitterIdVal\"!\n")
+            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
+
+          Command.SINGLE_SUCCESS
+        }
+    )
 }
 
 
@@ -184,12 +239,13 @@ fun argList() : LiteralArgumentBuilder<ServerCommandSource> {
 fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("copy")
     .then(
+      // [emitter id]
       emitterIdSuggestion
         .executes { context ->
           val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
           val commandBlock = makeCommandBlock(
-            emitterParamsToJSON(
-              getParticleEmitterParams(
+            emitterParamsToJson(
+              getEmitterParams(
                 emitterIdVal
               )!!
             )
@@ -237,3 +293,60 @@ fun makeCommandBlock(emitterData: Map<String, Any>): ItemStack {
 
   return i
 }
+
+
+fun makeIndexSuggestion() : RequiredArgumentBuilder<ServerCommandSource, String> {
+  return CommandManager.argument("Particle Index", StringArgumentType.string())
+    .suggests { context, builder ->
+      val emitterParams = getEmitterParams(StringArgumentType.getString(context, "Registered Emitter ID"))!!
+      val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
+
+      emitterParams.particleTypes.indices.forEach { i ->
+        suggestionsBuilder.suggest(i.toString())
+      }
+
+      suggestionsBuilder.suggest("EMITTER")
+
+      CompletableFuture.completedFuture(suggestionsBuilder.build())
+    }
+}
+
+
+/*
+fun paramSuggestion(particleIndex: Int, emitterId: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
+  val emitterParams = getParticleEmitterParams(emitterId)
+
+  val particleParams = if (emitterParams?.particleTypes!!.isNotEmpty()) {
+    emitterParams.particleTypes[particleIndex]
+  }
+  else { null }
+
+  val emitterProperties = emitterParams::class.memberProperties
+  val emitterPropertyNames: MutableList<String> = mutableListOf()
+  val emitterPropertyTypes: MutableList<KType> = mutableListOf()
+
+  var particleProperties: Collection<KProperty1<out ParticleParams, *>>? = null
+
+  if (particleParams != null) {
+    particleProperties = particleParams::class.memberProperties
+  }
+
+  if (particleIndex != -1) {
+    for (property in emitterProperties) {
+      emitterPropertyNames.add(property.name)
+      emitterPropertyTypes.add(property.returnType)
+    }
+  }
+  else if (particleProperties != null) {
+    for (property in particleProperties) {}
+  }
+
+  //
+  return CommandManager.argument("Param Key", StringArgumentType.string())
+    .suggests { context, builder ->
+      val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
+
+      CompletableFuture.completedFuture(suggestionsBuilder.build())
+    }
+}
+*/

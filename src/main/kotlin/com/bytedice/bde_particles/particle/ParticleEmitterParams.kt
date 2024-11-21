@@ -30,22 +30,7 @@ data class ParticleEmitterParams (
       25,
       0,
       0,
-      arrayOf(ParticleParams(
-        null,
-        arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
-        Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
-        Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
-        arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.0f, 0.0f, 0.0f)),
-        Pair(Vector3f(0.5f, 0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f)),
-        true,
-        arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.5f, 0.5f, 0.5f)),
-        Pair(Vector3f(-0.1f, 0.4f, -0.1f), Vector3f(0.1f, 0.8f, 0.1f)),
-        emptyArray(),
-        Vector3f(0.0f, -0.01f, 0.0f),
-        0.075f,
-        0.0f,
-        Pair(15, 45)
-      ))
+      arrayOf(ParticleParams.FIRE_GEYSER)
     )
   }
 }
