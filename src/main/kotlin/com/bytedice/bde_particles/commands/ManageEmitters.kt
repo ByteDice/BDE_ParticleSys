@@ -6,9 +6,9 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.LoreComponent
 import net.minecraft.component.type.NbtComponent
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -20,8 +20,6 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextColor
 import java.awt.Color
-import java.awt.TextComponent
-import java.io.Serializable
 import java.util.concurrent.CompletableFuture
 
 
@@ -78,7 +76,7 @@ object ManageEmitters {
 
 val allEmitterIds = emitterIdRegister.keys
 
-val emitterIdSuggestion = CommandManager.argument("Registered Emitter ID", StringArgumentType.string())
+val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = CommandManager.argument("Registered Emitter ID", StringArgumentType.string())
   .suggests { _, builder ->
     val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
     allEmitterIds.forEach { key ->
