@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool

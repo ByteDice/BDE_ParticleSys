@@ -1,16 +1,9 @@
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.emitterParamsToJson
-import com.bytedice.bde_particles.jsonToEmitterParams
 import com.bytedice.bde_particles.particle.*
-import com.bytedice.bde_particles.stringToMap
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
-import com.mojang.brigadier.StringReader
-import com.mojang.brigadier.arguments.ArgumentType
-import com.mojang.brigadier.arguments.BoolArgumentType
-import com.mojang.brigadier.arguments.FloatArgumentType
-import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
@@ -26,13 +19,8 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextColor
-import org.joml.Vector2f
-import org.joml.Vector3f
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.full.memberProperties
 
 
 // ManageEmitters
