@@ -33,15 +33,15 @@ import java.util.concurrent.CompletableFuture
     // [emitter id]
     // <[particle index] / EMITTER>
 
-    // <single param / dataClass>
+    // <single param / JSON>
       // single param (if EMITTER, use emitter params instead)
         // [param key]
         // [new param value]
         // output -> update the selected parameter of the selected emitter id to the new value
 
-      // dataClass
+      // JSON
         // [new params] (unspecified values is treated as current)
-        // output -> update all params according to the dataClass
+        // output -> parse the JSON and update all params
 
   // list
     // output -> all registered emitters
