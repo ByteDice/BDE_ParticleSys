@@ -7,5 +7,5 @@ If BDE_ParticleSys is used as a standalone mod, you will only be able to use it 
 
 # Open-source - Copyright
 
-**PowerPlates Website © 2024 by Byte Dice is licensed under CC BY-NC-SA 4.0**\
+**BDE_ParticleSys © 2024 by Byte Dice is licensed under CC BY-NC-SA 4.0**\
 **You can learn more about copyright by reading the full [license](/LICENSE)**
