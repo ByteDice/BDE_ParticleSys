@@ -34,14 +34,12 @@ import java.util.concurrent.CompletableFuture
     // [emitter id]
     // output -> removes the particle with that id
 
-  // config // TODO: find a way to make this remotely feasible
+  // config // TODO
     // [emitter id]
     // <[particle index] / EMITTER>
-
-    // single param (if EMITTER, use emitter params instead)
-      // [param key]
-      // [new param value]
-      // output -> update the selected parameter of the selected emitter id to the new value
+    // [param key] // HARDCODED KEYS, if EMITTER use emitter params.
+    // [new param value] // HARDCODED TYPES
+    // output -> update the selected parameter of the selected emitter id to the new value
 
   // list
     // output -> all registered emitters
