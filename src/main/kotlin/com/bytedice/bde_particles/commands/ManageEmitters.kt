@@ -79,6 +79,8 @@ val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = 
     CompletableFuture.completedFuture(suggestionsBuilder.build())
   }
 
+val configKeys = ArgConfigEmitterKeys()
+
 
 // TODO: fix "new emitter id" error
 fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
@@ -218,14 +220,15 @@ fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("config")
     .then(
       emitterIdSuggestion
-        .then(argConfigEmitter())
+        .then(
+          CommandManager.literal("EMITTER")
+            .then(configKeys.maxCount())
+            .then(configKeys.spawnsPerTick())
+            .then(configKeys.loopDur())
+            .then(configKeys.loopDelay())
+            .then(configKeys.loopCount())
+        )
     )
-}
-
-
-fun argConfigEmitter() : LiteralArgumentBuilder<ServerCommandSource> {
-  return CommandManager.literal("EMITTER")
-    .then(ArgConfigEmitterKeys().maxCount())
 }
 
 
