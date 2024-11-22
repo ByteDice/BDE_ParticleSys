@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particle
+package com.bytedice.bde_particles.particleIdRegister
 
 import org.joml.Vector2f
 import org.joml.Vector3f

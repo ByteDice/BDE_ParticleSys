@@ -1,12 +1,9 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
-import com.bytedice.bde_particles.math.raycastFromPlayer
-import com.bytedice.bde_particles.particle.*
+import com.bytedice.bde_particles.particleIdRegister.*
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -20,7 +17,6 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
-import org.joml.Vector3f
 
 
 // TODO: finish the particle ticking
@@ -131,54 +127,4 @@ fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> {
   )
 
   return emitterParamsJSON
-}
-
-
-fun jsonToEmitterParams(json: Map<String, Any>): EmitterParams {
-  val particleTypes = json["particleTypes"] as? List<*>
-    ?: throw IllegalArgumentException("particleTypes must be a list of ParticleParams")
-
-  val allParticleTypes: MutableList<ParticleParams> = mutableListOf()
-
-  for (particle in particleTypes.iterator()) {
-    val particleParams = particle as? ParticleParams ?: ParticleParams.DEFAULT
-
-    val updatedParticle = ParticleParams(
-      shape = (particleParams.shape ?: ParticleParams.DEFAULT.shape),
-      blockCurve = (json["blockCurve"] as? Array<String>) ?: particleParams.blockCurve,
-      rotRandom = (json["rotRandom"] as? Pair<Vector3f, Vector3f>) ?: particleParams.rotRandom,
-      rotVelRandom = (json["rotVelRandom"] as? Pair<Vector3f, Vector3f>) ?: particleParams.rotVelRandom,
-      rotVelCurve = (json["rotVelCurve"] as? Array<Vector3f>) ?: particleParams.rotVelCurve,
-      sizeRandom = (json["sizeRandom"] as? Pair<Vector3f, Vector3f>) ?: particleParams.sizeRandom,
-      uniformSize = (json["uniformSize"] as? Boolean) ?: particleParams.uniformSize,
-      sizeCurve = (json["sizeCurve"] as? Array<Vector3f>) ?: particleParams.sizeCurve,
-      velRandom = (json["velRandom"] as? Pair<Vector3f, Vector3f>) ?: particleParams.velRandom,
-      forceFields = (json["forceFields"] as? Array<ForceField>) ?: particleParams.forceFields,
-      gravity = (json["gravity"] as? Vector3f) ?: particleParams.gravity,
-      drag = (json["drag"] as? Float) ?: particleParams.drag,
-      minVel = (json["minVel"] as? Float) ?: particleParams.minVel,
-      lifeTime = (json["lifeTime"] as? Pair<Int, Int>) ?: particleParams.lifeTime
-    )
-
-    allParticleTypes.add(updatedParticle)
-  }
-
-  val params = EmitterParams(
-    maxCount = (json["maxCount"] as? Int) ?: EmitterParams.DEFAULT.maxCount,
-    spawnsPerTick = (json["spawnsPerTick"] as? Int) ?: EmitterParams.DEFAULT.spawnsPerTick,
-    loopDur = (json["loopDur"] as? Int) ?: EmitterParams.DEFAULT.loopDur,
-    loopDelay = (json["loopDelay"] as? Int) ?: EmitterParams.DEFAULT.loopDelay,
-    loopCount = (json["loopCount"] as? Int) ?: EmitterParams.DEFAULT.loopCount,
-    particleTypes = allParticleTypes.toTypedArray()
-  )
-
-  return params
-}
-
-
-
-fun stringToMap(input: String): Map<String, String> {
-  return input.split(",")
-    .map { it.split("=") }
-    .associate { it[0].trim() to it[1].trim() }
 }

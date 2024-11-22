@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.math
+package com.bytedice.bde_particles
 
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.hit.HitResult

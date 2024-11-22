@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particle
+package com.bytedice.bde_particles.particleIdRegister
 
 import org.joml.Vector3f
 
@@ -21,20 +21,20 @@ import org.joml.Vector3f
  * @param lifeTime A range for the particle's lifetime in ticks. A value below 1 will result in the particle not spawning.
  */
 data class ParticleParams (
-  val shape:        SpawningShape?           = SpawningShape.Circle(3.0f),
-  val blockCurve:   Array<String>            = arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
-  val rotRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
-  val rotVelRandom: Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
-  val rotVelCurve:  Array<Vector3f>          = arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.0f, 0.0f, 0.0f)),
-  val sizeRandom:   Pair<Vector3f, Vector3f> = Pair(Vector3f(0.5f, 0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f)),
-  val uniformSize:  Boolean                  = true,
-  val sizeCurve:    Array<Vector3f>          = arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.5f, 0.5f, 0.5f)),
-  val velRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.1f, 0.4f, -0.1f), Vector3f(0.1f, 0.8f, 0.1f)),
-  val forceFields:  Array<ForceField>        = arrayOf(ForceField()), // emptyArray(),
-  val gravity:      Vector3f                 = Vector3f(0.0f, -0.01f, 0.0f),
-  val drag:         Float                    = 0.075f,
-  val minVel:       Float                    = 0.0f,
-  val lifeTime:     Pair<Int, Int>           = Pair(15, 45)
+  var shape:        SpawningShape?           = SpawningShape.Circle(3.0f),
+  var blockCurve:   Array<String>            = arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
+  var rotRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
+  var rotVelRandom: Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
+  var rotVelCurve:  Array<Vector3f>          = arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.0f, 0.0f, 0.0f)),
+  var sizeRandom:   Pair<Vector3f, Vector3f> = Pair(Vector3f(0.5f, 0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f)),
+  var uniformSize:  Boolean                  = true,
+  var sizeCurve:    Array<Vector3f>          = arrayOf(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.5f, 0.5f, 0.5f)),
+  var velRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.1f, 0.4f, -0.1f), Vector3f(0.1f, 0.8f, 0.1f)),
+  var forceFields:  Array<ForceField>        = arrayOf(ForceField()), // emptyArray(),
+  var gravity:      Vector3f                 = Vector3f(0.0f, -0.01f, 0.0f),
+  var drag:         Float                    = 0.075f,
+  var minVel:       Float                    = 0.0f,
+  var lifeTime:     Pair<Int, Int>           = Pair(15, 45)
 ) {
   companion object Presets {
     val DEFAULT = ParticleParams()

@@ -1,8 +1,6 @@
-package com.bytedice.bde_particles.particle
+package com.bytedice.bde_particles.particleIdRegister
 
-import com.bytedice.bde_particles.DisplayEntity
-import com.bytedice.bde_particles.DisplayEntityProperties
-import com.bytedice.bde_particles.math.*
+import com.bytedice.bde_particles.*
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector3f

@@ -1,7 +1,7 @@
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.emitterParamsToJson
-import com.bytedice.bde_particles.particle.*
+import com.bytedice.bde_particles.particleIdRegister.*
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -26,26 +26,26 @@ import java.util.concurrent.CompletableFuture
 // ManageEmitters
 // <create / remove / config / list>
   // create
-    // [emitter id]
-    // [preset emitter id]
+    // <emitter id>
+    // <preset emitter id>
     // output -> register new emitter with a preset
 
   // remove
-    // [emitter id]
+    // <emitter id>
     // output -> removes the particle with that id
 
   // config // TODO
-    // [emitter id]
+    // <emitter id>
     // <[particle index] / EMITTER>
-    // [param key] // HARDCODED KEYS, if EMITTER use emitter params.
-    // [new param value] // HARDCODED TYPES
+    // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
+    // <new param value>              // HARDCODED TYPES
     // output -> update the selected parameter of the selected emitter id to the new value
 
   // list
     // output -> all registered emitters
 
   // copy
-    // [emitter id]
+    // <emitter id>
     // output -> give player a command block with the particle params (should be paste-able in kotlin)
 
 
@@ -59,6 +59,7 @@ object ManageEmitters {
         // <create / remove / config / list / copy>
         .then(argCreate())
         .then(argRemove())
+        .then(argConfig())
         .then(argList())
         .then(argCopy())
       )
@@ -68,6 +69,7 @@ object ManageEmitters {
 
 val allEmitterIds = emitterIdRegister.keys
 
+// TODO: maybe make this a Command.literal()
 val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = CommandManager.argument("Registered Emitter ID", StringArgumentType.string())
   .suggests { _, builder ->
     val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
@@ -78,6 +80,7 @@ val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = 
   }
 
 
+// TODO: fix "new emitter id" error
 fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("create")
     .then(
@@ -105,8 +108,13 @@ fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
                         "BPS - This emitter will be removed on server restart! Use \"/ManageEmitters copy\" to save the data to your clipboard!")
                   .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
               }
+              else if (newEmitterId !in allEmitterIds) {
+                Text.literal("BPS - Preset Emitter ID \"$emitterPresetVal\" doesn't exist!\n" +
+                        "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
+                  .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
+              }
               else {
-                Text.literal("BPS - Emitter ID \"$newEmitterId\" already exists!\n" +
+                Text.literal("BPS - Emitter ID \"$newEmitterId\" already exists\n" +
                         "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
                   .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
               }
@@ -198,6 +206,26 @@ fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
           Command.SINGLE_SUCCESS
         }
     )
+}
+
+// config // TODO
+  // <emitter id>
+  // <[particle index] / EMITTER>
+  // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
+  // <new param value>              // HARDCODED TYPES
+  // output -> update the selected parameter of the selected emitter id to the new value
+fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
+  return CommandManager.literal("config")
+    .then(
+      emitterIdSuggestion
+        .then(argConfigEmitter())
+    )
+}
+
+
+fun argConfigEmitter() : LiteralArgumentBuilder<ServerCommandSource> {
+  return CommandManager.literal("EMITTER")
+    .then(ArgConfigEmitterKeys().maxCount())
 }
 
 

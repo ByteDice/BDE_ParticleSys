@@ -25,7 +25,7 @@ object ParticleEmitterTool {
     val displayName = Text.literal(name)
       .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)).withItalic(true))
 
-    val loreLines = Text.literal("BPS - Bound to ID \"$emitterId\".")
+    val loreLines = Text.literal("BPS - Bound to Emitter ID \"$emitterId\".")
       .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)).withItalic(true))
 
     val lore = LoreComponent(listOf(loreLines))

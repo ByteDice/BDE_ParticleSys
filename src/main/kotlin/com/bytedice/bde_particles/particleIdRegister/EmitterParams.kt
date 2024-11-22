@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particle
+package com.bytedice.bde_particles.particleIdRegister
 
 /**
  * EmitterParams defines the parameters for controlling how particles are emitted,
@@ -12,12 +12,12 @@ package com.bytedice.bde_particles.particle
  * @param particleTypes An array of `ParticleParams` defining the types of particles to spawn. If empty, no particles will spawn.
  */
 data class EmitterParams (
-  val maxCount:      Int                   = 200,
-  val spawnsPerTick: Int                   = 2,
-  val loopDur:       Int                   = 25,
-  val loopDelay:     Int                   = 10,
-  val loopCount:     Int                   = 3,
-  val particleTypes: Array<ParticleParams> = arrayOf(ParticleParams()),
+  var maxCount:      Int                   = 200,
+  var spawnsPerTick: Int                   = 2,
+  var loopDur:       Int                   = 25,
+  var loopDelay:     Int                   = 10,
+  var loopCount:     Int                   = 3,
+  var particleTypes: Array<ParticleParams> = arrayOf(ParticleParams()),
 )
 {
   companion object Presets {
@@ -28,7 +28,7 @@ data class EmitterParams (
       25,
       0,
       0,
-      arrayOf(ParticleParams.FIRE_GEYSER)
+      arrayOf(ParticleParams.DEFAULT)
     )
   }
 }
