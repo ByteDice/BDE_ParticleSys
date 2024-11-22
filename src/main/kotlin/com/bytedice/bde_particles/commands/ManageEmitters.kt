@@ -4,6 +4,7 @@ import com.bytedice.bde_particles.emitterParamsToJson
 import com.bytedice.bde_particles.particleIdRegister.*
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
@@ -69,17 +70,17 @@ object ManageEmitters {
 
 val allEmitterIds = emitterIdRegister.keys
 
-// TODO: maybe make this a Command.literal()
+// TODO: maybe make this a Command.literal() if possible
 val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = CommandManager.argument("Registered Emitter ID", StringArgumentType.string())
   .suggests { _, builder ->
-    val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
     allEmitterIds.forEach { key ->
-      suggestionsBuilder.suggest(key)
+      builder.suggest(key)
     }
-    CompletableFuture.completedFuture(suggestionsBuilder.build())
+    CompletableFuture.completedFuture(builder.build())
   }
 
-val configKeys = ArgConfigEmitterKeys()
+val emitterConfigKeys = ArgConfigEmitterKeys()
+val particleConfigKeys = ArgConfigParticleKeys()
 
 
 // TODO: fix "new emitter id" error
@@ -222,11 +223,26 @@ fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
       emitterIdSuggestion
         .then(
           CommandManager.literal("EMITTER")
-            .then(configKeys.maxCount())
-            .then(configKeys.spawnsPerTick())
-            .then(configKeys.loopDur())
-            .then(configKeys.loopDelay())
-            .then(configKeys.loopCount())
+            .then(emitterConfigKeys.maxCount())
+            .then(emitterConfigKeys.spawnsPerTick())
+            .then(emitterConfigKeys.loopDur())
+            .then(emitterConfigKeys.loopDelay())
+            .then(emitterConfigKeys.loopCount())
+        )
+        .then(
+          CommandManager.argument("Particle Index", IntegerArgumentType.integer())
+            .suggests { context, builder ->
+              val emitterId = StringArgumentType.getString(context, "Registered Emitter ID")
+
+              getEmitterParams(emitterId)?.particleTypes?.indices?.forEach {
+                builder.suggest(it)
+              }
+
+              CompletableFuture.completedFuture(builder.build())
+            }
+            .then(particleConfigKeys.shape())
+            .then(particleConfigKeys.blockCurve())
+            .then(particleConfigKeys.rotRandom())
         )
     )
 }

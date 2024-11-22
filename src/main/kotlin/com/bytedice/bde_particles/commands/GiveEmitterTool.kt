@@ -28,11 +28,10 @@ object GiveEmitterTool {
 
     val emitterIdSuggestion = CommandManager.argument("Emitter ID", StringArgumentType.string())
       .suggests { _, builder ->
-        val suggestionsBuilder = SuggestionsBuilder(builder.remaining, 0)
         allEmitterIds.forEach { key ->
-          suggestionsBuilder.suggest(key)
+          builder.suggest(key)
         }
-        CompletableFuture.completedFuture(suggestionsBuilder.build())
+        CompletableFuture.completedFuture(builder.build())
       }
 
     dispatcher.register(

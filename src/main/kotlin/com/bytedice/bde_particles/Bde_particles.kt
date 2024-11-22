@@ -22,7 +22,7 @@ import net.minecraft.world.World
 // TODO: finish the particle ticking
 // TODO: save particle emitters in world file, or kill them on server restart (so they don't linger forever)
 // TODO: make custom commands to create particles easier (only temporarily saved)
-// TODO: add interpolation curves (easing)
+// TODO: add interpolation curves (easing). Also remake the Array<Vector3f>'s to Triple<V3f, V3f, EASING>
 // TODO: kill all particles command
 
 

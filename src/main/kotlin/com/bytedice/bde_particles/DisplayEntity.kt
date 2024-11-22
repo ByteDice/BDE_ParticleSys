@@ -73,7 +73,7 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
   }
 
   fun kill() {
-    if (entity == null) { println("BPS - Particle entity is null!"); return }
+    if (entity == null) { println("BPS - Particle Emitter entity is null!"); return }
     entity?.kill()
   }
 }
