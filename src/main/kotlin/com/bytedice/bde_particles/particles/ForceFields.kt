@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particleIdRegister
+package com.bytedice.bde_particles.particles
 
 data class ForceField (
   val x:        Float           = 0.0f,

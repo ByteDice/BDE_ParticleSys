@@ -1,7 +1,7 @@
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.emitterParamsToJson
-import com.bytedice.bde_particles.particleIdRegister.*
+import com.bytedice.bde_particles.particles.*
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType

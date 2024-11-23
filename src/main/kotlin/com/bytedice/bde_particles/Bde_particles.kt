@@ -4,7 +4,7 @@ import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.KillAllEmitters
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
-import com.bytedice.bde_particles.particleIdRegister.*
+import com.bytedice.bde_particles.particles.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -27,7 +27,6 @@ import net.minecraft.world.World
 import java.util.*
 
 
-// TODO: make it work client-side too
 // TODO: finish the particle ticking
 // TODO: make custom commands to create particles easier (only temporarily saved)
 

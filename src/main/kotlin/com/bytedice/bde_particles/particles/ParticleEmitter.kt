@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particleIdRegister
+package com.bytedice.bde_particles.particles
 
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d

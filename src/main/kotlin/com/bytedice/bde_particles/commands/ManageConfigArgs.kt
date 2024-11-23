@@ -1,8 +1,8 @@
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.InterpolationCurves
-import com.bytedice.bde_particles.particleIdRegister.SpawningShape
-import com.bytedice.bde_particles.particleIdRegister.updateSingleParam
+import com.bytedice.bde_particles.particles.SpawningShape
+import com.bytedice.bde_particles.particles.updateSingleParam
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.FloatArgumentType

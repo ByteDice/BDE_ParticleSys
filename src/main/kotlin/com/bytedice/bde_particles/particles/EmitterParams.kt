@@ -1,4 +1,4 @@
-package com.bytedice.bde_particles.particleIdRegister
+package com.bytedice.bde_particles.particles
 
 /**
  * EmitterParams defines the parameters for controlling how particles are emitted,

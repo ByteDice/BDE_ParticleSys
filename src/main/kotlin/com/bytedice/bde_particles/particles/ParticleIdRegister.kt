@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.bytedice.bde_particles.particleIdRegister
+package com.bytedice.bde_particles.particles
 
 import com.bytedice.bde_particles.InterpolationCurves
 import org.joml.Vector3f
