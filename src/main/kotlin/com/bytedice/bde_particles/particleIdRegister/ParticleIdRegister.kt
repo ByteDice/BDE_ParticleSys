@@ -2,6 +2,7 @@
 
 package com.bytedice.bde_particles.particleIdRegister
 
+import com.bytedice.bde_particles.InterpolationCurves
 import org.joml.Vector3f
 
 
@@ -97,16 +98,16 @@ fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramVa
     "blockCurve"   -> paramValue as Array<String>
     "rotRandom"    -> paramValue as Pair<Vector3f, Vector3f>
     "rotVelRandom" -> paramValue as Pair<Vector3f, Vector3f>
-    "rotVelCurve"  -> paramValue as Array<Vector3f>
     "sizeRandom"   -> paramValue as Pair<Vector3f, Vector3f>
     "uniformSize"  -> paramValue as Boolean
-    "sizeCurve"    -> paramValue as Array<Vector3f>
     "velRandom"    -> paramValue as Pair<Vector3f, Vector3f>
     "forceFields"  -> paramValue as Array<ForceField>
     "gravity"      -> paramValue as Vector3f
     "drag"         -> paramValue as Float
     "minVel"       -> paramValue as Float
     "lifeTime"     -> paramValue as Pair<Int, Int>
+    "rotVelCurve"  -> paramValue as Triple<Vector3f, Vector3f, InterpolationCurves>
+    "sizeCurve"    -> paramValue as Triple<Vector3f, Vector3f, InterpolationCurves>
     else           -> null
   }
 
@@ -119,16 +120,16 @@ fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramVa
     "blockCurve"   -> newParams.blockCurve   = value as Array<String>
     "rotRandom"    -> newParams.rotRandom    = value as Pair<Vector3f, Vector3f>
     "rotVelRandom" -> newParams.rotVelRandom = value as Pair<Vector3f, Vector3f>
-    "rotVelCurve"  -> newParams.rotVelCurve  = value as Array<Vector3f>
     "sizeRandom"   -> newParams.sizeRandom   = value as Pair<Vector3f, Vector3f>
     "uniformSize"  -> newParams.uniformSize  = value as Boolean
-    "sizeCurve"    -> newParams.sizeCurve    = value as Array<Vector3f>
     "velRandom"    -> newParams.velRandom    = value as Pair<Vector3f, Vector3f>
     "forceFields"  -> newParams.forceFields  = value as Array<ForceField>
     "gravity"      -> newParams.gravity      = value as Vector3f
     "drag"         -> newParams.drag         = value as Float
     "minVel"       -> newParams.minVel       = value as Float
     "lifeTime"     -> newParams.lifeTime     = value as Pair<Int, Int>
+    "rotVelCurve"  -> newParams.rotVelCurve  = value as Triple<Vector3f, Vector3f, InterpolationCurves>
+    "sizeCurve"    -> newParams.sizeCurve    = value as Triple<Vector3f, Vector3f, InterpolationCurves>
     else           -> return Pair(params, false)
   }
 

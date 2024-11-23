@@ -1,6 +1,7 @@
 package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
+import com.bytedice.bde_particles.commands.KillAllEmitters
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particleIdRegister.*
@@ -22,15 +23,12 @@ import net.minecraft.world.World
 // TODO: finish the particle ticking
 // TODO: save particle emitters in world file, or kill them on server restart (so they don't linger forever)
 // TODO: make custom commands to create particles easier (only temporarily saved)
-// TODO: add interpolation curves (easing). Also remake the Array<Vector3f>'s to Triple<V3f, V3f, EASING>
-// TODO: kill all particles command
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 
 
 class Bde_particles : ModInitializer {
-
   override fun onInitialize() {
     ServerLifecycleEvents.SERVER_STARTED.register { _ ->
       init()
@@ -42,7 +40,8 @@ class Bde_particles : ModInitializer {
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveEmitterTool.register(dispatcher, registryAccess)
-      ManageEmitters     .register(dispatcher)
+      ManageEmitters .register(dispatcher)
+      KillAllEmitters.register(dispatcher)
     }
 
     UseItemCallback.EVENT.register(UseItemCallback { player: PlayerEntity, world: World, hand: Hand ->

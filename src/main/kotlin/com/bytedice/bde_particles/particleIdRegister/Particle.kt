@@ -135,8 +135,9 @@ class Particle(private val particleParams: ParticleParams) {
     fun calcRot(timeAliveClamped: Float) : Vector3f {
       val newRot = Vector3f(rot)
       val newVel = Vector3f(rotVel)
+      val rotCurve = particleParams.rotVelCurve
 
-      newVel.mul(interpolateCurve(particleParams.sizeCurve, timeAliveClamped))
+      newVel.mul(interpolateCurve(rotCurve.first, rotCurve.second, timeAliveClamped, rotCurve.third))
       newRot.add(newVel)
       return newRot
     }
@@ -157,7 +158,8 @@ class Particle(private val particleParams: ParticleParams) {
 
     fun calcSize(timeAliveClamped: Float) : Vector3f {
       val scale = Vector3f(scale)
-      scale.mul(interpolateCurve(particleParams.sizeCurve, timeAliveClamped))
+      val sizeCurve = particleParams.sizeCurve
+      scale.mul(interpolateCurve(sizeCurve.first, sizeCurve.second, timeAliveClamped, sizeCurve.third))
       return scale
     }
 

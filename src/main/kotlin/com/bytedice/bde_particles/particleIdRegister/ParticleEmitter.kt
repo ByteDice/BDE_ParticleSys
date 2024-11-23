@@ -13,14 +13,15 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   private var loopDur   = 0
   private var loopDelayActive = false
 
-  private var isCounting = true
+  private var isTicking = true
 
   var isDead = false
 
 
   fun tick() {
-    if (isCounting) { count(); addParticle() }
-    if (!isCounting && allParticles.isEmpty()) { isDead = true }
+    if (isTicking) { count() }
+    if (isTicking) { addParticle() }
+    if (!isTicking && allParticles.isEmpty()) { isDead = true }
 
     for (particle in allParticles) {
       if (particle.isDead) { allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray() }
@@ -29,7 +30,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   }
 
 
-  private fun addParticle() {
+  fun addParticle() {
     if (loopDelayActive) { return }
 
     for (i in emitterParams.particleTypes.indices) {
@@ -46,7 +47,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   }
 
 
-  private fun count() {
+  fun count() {
     // this is the only section I have comments
     // because im so damn good at cooking spaghetti
 
@@ -56,9 +57,9 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
     // if the duration is greater than max duration, add 1 loopCount
     // return if max loopCount is 0
     // if the delay is greater than 0 then enable it
-    if (loopDur > emitterParams.loopDur) {
+    if (loopDur >= emitterParams.loopDur) {
       if (loopCount == 0) {
-        isCounting = false
+        isTicking = false
         return
       }
       loopCount += 1
@@ -67,15 +68,15 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
     }
 
     // if the delay is greater than max delay, disable the delay
-    else if (loopDelay > emitterParams.loopDelay) {
+    else if (loopDelay >= emitterParams.loopDelay) {
       loopDelay = 0
       loopDelayActive = false
     }
 
     // if loopCount is greater than max loopCount then stop immediately
     // if max loopCount is below 0 then don't do anything, loop infinitely
-    if (loopCount > 0 && emitterParams.loopCount >= loopCount) {
-      isCounting = false
+    if (loopCount > 0 && loopCount >= emitterParams.loopCount) {
+      isTicking = false
       return
     }
 
@@ -93,7 +94,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
       particle.kill()
       allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray()
     }
-    isCounting = false
+    isTicking = false
     isDead = true
   }
 }

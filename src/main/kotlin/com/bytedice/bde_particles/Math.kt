@@ -12,6 +12,42 @@ import kotlin.math.*
 import kotlin.random.Random
 
 
+class InterpolationCurves(val function: (Float) -> Float) {
+  companion object {
+    val LINEAR = InterpolationCurves { y -> y }
+    val SQRT = InterpolationCurves { y -> sqrt(y) }
+    val EXPONENT = InterpolationCurves { y -> y.pow(2.0f) }
+    val CUBIC = InterpolationCurves { y -> y.pow(3.0f) }
+    val SINE = InterpolationCurves { y -> sin(y * PI.toFloat() / 2) }
+    val COSINE = InterpolationCurves { y -> 1 - cos(y * PI.toFloat() / 2) }
+    val INVERSE = InterpolationCurves { y -> 1 - y }
+    val LOG = InterpolationCurves { y -> if (y > 0) ln(y + 1) else 0f }
+    val EXP = InterpolationCurves { y -> exp(y) - 1 }
+    val BOUNCE = InterpolationCurves { y ->
+      val n1 = 7.5625f
+      val d1 = 2.75f
+      when {
+        y < 1 / d1 -> n1 * y * y
+        y < 2 / d1 -> {
+          val t = y - 1.5f / d1
+          n1 * t * t + 0.75f
+        }
+        y < 2.5 / d1 -> {
+          val t = y - 2.25f / d1
+          n1 * t * t + 0.9375f
+        }
+        else -> {
+          val t = y - 2.625f / d1
+          n1 * t * t + 0.984375f
+        }
+      }
+    }
+
+    fun custom(equation: (Float) -> Float) = InterpolationCurves(equation)
+  }
+}
+
+
 fun raycastFromPlayer(player: ServerPlayerEntity, maxDistance: Double): HitResult? {
   val world: World = player.world
   val eyePos: Vec3d = player.getCameraPosVec(1.0f)
@@ -173,23 +209,18 @@ fun lerp(x: Float, y: Float, t: Float) : Float {
 }
 
 
-fun interpolateCurve(curve: Array<Vector3f>, t: Float): Vector3f {
-  if (curve.size < 2) { return curve[0] }
-
+fun interpolateCurve(start: Vector3f, end: Vector3f, t: Float, curve: InterpolationCurves): Vector3f {
   val clampedT = t.coerceIn(0.0f, 1.0f)
 
-  val scaledT = clampedT * (curve.size - 1)
-  val segmentIndex = scaledT.toInt()
-  val segmentT = scaledT - segmentIndex
+  val curvedT = curve.function(clampedT)
 
-  val start = curve[segmentIndex]
-  val end = curve[(segmentIndex + 1).coerceAtMost(curve.size - 1)] // Ensure bounds
-
-  return Vector3f(
-    start.x + (end.x - start.x) * segmentT,
-    start.y + (end.y - start.y) * segmentT,
-    start.z + (end.z - start.z) * segmentT
+  val interpolatedVec = Vector3f(
+    lerp(start.x, end.x, curvedT),
+    lerp(start.y, end.y, curvedT),
+    lerp(start.z, end.z, curvedT)
   )
+
+  return interpolatedVec
 }
 
 
