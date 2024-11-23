@@ -23,12 +23,13 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
     this.hasSpawned = true
   }
 
+
   fun updateProperties(properties: DisplayEntityProperties) {
     val nbt = NbtCompound().apply {
       val tagList = NbtList()
 
-      properties.tags.forEach { tag ->
-        tagList.add(NbtString.of(tag))
+      properties.tags.forEach {
+        tagList.add(NbtString.of(it))
       }
 
       put("Tags", tagList)
@@ -71,6 +72,7 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
     this.properties = properties
   }
+
 
   fun kill() {
     if (entity == null) { println("BPS - Particle Emitter entity is null!"); return }

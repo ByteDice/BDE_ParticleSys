@@ -75,9 +75,9 @@ class Particle(private val particleParams: ParticleParams) {
       translation  = newOffset.add(offset),
       leftRotation = quatRot,
       scale        = scale,
-      tags         = arrayOf("BPS_Particle")
+      tags         = arrayOf("BPS_Particle", "BPS_UUID", sessionUuid.toString())
     )
-    
+
     blockDisplay = DisplayEntity(properties)
 
     isInit = true
@@ -183,7 +183,7 @@ class Particle(private val particleParams: ParticleParams) {
       translation  = combinedOffset,
       leftRotation = quatRot,
       scale        = newScale,
-      tags         = arrayOf("BPS_Particle")
+      tags         = arrayOf("BPS_Particle", "BPS_UUID", sessionUuid.toString())
     )
 
     return newProperties

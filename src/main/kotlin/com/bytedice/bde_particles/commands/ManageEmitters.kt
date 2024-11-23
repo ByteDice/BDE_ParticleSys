@@ -243,6 +243,7 @@ fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
             .then(particleConfigKeys.shape())
             .then(particleConfigKeys.blockCurve())
             .then(particleConfigKeys.rotRandom())
+            .then(particleConfigKeys.rotVelRandom())
         )
     )
 }

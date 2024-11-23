@@ -10,22 +10,29 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
+import net.minecraft.entity.EntityType
+import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.NbtList
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
+import org.apache.logging.log4j.core.jmx.Server
+import java.util.*
 
 
 // TODO: finish the particle ticking
-// TODO: save particle emitters in world file, or kill them on server restart (so they don't linger forever)
 // TODO: make custom commands to create particles easier (only temporarily saved)
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
+val sessionUuid = UUID.randomUUID()
 
 
 class Bde_particles : ModInitializer {
@@ -34,8 +41,8 @@ class Bde_particles : ModInitializer {
       init()
     }
 
-    ServerTickEvents.START_SERVER_TICK.register { _ ->
-      tick()
+    ServerTickEvents.START_SERVER_TICK.register { server ->
+      tick(server)
     }
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
@@ -61,7 +68,19 @@ fun init() {
 }
 
 
-fun tick() {
+fun tick(server: MinecraftServer) {
+  for (world in server.worlds) {
+    for (entity in world.iterateEntities()) {
+      if (entity.type == EntityType.BLOCK_DISPLAY) {
+        if (displayEntityContainsTag(entity as BlockDisplayEntity, "BPS_UUID")
+          && !displayEntityContainsTag(entity as BlockDisplayEntity, sessionUuid.toString())) {
+
+          entity.kill()
+        }
+      }
+    }
+  }
+
   for (emitter in ALL_PARTICLE_EMITTERS) {
     if (emitter.isDead) {
       ALL_PARTICLE_EMITTERS = ALL_PARTICLE_EMITTERS.toMutableList().apply { remove(emitter) }.toTypedArray()
@@ -126,4 +145,13 @@ fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> {
   )
 
   return emitterParamsJSON
+}
+
+
+fun displayEntityContainsTag(entity: BlockDisplayEntity, tag: String) : Boolean {
+  val nbt = NbtCompound()
+  entity.writeNbt(nbt)
+  val tagsNbtList = nbt.getList("Tags", 8)
+
+  return tagsNbtList?.any { it.asString() == tag } == true
 }

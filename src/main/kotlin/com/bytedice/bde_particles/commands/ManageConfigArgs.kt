@@ -230,7 +230,7 @@ class ArgConfigParticleKeys {
   }
   fun rotVelRandom() : LiteralArgumentBuilder<ServerCommandSource> {
     // I'd like to introduce you to, drumroll please... *drumroll*... The pyramid of "X1,Y1,Z1,X2,Y2,Z2"
-    return CommandManager.literal("rotVelRandom")
+    return CommandManager.literal("rotVelRandom") // TODO: convert this to a reusable variable
       .then(CommandManager.argument("X1", FloatArgumentType.floatArg())
         .then(CommandManager.argument("Y1", FloatArgumentType.floatArg())
           .then(CommandManager.argument("Z1", FloatArgumentType.floatArg())
