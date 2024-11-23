@@ -18,7 +18,6 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.lwjgl.system.linux.X11
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
 

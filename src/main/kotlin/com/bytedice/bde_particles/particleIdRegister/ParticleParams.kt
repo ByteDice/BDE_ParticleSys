@@ -2,7 +2,6 @@ package com.bytedice.bde_particles.particleIdRegister
 
 import com.bytedice.bde_particles.InterpolationCurves
 import org.joml.Vector3f
-import kotlin.math.pow
 
 /**
  * ParticleParams defines the parameters for particle behavior, including shape, size, velocity, and other physics properties.

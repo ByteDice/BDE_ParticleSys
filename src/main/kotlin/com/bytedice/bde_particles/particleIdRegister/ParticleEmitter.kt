@@ -30,7 +30,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   }
 
 
-  fun addParticle() {
+  private fun addParticle() {
     if (loopDelayActive) { return }
 
     for (i in emitterParams.particleTypes.indices) {
@@ -47,7 +47,7 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   }
 
 
-  fun count() {
+  private fun count() {
     // this is the only section I have comments
     // because im so damn good at cooking spaghetti
 

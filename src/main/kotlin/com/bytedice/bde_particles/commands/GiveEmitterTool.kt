@@ -5,7 +5,6 @@ import com.bytedice.bde_particles.particleIdRegister.emitterIdRegister
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
-import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.command.argument.ItemStackArgumentType
 import net.minecraft.server.command.CommandManager

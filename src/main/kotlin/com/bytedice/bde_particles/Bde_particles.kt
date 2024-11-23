@@ -31,7 +31,7 @@ import java.util.*
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
-val sessionUuid = UUID.randomUUID()
+val sessionUuid: UUID = UUID.randomUUID()
 
 
 class Bde_particles : ModInitializer {
@@ -72,7 +72,7 @@ fun tick(server: MinecraftServer) {
     for (entity in world.iterateEntities()) {
       if (entity.type == EntityType.BLOCK_DISPLAY) {
         if (displayEntityContainsTag(entity as BlockDisplayEntity, "BPS_UUID")
-          && !displayEntityContainsTag(entity as BlockDisplayEntity, sessionUuid.toString())) {
+          && !displayEntityContainsTag(entity, sessionUuid.toString())) {
 
           entity.kill()
         }
