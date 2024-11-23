@@ -5,11 +5,13 @@ import com.bytedice.bde_particles.commands.KillAllEmitters
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particleIdRegister.*
+import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -25,9 +27,9 @@ import net.minecraft.world.World
 import java.util.*
 
 
+// TODO: make it work client-side too
 // TODO: finish the particle ticking
 // TODO: make custom commands to create particles easier (only temporarily saved)
-    // ONLY FORCE FIELDS LEFT LES GO!!!!!!!!
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
@@ -36,6 +38,12 @@ val sessionUuid: UUID = UUID.randomUUID()
 
 class Bde_particles : ModInitializer {
   override fun onInitialize() {
+    if (FabricLoader.getInstance().environmentType != EnvType.SERVER) {
+      return
+    }
+
+    println("BPS - Initializing on ${FabricLoader.getInstance().environmentType}")
+
     ServerLifecycleEvents.SERVER_STARTED.register { _ ->
       init()
     }
@@ -51,7 +59,10 @@ class Bde_particles : ModInitializer {
     }
 
     UseItemCallback.EVENT.register(UseItemCallback { player: PlayerEntity, world: World, hand: Hand ->
-      onRightClick(player, world as ServerWorld, hand)
+      if (world is ServerWorld) {
+        onRightClick(player, world, hand)
+      }
+      TypedActionResult(ActionResult.PASS, player.getStackInHand(hand))
     })
 
     ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { _ ->
