@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture
     // <emitter id>
     // output -> removes the particle with that id
 
-  // config // TODO
+  // config
     // <emitter id>
     // <[particle index] / EMITTER>
     // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
@@ -83,7 +83,10 @@ val emitterConfigKeys = ArgConfigEmitterKeys()
 val particleConfigKeys = ArgConfigParticleKeys()
 
 
-// TODO: fix "new emitter id" error
+// create
+  // <emitter id>
+  // <preset emitter id>
+  // output -> register new emitter with a preset
 fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("create")
     .then(
@@ -129,7 +132,9 @@ fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
     )
 }
 
-
+// remove
+  // <emitter id>
+  // output -> removes the particle with that id
 fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("remove")
     .then(
@@ -155,7 +160,8 @@ fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
     )
 }
 
-
+// list
+  // output -> all registered emitters
 fun argList() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("list")
     .executes { context ->
@@ -174,7 +180,9 @@ fun argList() : LiteralArgumentBuilder<ServerCommandSource> {
     }
 }
 
-
+// copy
+  // <emitter id>
+  // output -> give player a command block with the particle params (should be paste-able in kotlin)
 fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("copy")
     .then(
@@ -211,7 +219,7 @@ fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
     )
 }
 
-// config // TODO
+// config
   // <emitter id>
   // <[particle index] / EMITTER>
   // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
@@ -244,6 +252,16 @@ fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
             .then(particleConfigKeys.blockCurve())
             .then(particleConfigKeys.rotRandom())
             .then(particleConfigKeys.rotVelRandom())
+            .then(particleConfigKeys.sizeRandom())
+            .then(particleConfigKeys.uniformSize())
+            .then(particleConfigKeys.velRandom())
+            //.then(particleConfigKeys.forceFields())
+            .then(particleConfigKeys.gravity())
+            .then(particleConfigKeys.drag())
+            .then(particleConfigKeys.minVel())
+            .then(particleConfigKeys.lifeTime())
+            .then(particleConfigKeys.rotVelCurve())
+            .then(particleConfigKeys.sizeCurve())
         )
     )
 }

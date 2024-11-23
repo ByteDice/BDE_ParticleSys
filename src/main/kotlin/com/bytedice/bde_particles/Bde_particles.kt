@@ -15,7 +15,6 @@ import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.nbt.NbtList
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
@@ -23,12 +22,12 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
-import org.apache.logging.log4j.core.jmx.Server
 import java.util.*
 
 
 // TODO: finish the particle ticking
 // TODO: make custom commands to create particles easier (only temporarily saved)
+    // ONLY FORCE FIELDS LEFT LES GO!!!!!!!!
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()

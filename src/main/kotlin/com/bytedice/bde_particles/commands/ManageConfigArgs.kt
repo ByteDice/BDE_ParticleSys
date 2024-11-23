@@ -1,12 +1,15 @@
 package com.bytedice.bde_particles.commands
 
+import com.bytedice.bde_particles.InterpolationCurves
 import com.bytedice.bde_particles.particleIdRegister.SpawningShape
 import com.bytedice.bde_particles.particleIdRegister.updateSingleParam
 import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
@@ -17,6 +20,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.system.linux.X11
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 
 fun argUpdateEmitterParam(context: CommandContext<ServerCommandSource>, paramName: String, typeValue: Any) : MutableText {
@@ -192,68 +196,242 @@ class ArgConfigParticleKeys {
       .then(
         CommandManager.argument("Array (separate by comma)", StringArgumentType.string())
           .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
             val typeValue = StringArgumentType.getString(context, "Array (separate by comma)")
             val typeArray = typeValue.split(",").toTypedArray()
-            val feedback = argUpdateEmitterParam(context, "blockCurve", typeArray)
+            val feedback = argUpdateParticleParam(context, particleIndex, "blockCurve", typeArray)
             context.source.sendFeedback({ feedback }, false)
             Command.SINGLE_SUCCESS
           }
       )
   }
   fun rotRandom() : LiteralArgumentBuilder<ServerCommandSource> {
-    // I'd like to introduce you to, drumroll please... *drumroll*... The pyramid of "X1,Y1,Z1,X2,Y2,Z2"
     return CommandManager.literal("rotRandom")
-      .then(CommandManager.argument("X1", FloatArgumentType.floatArg())
-        .then(CommandManager.argument("Y1", FloatArgumentType.floatArg())
-          .then(CommandManager.argument("Z1", FloatArgumentType.floatArg())
-            .then(CommandManager.argument("X2", FloatArgumentType.floatArg())
-              .then(CommandManager.argument("Y2", FloatArgumentType.floatArg())
-                .then(CommandManager.argument("Z2", FloatArgumentType.floatArg())
-                  .executes { context ->
-                    val x1 = FloatArgumentType.getFloat(context, "X1")
-                    val y1 = FloatArgumentType.getFloat(context, "Y1")
-                    val z1 = FloatArgumentType.getFloat(context, "Z1")
-                    val x2 = FloatArgumentType.getFloat(context, "X2")
-                    val y2 = FloatArgumentType.getFloat(context, "Y2")
-                    val z2 = FloatArgumentType.getFloat(context, "Z2")
+      .then(
+        argPairVector3f()
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val vectors = x1x2ToPairVector3f(context)
 
-                    val feedback = argUpdateEmitterParam(context, "rotRandom", Pair(Vector3f(x1, y1, z1), Vector3f(x2, y2, z2)))
-                    context.source.sendFeedback({ feedback }, false)
-                    Command.SINGLE_SUCCESS
-                  }
-                )
-              )
-            )
-          )
+            val feedback = argUpdateParticleParam(context, particleIndex, "rotRandom", vectors)
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
         )
-      )
   }
   fun rotVelRandom() : LiteralArgumentBuilder<ServerCommandSource> {
-    // I'd like to introduce you to, drumroll please... *drumroll*... The pyramid of "X1,Y1,Z1,X2,Y2,Z2"
-    return CommandManager.literal("rotVelRandom") // TODO: convert this to a reusable variable
-      .then(CommandManager.argument("X1", FloatArgumentType.floatArg())
-        .then(CommandManager.argument("Y1", FloatArgumentType.floatArg())
-          .then(CommandManager.argument("Z1", FloatArgumentType.floatArg())
-            .then(CommandManager.argument("X2", FloatArgumentType.floatArg())
-              .then(CommandManager.argument("Y2", FloatArgumentType.floatArg())
-                .then(CommandManager.argument("Z2", FloatArgumentType.floatArg())
-                  .executes { context ->
-                    val x1 = FloatArgumentType.getFloat(context, "X1")
-                    val y1 = FloatArgumentType.getFloat(context, "Y1")
-                    val z1 = FloatArgumentType.getFloat(context, "Z1")
-                    val x2 = FloatArgumentType.getFloat(context, "X2")
-                    val y2 = FloatArgumentType.getFloat(context, "Y2")
-                    val z2 = FloatArgumentType.getFloat(context, "Z2")
+    return CommandManager.literal("rotVelRandom")
+      .then(
+        argPairVector3f()
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val vectors = x1x2ToPairVector3f(context)
 
-                    val feedback = argUpdateEmitterParam(context, "rotVelRandom", Pair(Vector3f(x1, y1, z1), Vector3f(x2, y2, z2)))
-                    context.source.sendFeedback({ feedback }, false)
-                    Command.SINGLE_SUCCESS
-                  }
-                )
-              )
-            )
-          )
+            val feedback = argUpdateParticleParam(context, particleIndex, "rotVelRandom", vectors)
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+        )
+  }
+  fun sizeRandom() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("sizeRandom")
+      .then(
+        argPairVector3f()
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val vectors = x1x2ToPairVector3f(context)
+
+            val feedback = argUpdateParticleParam(context, particleIndex, "sizeRandom", vectors)
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun uniformSize() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("uniformSize")
+      .then(
+        CommandManager.argument("Bool", BoolArgumentType.bool())
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val uniform = BoolArgumentType.getBool(context, "Bool")
+            val feedback = argUpdateParticleParam(context, particleIndex, "uniformSize", uniform)
+            context.source.sendFeedback( { feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun velRandom() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("velRandom")
+      .then(
+        argPairVector3f()
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val vectors = x1x2ToPairVector3f(context)
+
+            val feedback = argUpdateParticleParam(context, particleIndex, "velRandom", vectors)
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun forceFields() {} // TODO: how?
+  fun gravity() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("gravity")
+      .then(
+        argVector3f()
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val x1 = FloatArgumentType.getFloat(context, "Min X")
+            val y1 = FloatArgumentType.getFloat(context, "Min Y")
+            val z1 = FloatArgumentType.getFloat(context, "Min Z")
+
+            val feedback = argUpdateParticleParam(context, particleIndex, "gravity", Vector3f(x1, y1, z1))
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun drag() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("drag")
+      .then(
+        CommandManager.argument("Float", FloatArgumentType.floatArg())
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val value = FloatArgumentType.getFloat(context, "Float")
+            val feedback = argUpdateParticleParam(context, particleIndex, "drag", value)
+            context.source.sendFeedback( { feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun minVel() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("minVel")
+      .then(
+        CommandManager.argument("Float", FloatArgumentType.floatArg())
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val value = FloatArgumentType.getFloat(context, "Float")
+            val feedback = argUpdateParticleParam(context, particleIndex, "minVel", value)
+            context.source.sendFeedback( { feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+      )
+  }
+  fun lifeTime() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("lifeTime")
+      .then(CommandManager.argument("min", IntegerArgumentType.integer())
+        .then(CommandManager.argument("max", IntegerArgumentType.integer())
+          .executes { context ->
+            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+            val min = IntegerArgumentType.getInteger(context, "min")
+            val max = IntegerArgumentType.getInteger(context, "max")
+            val feedback = argUpdateParticleParam(context, particleIndex, "lifeTime", Pair(min, max))
+            context.source.sendFeedback( { feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
         )
       )
   }
+  fun rotVelCurve() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("rotVelCurve")
+      .then(argCurve()
+        .executes { context ->
+          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+          val vectors = x1x2ToPairVector3f(context)
+          val curveString = StringArgumentType.getString(context, "Curve")
+          
+          val feedback = argUpdateParticleParam(
+            context,
+            particleIndex,
+            "rotVelCurve",
+            Triple(vectors.first, vectors.second, getCurveByString(curveString)))
+
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
+      )
+  }
+  fun sizeCurve() : LiteralArgumentBuilder<ServerCommandSource> {
+    return CommandManager.literal("sizeCurve")
+      .then(argCurve()
+        .executes { context ->
+          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+          val vectors = x1x2ToPairVector3f(context)
+          val curveString = StringArgumentType.getString(context, "Curve")
+
+          val feedback = argUpdateParticleParam(
+            context,
+            particleIndex,
+            "sizeCurve",
+            Triple(vectors.first, vectors.second, getCurveByString(curveString)))
+
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
+      )
+  }
+}
+
+
+fun argPairVector3f() : RequiredArgumentBuilder<ServerCommandSource, Float> {
+  return CommandManager.argument("Min X", FloatArgumentType.floatArg())
+    .then(CommandManager.argument("Min Y", FloatArgumentType.floatArg())
+      .then(CommandManager.argument("Min Z", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Max X", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
+            .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg()))
+          )
+        )
+      )
+    )
+}
+
+
+fun argVector3f() : RequiredArgumentBuilder<ServerCommandSource, Float> {
+  return CommandManager.argument("Min X", FloatArgumentType.floatArg())
+    .then(CommandManager.argument("Min Y", FloatArgumentType.floatArg())
+      .then(CommandManager.argument("Min Z", FloatArgumentType.floatArg()))
+    )
+}
+
+
+val curves = arrayOf("LINEAR", "SQRT", "EXPONENT", "CUBIC", "SINE", "COSINE", "INVERSE", "LOG", "EXP", "BOUNCE")
+
+fun argCurve() : RequiredArgumentBuilder<ServerCommandSource, Float> {
+  return argPairVector3f()
+    .then(
+      CommandManager.argument("Curve", StringArgumentType.string())
+        .suggests { _, builder ->
+          curves.forEach { builder.suggest(it) }
+          CompletableFuture.completedFuture(builder.build())
+        }
+    )
+}
+
+
+fun getCurveByString(str: String) : InterpolationCurves {
+  return when (str) {
+    "LINEAR"   -> InterpolationCurves.LINEAR
+    "SQRT"     -> InterpolationCurves.SQRT
+    "EXPONENT" -> InterpolationCurves.EXPONENT
+    "CUBIC"    -> InterpolationCurves.CUBIC
+    "SINE"     -> InterpolationCurves.SINE
+    "COSINE"   -> InterpolationCurves.COSINE
+    "INVERSE"  -> InterpolationCurves.INVERSE
+    "LOG"      -> InterpolationCurves.LOG
+    "EXP"      -> InterpolationCurves.EXP
+    "BOUNCE"   -> InterpolationCurves.BOUNCE
+    else       -> InterpolationCurves.LINEAR
+  }
+}
+
+
+fun x1x2ToPairVector3f(context: CommandContext<ServerCommandSource>) : Pair<Vector3f, Vector3f> {
+  val x1 = FloatArgumentType.getFloat(context, "Min X")
+  val y1 = FloatArgumentType.getFloat(context, "Min Y")
+  val z1 = FloatArgumentType.getFloat(context, "Min Z")
+  val x2 = FloatArgumentType.getFloat(context, "Max X")
+  val y2 = FloatArgumentType.getFloat(context, "Max Y")
+  val z2 = FloatArgumentType.getFloat(context, "Max Z")
+  return Pair(Vector3f(x1, y1, z1), Vector3f(x2, y2, z2))
 }
