@@ -243,7 +243,7 @@ fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
         .then(particleConfigKeys.sizeRandom())
         .then(particleConfigKeys.uniformSize())
         .then(particleConfigKeys.velRandom())
-        //.then(particleConfigKeys.forceFields())
+        .then(particleConfigKeys.forceFields())
         .then(particleConfigKeys.gravity())
         .then(particleConfigKeys.drag())
         .then(particleConfigKeys.minVel())

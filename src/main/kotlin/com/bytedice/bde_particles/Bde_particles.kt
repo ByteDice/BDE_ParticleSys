@@ -28,7 +28,6 @@ import java.util.*
 
 
 // TODO: finish the particle ticking
-// TODO: make custom commands to create particles easier (only temporarily saved)
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
