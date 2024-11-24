@@ -40,28 +40,25 @@ fun updateEmitterParams(id: String, newParams: EmitterParams) {
 }
 
 
-fun updateSingleParam(id: String, particleIndex: Int, paramName: String, paramValue: Any) : Boolean {
+fun updateSingleEmitterParam(id: String, paramName: String, paramValue: Any) : Boolean {
   val emitter = getEmitterParams(id) ?: return false
+  val updatedValues = updateSingleEmitterParam(emitter, paramName, paramValue)
+  updateEmitterParams(id, updatedValues.first)
 
-  if (particleIndex == -1) {
-    val updatedValues = updateSingleEmitterParam(emitter, paramName, paramValue)
-    updateEmitterParams(id, updatedValues.first)
+  return updatedValues.second
+}
 
-    return updatedValues.second
-  }
-  else if (emitter.particleTypes.isNotEmpty()) {
-    val particle = emitter.particleTypes[particleIndex]
 
-    val updatedValues = updateSingleParticleParam(particle, paramName, paramValue)
+fun updateSingleParticleParam(emitterId: String, paramName: String, paramValue: Any) : Boolean {
+  val emitter = getEmitterParams(emitterId) ?: return false
+  val particle = emitter.particle
 
-    emitter.particleTypes[particleIndex] = updatedValues.first
-    updateEmitterParams(id, emitter)
+  val updatedValues = updateSingleParticleParam(particle, paramName, paramValue)
 
-    return updatedValues.second
-  }
-  else {
-    return false
-  }
+  emitter.particle = updatedValues.first
+  updateEmitterParams(emitterId, emitter)
+
+  return updatedValues.second
 }
 
 

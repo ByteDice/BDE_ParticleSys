@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture
 
   // config
     // <emitter id>
-    // <[particle index] / EMITTER>
+    // <PARTICLE / EMITTER>
     // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
     // <new param value>              // HARDCODED TYPES
     // output -> update the selected parameter of the selected emitter id to the new value
@@ -69,7 +69,7 @@ object ManageEmitters {
 
 val allEmitterIds = emitterIdRegister.keys
 
-// TODO: maybe make this a Command.literal() if possible
+// TODO: perhaps make this a Command.literal() if possible
 val emitterIdSuggestion: RequiredArgumentBuilder<ServerCommandSource, String> = CommandManager.argument("Registered Emitter ID", StringArgumentType.string())
   .suggests { _, builder ->
     allEmitterIds.forEach { key ->
@@ -212,30 +212,21 @@ fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
 
 // config
   // <emitter id>
-  // <[particle index] / EMITTER>
+  // <PARTICLE / EMITTER>
   // <param key>                    // HARDCODED KEYS, if EMITTER use emitter params.
   // <new param value>              // HARDCODED TYPES
   // output -> update the selected parameter of the selected emitter id to the new value
 fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("config")
     .then(emitterIdSuggestion
-      .then(CommandManager.literal("EMITTER")
+      .then(CommandManager.literal("emitter")
         .then(emitterConfigKeys.maxCount())
         .then(emitterConfigKeys.spawnsPerTick())
         .then(emitterConfigKeys.loopDur())
         .then(emitterConfigKeys.loopDelay())
         .then(emitterConfigKeys.loopCount())
       )
-      .then(CommandManager.argument("Particle Index", IntegerArgumentType.integer())
-        .suggests { context, builder ->
-          val emitterId = StringArgumentType.getString(context, "Registered Emitter ID")
-
-          getEmitterParams(emitterId)?.particleTypes?.indices?.forEach {
-            builder.suggest(it)
-          }
-
-          CompletableFuture.completedFuture(builder.build())
-        }
+      .then(CommandManager.literal("particle")
         .then(particleConfigKeys.shape())
         .then(particleConfigKeys.blockCurve())
         .then(particleConfigKeys.rotRandom())

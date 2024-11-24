@@ -33,16 +33,14 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   private fun addParticle() {
     if (loopDelayActive) { return }
 
-    for (i in emitterParams.particleTypes.indices) {
-      repeat(this.emitterParams.spawnsPerTick) {
-        if (allParticles.size >= emitterParams.maxCount) { return }
+    repeat(this.emitterParams.spawnsPerTick) {
+      if (allParticles.size >= emitterParams.maxCount) { return }
 
-        val particle = Particle(emitterParams.particleTypes[i])
-        particle.init(this.emitterPos)
-        particle.spawn(emitterWorld)
+      val particle = Particle(emitterParams.particle)
+      particle.init(this.emitterPos)
+      particle.spawn(emitterWorld)
 
-        allParticles += particle
-      }
+      allParticles += particle
     }
   }
 

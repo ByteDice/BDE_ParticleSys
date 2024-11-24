@@ -29,7 +29,7 @@ data class ParticleParams (
   var sizeRandom:   Pair<Vector3f, Vector3f> = Pair(Vector3f(0.5f, 0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f)),
   var uniformSize:  Boolean                  = true,
   var velRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.1f, 0.4f, -0.1f), Vector3f(0.1f, 0.8f, 0.1f)),
-  var forceFields:  Array<ForceField>        = emptyArray(),
+  var forceFields:  Array<ForceField>        = arrayOf(ForceField()),
   var gravity:      Vector3f                 = Vector3f(0.0f, -0.01f, 0.0f),
   var drag:         Float                    = 0.075f,
   var minVel:       Float                    = 0.0f,

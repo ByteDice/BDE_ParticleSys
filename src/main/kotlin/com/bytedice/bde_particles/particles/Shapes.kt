@@ -11,9 +11,12 @@ sealed class SpawningShape {
 }
 
 sealed class ForceFieldShape {
-  data class SPHERE(val radius: Float = 1.0f) : ForceFieldShape()
+  data class SPHERE(
+    val radius: Float = 3.0f,
+    val force: Pair<Float, Float> = Pair(0.0f, 0.02f),
+  ) : ForceFieldShape()
   data class CUBE(
     val size:     Vector3f = Vector3f(1.0f, 1.0f, 1.0f),
-    val forceDir: Vector3f = Vector3f(0.0f, 0.0f, 0.0f) // 0.0 on all means from center
+    val forceDir: Vector3f = Vector3f(0.0f, 0.0f, 0.0f)
   ) : ForceFieldShape()
 }

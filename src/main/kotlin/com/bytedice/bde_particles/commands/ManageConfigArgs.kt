@@ -24,9 +24,10 @@ import java.util.concurrent.CompletableFuture
 
 val curves = arrayOf("LINEAR", "SQRT", "EXPONENT", "CUBIC", "SINE", "COSINE", "INVERSE", "LOG", "EXP", "BOUNCE")
 
-fun argUpdateEmitterParam(context: CommandContext<ServerCommandSource>, paramName: String, typeValue: Any) : MutableText {
+
+fun updateEmitterParam(context: CommandContext<ServerCommandSource>, paramName: String, typeValue: Any) : MutableText {
   val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
-  val success = updateSingleParam(emitterIdVal, -1, paramName, typeValue)
+  val success = updateSingleEmitterParam(emitterIdVal, paramName, typeValue)
 
   val feedback = if (success) {
     Text.literal("BPS - Successfully updated Emitter ID \"$emitterIdVal\": Parameter \"$paramName\", value \"$typeValue\"")
@@ -42,17 +43,18 @@ fun argUpdateEmitterParam(context: CommandContext<ServerCommandSource>, paramNam
 }
 
 
-fun argUpdateParticleParam(context: CommandContext<ServerCommandSource>, particleIndex: Int, paramName: String, typeValue: Any) : MutableText {
+fun updateParticleParam(context: CommandContext<ServerCommandSource>, paramName: String, typeValue: Any) : MutableText {
   val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
-  val success = updateSingleParam(emitterIdVal, particleIndex, paramName, typeValue)
+  val particle = getEmitterParams(emitterIdVal)?.particle
+  val success = updateSingleParticleParam(emitterIdVal, paramName, typeValue)
 
   val feedback = if (success) {
-    Text.literal("BPS - Successfully updated Emitter ID \"$emitterIdVal\": Index \"$particleIndex\", parameter \"$paramName\", value \"$typeValue\"")
+    Text.literal("BPS - Successfully updated Particle of Emitter ID \"$emitterIdVal\": parameter \"$paramName\", value \"$typeValue\"")
       .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
   }
   else {
-    Text.literal("BPS - Failed to update Emitter ID \"$emitterIdVal\": Index \"$particleIndex\", parameter \"$paramName\", value \"$typeValue\": Unknown Error\n" +
-            "Try checking if the emitter, particle index, and parameter exist, and the value is the correct type.")
+    Text.literal("BPS - Failed to update Emitter ID \"$emitterIdVal\": parameter \"$paramName\", value \"$typeValue\": Unknown Error\n" +
+            "Try checking if the Emitter ID and parameter exist, and the value is the correct type.")
       .setStyle(Style.EMPTY.withColor(Color(200, 0, 0).rgb))
   }
 
@@ -63,62 +65,57 @@ fun argUpdateParticleParam(context: CommandContext<ServerCommandSource>, particl
 class ArgConfigEmitterKeys {
   fun maxCount() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("maxCount")
-      .then(
-        CommandManager.argument("Int", IntegerArgumentType.integer())
-          .executes { context ->
-            val typeValue = IntegerArgumentType.getInteger(context, "Int")
-            val feedback = argUpdateEmitterParam(context, "maxCount", typeValue)
-            context.source.sendFeedback({ feedback }, false)
-            Command.SINGLE_SUCCESS
-          }
+      .then(CommandManager.argument("Int", IntegerArgumentType.integer())
+        .executes { context ->
+          val typeValue = IntegerArgumentType.getInteger(context, "Int")
+          val feedback = updateEmitterParam(context, "maxCount", typeValue)
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
   fun spawnsPerTick() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("spawnsPerTick")
-      .then(
-        CommandManager.argument("Int", IntegerArgumentType.integer())
-          .executes { context ->
-            val typeValue = IntegerArgumentType.getInteger(context, "Int")
-            val feedback = argUpdateEmitterParam(context, "spawnsPerTick", typeValue)
-            context.source.sendFeedback({ feedback }, false)
-            Command.SINGLE_SUCCESS
-          }
+      .then(CommandManager.argument("Int", IntegerArgumentType.integer())
+        .executes { context ->
+          val typeValue = IntegerArgumentType.getInteger(context, "Int")
+          val feedback = updateEmitterParam(context, "spawnsPerTick", typeValue)
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
   fun loopDur() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("loopDur")
-      .then(
-        CommandManager.argument("Int", IntegerArgumentType.integer())
-          .executes { context ->
-            val typeValue = IntegerArgumentType.getInteger(context, "Int")
-            val feedback = argUpdateEmitterParam(context, "loopDur", typeValue)
-            context.source.sendFeedback({ feedback }, false)
-            Command.SINGLE_SUCCESS
-          }
+      .then(CommandManager.argument("Int", IntegerArgumentType.integer())
+        .executes { context ->
+          val typeValue = IntegerArgumentType.getInteger(context, "Int")
+          val feedback = updateEmitterParam(context, "loopDur", typeValue)
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
   fun loopDelay() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("loopDelay")
-      .then(
-        CommandManager.argument("Int", IntegerArgumentType.integer())
-          .executes { context ->
-            val typeValue = IntegerArgumentType.getInteger(context, "Int")
-            val feedback = argUpdateEmitterParam(context, "loopDelay", typeValue)
-            context.source.sendFeedback({ feedback }, false)
-            Command.SINGLE_SUCCESS
-          }
+      .then(CommandManager.argument("Int", IntegerArgumentType.integer())
+        .executes { context ->
+          val typeValue = IntegerArgumentType.getInteger(context, "Int")
+          val feedback = updateEmitterParam(context, "loopDelay", typeValue)
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
   fun loopCount() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("loopCount")
-      .then(
-        CommandManager.argument("Int", IntegerArgumentType.integer())
-          .executes { context ->
-            val typeValue = IntegerArgumentType.getInteger(context, "Int")
-            val feedback = argUpdateEmitterParam(context, "loopCount", typeValue)
-            context.source.sendFeedback({ feedback }, false)
-            Command.SINGLE_SUCCESS
-          }
+      .then(CommandManager.argument("Int", IntegerArgumentType.integer())
+        .executes { context ->
+          val typeValue = IntegerArgumentType.getInteger(context, "Int")
+          val feedback = updateEmitterParam(context, "loopCount", typeValue)
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
 }
@@ -130,9 +127,8 @@ class ArgConfigParticleKeys {
       .then(CommandManager.literal("circle")
         .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
           .executes { context ->
-            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
             val radius = FloatArgumentType.getFloat(context, "Radius")
-            val feedback = argUpdateParticleParam(context, particleIndex, "shape", SpawningShape.CIRCLE(radius))
+            val feedback = updateParticleParam(context, "shape", SpawningShape.CIRCLE(radius))
             context.source.sendFeedback( { feedback }, false)
             Command.SINGLE_SUCCESS
           }
@@ -142,10 +138,9 @@ class ArgConfigParticleKeys {
         .then(CommandManager.argument("Width", FloatArgumentType.floatArg())
           .then(CommandManager.argument("Height", FloatArgumentType.floatArg())
             .executes { context ->
-              val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
               val w = FloatArgumentType.getFloat(context, "Width")
               val h = FloatArgumentType.getFloat(context, "Height")
-              val feedback = argUpdateParticleParam(context, particleIndex, "shape", SpawningShape.RECT(Vector2f(w, h)))
+              val feedback = updateParticleParam(context, "shape", SpawningShape.RECT(Vector2f(w, h)))
               context.source.sendFeedback( { feedback }, false)
               Command.SINGLE_SUCCESS
             }
@@ -157,11 +152,10 @@ class ArgConfigParticleKeys {
           .then(CommandManager.argument("Y", FloatArgumentType.floatArg())
             .then(CommandManager.argument("Z", FloatArgumentType.floatArg())
               .executes { context ->
-                val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                 val x = FloatArgumentType.getFloat(context, "X")
                 val y = FloatArgumentType.getFloat(context, "Y")
                 val z = FloatArgumentType.getFloat(context, "Z")
-                val feedback = argUpdateParticleParam(context, particleIndex, "shape", SpawningShape.CUBE(Vector3f(x, y, z)))
+                val feedback = updateParticleParam(context, "shape", SpawningShape.CUBE(Vector3f(x, y, z)))
                 context.source.sendFeedback( { feedback }, false)
                 Command.SINGLE_SUCCESS
               }
@@ -172,9 +166,8 @@ class ArgConfigParticleKeys {
       .then(CommandManager.literal("sphere")
         .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
           .executes { context ->
-            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
             val radius = FloatArgumentType.getFloat(context, "Radius")
-            val feedback = argUpdateParticleParam(context, particleIndex, "shape", SpawningShape.SPHERE(radius))
+            val feedback = updateParticleParam(context, "shape", SpawningShape.SPHERE(radius))
             context.source.sendFeedback( { feedback }, false)
             Command.SINGLE_SUCCESS
           }
@@ -185,10 +178,9 @@ class ArgConfigParticleKeys {
     return CommandManager.literal("blockCurve")
       .then(CommandManager.argument("Array (separate by comma)", StringArgumentType.string())
         .executes { context ->
-          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
           val typeValue = StringArgumentType.getString(context, "Array (separate by comma)")
           val typeArray = typeValue.split(",").toTypedArray()
-          val feedback = argUpdateParticleParam(context, particleIndex, "blockCurve", typeArray)
+          val feedback = updateParticleParam(context, "blockCurve", typeArray)
           context.source.sendFeedback({ feedback }, false)
           Command.SINGLE_SUCCESS
         }
@@ -203,10 +195,8 @@ class ArgConfigParticleKeys {
               .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
                   .executes { context ->
-                    val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                     val vectors = x1x2ToPairVector3f(context)
-
-                    val feedback = argUpdateParticleParam(context, particleIndex, "rotRandom", vectors)
+                    val feedback = updateParticleParam(context, "rotRandom", vectors)
                     context.source.sendFeedback({ feedback }, false)
                     Command.SINGLE_SUCCESS
                   }
@@ -226,10 +216,8 @@ class ArgConfigParticleKeys {
               .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
                   .executes { context ->
-                    val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                     val vectors = x1x2ToPairVector3f(context)
-
-                    val feedback = argUpdateParticleParam(context, particleIndex, "rotVelRandom", vectors)
+                    val feedback = updateParticleParam(context, "rotVelRandom", vectors)
                     context.source.sendFeedback({ feedback }, false)
                     Command.SINGLE_SUCCESS
                   }
@@ -249,10 +237,8 @@ class ArgConfigParticleKeys {
               .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
                   .executes { context ->
-                    val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                     val vectors = x1x2ToPairVector3f(context)
-
-                    val feedback = argUpdateParticleParam(context, particleIndex, "sizeRandom", vectors)
+                    val feedback = updateParticleParam(context, "sizeRandom", vectors)
                     context.source.sendFeedback({ feedback }, false)
                     Command.SINGLE_SUCCESS
                   }
@@ -267,9 +253,8 @@ class ArgConfigParticleKeys {
     return CommandManager.literal("uniformSize")
       .then(CommandManager.argument("Bool", BoolArgumentType.bool())
         .executes { context ->
-          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
           val uniform = BoolArgumentType.getBool(context, "Bool")
-          val feedback = argUpdateParticleParam(context, particleIndex, "uniformSize", uniform)
+          val feedback = updateParticleParam(context, "uniformSize", uniform)
           context.source.sendFeedback( { feedback }, false)
           Command.SINGLE_SUCCESS
         }
@@ -284,10 +269,8 @@ class ArgConfigParticleKeys {
               .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
                   .executes { context ->
-                    val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                     val vectors = x1x2ToPairVector3f(context)
-
-                    val feedback = argUpdateParticleParam(context, particleIndex, "velRandom", vectors)
+                    val feedback = updateParticleParam(context, "velRandom", vectors)
                     context.source.sendFeedback({ feedback }, false)
                     Command.SINGLE_SUCCESS
                   }
@@ -299,7 +282,7 @@ class ArgConfigParticleKeys {
       )
   }
   fun forceFields() : LiteralArgumentBuilder<ServerCommandSource> {
-    return CommandManager.literal("ForceFields")
+    return CommandManager.literal("forceFields")
       .then(argAddForceField())
       .then(argRemoveForceField())
   }
@@ -309,12 +292,11 @@ class ArgConfigParticleKeys {
         .then(CommandManager.argument("Y", FloatArgumentType.floatArg())
           .then(CommandManager.argument("Z", FloatArgumentType.floatArg())
             .executes { context ->
-              val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
               val x1 = FloatArgumentType.getFloat(context, "X")
               val y1 = FloatArgumentType.getFloat(context, "Y")
               val z1 = FloatArgumentType.getFloat(context, "Z")
 
-              val feedback = argUpdateParticleParam(context, particleIndex, "gravity", Vector3f(x1, y1, z1))
+              val feedback = updateParticleParam(context, "gravity", Vector3f(x1, y1, z1))
               context.source.sendFeedback({ feedback }, false)
               Command.SINGLE_SUCCESS
             }
@@ -326,9 +308,8 @@ class ArgConfigParticleKeys {
     return CommandManager.literal("drag")
       .then(CommandManager.argument("Float", FloatArgumentType.floatArg())
         .executes { context ->
-          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
           val value = FloatArgumentType.getFloat(context, "Float")
-          val feedback = argUpdateParticleParam(context, particleIndex, "drag", value)
+          val feedback = updateParticleParam(context, "drag", value)
           context.source.sendFeedback( { feedback }, false)
           Command.SINGLE_SUCCESS
         }
@@ -338,9 +319,8 @@ class ArgConfigParticleKeys {
     return CommandManager.literal("minVel")
       .then(CommandManager.argument("Float", FloatArgumentType.floatArg())
         .executes { context ->
-          val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
           val value = FloatArgumentType.getFloat(context, "Float")
-          val feedback = argUpdateParticleParam(context, particleIndex, "minVel", value)
+          val feedback = updateParticleParam(context, "minVel", value)
           context.source.sendFeedback( { feedback }, false)
           Command.SINGLE_SUCCESS
         }
@@ -351,10 +331,9 @@ class ArgConfigParticleKeys {
       .then(CommandManager.argument("min", IntegerArgumentType.integer())
         .then(CommandManager.argument("max", IntegerArgumentType.integer())
           .executes { context ->
-            val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
             val min = IntegerArgumentType.getInteger(context, "min")
             val max = IntegerArgumentType.getInteger(context, "max")
-            val feedback = argUpdateParticleParam(context, particleIndex, "lifeTime", Pair(min, max))
+            val feedback = updateParticleParam(context, "lifeTime", Pair(min, max))
             context.source.sendFeedback( { feedback }, false)
             Command.SINGLE_SUCCESS
           }
@@ -375,13 +354,11 @@ class ArgConfigParticleKeys {
                       CompletableFuture.completedFuture(builder.build())
                     }
                     .executes { context ->
-                      val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                       val vectors = x1x2ToPairVector3f(context)
                       val curveString = StringArgumentType.getString(context, "Curve")
 
-                      val feedback = argUpdateParticleParam(
+                      val feedback = updateParticleParam(
                         context,
-                        particleIndex,
                         "rotVelCurve",
                         Triple(vectors.first, vectors.second, getCurveByString(curveString)))
 
@@ -410,13 +387,11 @@ class ArgConfigParticleKeys {
                       CompletableFuture.completedFuture(builder.build())
                     }
                     .executes { context ->
-                      val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
                       val vectors = x1x2ToPairVector3f(context)
                       val curveString = StringArgumentType.getString(context, "Curve")
 
-                      val feedback = argUpdateParticleParam(
+                      val feedback = updateParticleParam(
                         context,
-                        particleIndex,
                         "sizeCurve",
                         Triple(vectors.first, vectors.second, getCurveByString(curveString)))
 
@@ -503,10 +478,10 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("remove")
     .then(CommandManager.argument("Force Field Name", StringArgumentType.string())
       .suggests { context, builder ->
-        val particleId = StringArgumentType.getString(context, "Registered Emitter ID")
-        val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
-        val params = getEmitterParams(particleId)
-        val forceFields = params!!.particleTypes[particleIndex].forceFields
+        val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
+        
+        val params = getEmitterParams(emitterIdVal)
+        val forceFields = params!!.particle.forceFields
 
         forceFields.iterator().forEach {
           builder.suggest(it.name)
@@ -516,11 +491,10 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
       }
       .executes { context ->
         val ffName = StringArgumentType.getString(context, "Force Field Name")
-        val particleId = StringArgumentType.getString(context, "Registered Emitter ID")
-        val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+        val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
 
-        val params = getEmitterParams(particleId)
-        val forceFields = params!!.particleTypes[particleIndex].forceFields
+        val params = getEmitterParams(emitterIdVal)
+        val forceFields = params!!.particle.forceFields
         val newForceFields: MutableList<ForceField> = forceFields.toMutableList()
 
         for (forceField in forceFields) {
@@ -529,9 +503,8 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
           }
         }
 
-        val feedback = argUpdateParticleParam(
+        val feedback = updateParticleParam(
           context,
-          particleIndex,
           "forceFields",
           newForceFields
         )
@@ -543,19 +516,20 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
 
 
 fun forceFieldAddSphereExec(context: CommandContext<ServerCommandSource>) : Int {
-  val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
-  val radius = FloatArgumentType.getFloat(context, "Radius")
   val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
+  
+  val radius = FloatArgumentType.getFloat(context, "Radius")
+  val minForce = FloatArgumentType.getFloat(context, "Min Force")
+  val maxForce = FloatArgumentType.getFloat(context, "Max Force")
 
-  val shape = ForceFieldShape.SPHERE(radius)
+  val shape = ForceFieldShape.SPHERE(radius, Pair(minForce, maxForce))
   val forceField = forceFieldGenericParams(context, shape)
 
   val currentParams = getEmitterParams(emitterIdVal)
-  val forceFields = currentParams!!.particleTypes[particleIndex].forceFields
+  val forceFields = currentParams!!.particle.forceFields
 
-  val feedback = argUpdateParticleParam(
+  val feedback = updateParticleParam(
     context,
-    particleIndex,
     "forceFields",
     forceFields.toMutableList().add(forceField)
   )
@@ -568,7 +542,6 @@ fun forceFieldAddSphereExec(context: CommandContext<ServerCommandSource>) : Int 
 
 
 fun forceFieldAddCubeExec(context: CommandContext<ServerCommandSource>) : Int {
-  val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
   val xSize = FloatArgumentType.getFloat(context, "X Size")
   val ySize = FloatArgumentType.getFloat(context, "Y Size")
   val zSize = FloatArgumentType.getFloat(context, "Z Size")
@@ -581,11 +554,10 @@ fun forceFieldAddCubeExec(context: CommandContext<ServerCommandSource>) : Int {
   val forceField = forceFieldGenericParams(context, shape)
 
   val currentParams = getEmitterParams(emitterIdVal)
-  val forceFields = currentParams!!.particleTypes[particleIndex].forceFields
+  val forceFields = currentParams!!.particle.forceFields
 
-  val feedback = argUpdateParticleParam(
+  val feedback = updateParticleParam(
     context,
-    particleIndex,
     "forceFields",
     forceFields.toMutableList().add(forceField)
   )
@@ -602,13 +574,10 @@ fun forceFieldGenericParams(context: CommandContext<ServerCommandSource>, shape:
   val posX = FloatArgumentType.getFloat(context, "X Pos")
   val posY = FloatArgumentType.getFloat(context, "Y Pos")
   val posZ = FloatArgumentType.getFloat(context, "Z Pos")
-  val minForce = FloatArgumentType.getFloat(context, "Min Force")
-  val maxForce = FloatArgumentType.getFloat(context, "Max Force")
 
   return ForceField(
     name.replace(" ", "_"),
     Vector3f(posX, posY, posZ),
-    Pair(minForce, maxForce),
     shape
   )
 }

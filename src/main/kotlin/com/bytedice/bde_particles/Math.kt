@@ -224,24 +224,25 @@ fun interpolateCurve(start: Vector3f, end: Vector3f, t: Float, curve: Interpolat
 }
 
 
-fun sdfSphere(point: Vec3d, radius: Double): Double {
-  val x = point.x
-  val y = point.y
-  val z = point.z
+fun sdfSphere(pos: Vector3f, radius: Float, objectPos: Vector3f): Float {
+  val dx = objectPos.x - pos.x
+  val dy = objectPos.y - pos.y
+  val dz = objectPos.z - pos.z
 
-  val distanceFromCenter = sqrt(x * x + y * y + z * z)
-  return distanceFromCenter - radius
+  val distanceFromCenter = sqrt(dx * dx + dy * dy + dz * dz)
+  return (distanceFromCenter - radius)
 }
 
 
-fun sdfCube(point: Vec3d, size: Vec3d): Double {
-  val px = point.x
-  val py = point.y
-  val pz = point.z
 
-  val sx = size.x
-  val sy = size.y
-  val sz = size.z
+fun sdfCube(pos: Vector3f, size: Vector3f, objectPos: Vector3f): Float {
+  val px = objectPos.x - pos.x
+  val py = objectPos.y - pos.y
+  val pz = objectPos.z - pos.z
+
+  val sx = size.x.toDouble()
+  val sy = size.y.toDouble()
+  val sz = size.z.toDouble()
 
   val halfSize = Triple(sx / 2, sy / 2, sz / 2)
 
@@ -256,5 +257,10 @@ fun sdfCube(point: Vec3d, size: Vec3d): Double {
 
   val insideDistance = min(max(dx, max(dy, dz)), 0.0)
 
-  return outsideDistance + insideDistance
+  return (outsideDistance + insideDistance).toFloat()
+}
+
+
+fun normalizeSdf(sdf: Float, radius: Float): Float {
+  return if (sdf < 0) (sdf + radius) / radius else 0f
 }

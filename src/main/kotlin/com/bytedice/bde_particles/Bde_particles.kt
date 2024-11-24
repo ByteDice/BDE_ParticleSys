@@ -27,10 +27,6 @@ import net.minecraft.world.World
 import java.util.*
 
 
-// TODO: finish the particle ticking
-// TODO: make custom commands to create particles easier (only temporarily saved)
-
-
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 val sessionUuid: UUID = UUID.randomUUID()
 
@@ -122,27 +118,26 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
 
 fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> {
   val allParticleParamsJSON: MutableList<Map<String, Any?>> = mutableListOf()
+  val particle = params.particle
 
-  for (particle in params.particleTypes) {
-    val particleParamsJSON = mapOf(
-      "shape"        to particle.shape,
-      "blockCurve"   to particle.blockCurve,
-      "rotRandom"    to particle.rotRandom,
-      "rotVelRandom" to particle.rotVelRandom,
-      "rotVelCurve"  to particle.rotVelCurve,
-      "sizeRandom"   to particle.sizeRandom,
-      "uniformSize"  to particle.uniformSize,
-      "sizeCurve"    to particle.sizeCurve,
-      "velRandom"    to particle.velRandom,
-      "forceFields"  to particle.forceFields,
-      "gravity"      to particle.gravity,
-      "drag"         to particle.drag,
-      "minVel"       to particle.minVel,
-      "lifeTime"     to particle.lifeTime
-    )
+  val particleParamsJSON = mapOf(
+    "shape"        to particle.shape,
+    "blockCurve"   to particle.blockCurve,
+    "rotRandom"    to particle.rotRandom,
+    "rotVelRandom" to particle.rotVelRandom,
+    "rotVelCurve"  to particle.rotVelCurve,
+    "sizeRandom"   to particle.sizeRandom,
+    "uniformSize"  to particle.uniformSize,
+    "sizeCurve"    to particle.sizeCurve,
+    "velRandom"    to particle.velRandom,
+    "forceFields"  to particle.forceFields,
+    "gravity"      to particle.gravity,
+    "drag"         to particle.drag,
+    "minVel"       to particle.minVel,
+    "lifeTime"     to particle.lifeTime
+  )
 
     allParticleParamsJSON.add(particleParamsJSON)
-  }
 
   val emitterParamsJSON = mapOf(
     "maxCount"      to params.maxCount,

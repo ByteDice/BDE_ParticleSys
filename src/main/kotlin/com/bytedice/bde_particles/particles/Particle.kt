@@ -5,8 +5,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector3f
 import org.joml.Vector4f
-import kotlin.math.abs
-import kotlin.math.round
+import kotlin.math.*
 
 
 class Particle(private val particleParams: ParticleParams) {
@@ -124,13 +123,28 @@ class Particle(private val particleParams: ParticleParams) {
       return particleParams.blockCurve[newBlockIdx]
     }
 
-    /*fun calcVel() {
-      for (forceField in particleParams.forceFields) {
-        if (forceField.shape::class == ForceFieldShape.Sphere::class) {
+    fun sphereSdfVel(forceField: ForceField) : Vector3f {
+      if (forceField.shape !is ForceFieldShape.SPHERE) { return Vector3f(0.0f, 0.0f, 0.0f) }
+      val shape = forceField.shape
 
-        }
-      }
-    }*/
+      val sdfVal        = sdfSphere(forceField.pos, shape.radius, offset)
+      val normalizedSdf = normalizeSdf(sdfVal, shape.radius)
+      val velDir        = Vector3f(offset).sub(forceField.pos).normalize()
+      val velMul        = lerp(shape.force.second, shape.force.second, 1 - normalizedSdf)
+
+      return velDir.mul(velMul)
+    }
+
+    fun cubeSdfVel(forceField: ForceField) : Vector3f {
+      if (forceField.shape !is ForceFieldShape.CUBE) { return Vector3f(0.0f, 0.0f, 0.0f) }
+      val shape = forceField.shape
+
+      val sdfVal = sdfCube(forceField.pos, shape.size, offset)
+      val velDir = if (sdfVal < 0) { shape.forceDir }
+      else { Vector3f(0.0f, 0.0f, 0.0f) }
+
+      return velDir
+    }
 
     fun calcRot(timeAliveClamped: Float) : Vector3f {
       val newRot = Vector3f(rot)
@@ -173,6 +187,11 @@ class Particle(private val particleParams: ParticleParams) {
     vel    = newVel
     offset = newOffset
     rot    = newRot
+
+    for (forceField in particleParams.forceFields) {
+      if (forceField.shape is ForceFieldShape.SPHERE) { vel.add(sphereSdfVel(forceField)) }
+      else if (forceField.shape is ForceFieldShape.CUBE) { vel.add(cubeSdfVel(forceField)) }
+    }
 
     val (quatRot, transformOffset) = calcTransformOffset(newRot, initOffset, newScale)
     val combinedOffset = transformOffset.add(newOffset)

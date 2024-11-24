@@ -4,7 +4,6 @@ import org.joml.Vector3f
 
 data class ForceField (
   val name:  String             = "DEFAULT",
-  val pos:   Vector3f           = Vector3f(0.0f, 0.0f, 0.0f),
-  val force: Pair<Float, Float> = Pair(0.0f, 1.0f),
+  val pos:   Vector3f           = Vector3f(0.0f, 5.0f, 0.0f),
   val shape: ForceFieldShape = ForceFieldShape.SPHERE()
 )

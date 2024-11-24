@@ -9,15 +9,15 @@ package com.bytedice.bde_particles.particles
  * @param loopDur The duration for which the loop runs, in ticks. A value 0 or below means the loop is infinite, and `loopDelay` and `loopCount` will be ignored.
  * @param loopDelay The delay between each loop cycle, in ticks. Negative values are treated as 0, meaning no delay.
  * @param loopCount The number of times the loop will repeat. 0 means it will shoot a single burst of particles. A value below 0 means it will repeat indefinitely.
- * @param particleTypes An array of `ParticleParams` defining the types of particles to spawn. If empty, no particles will spawn.
+ * @param particle The particle params of the particle that will spawn.
  */
 data class EmitterParams (
-  var maxCount:      Int                   = 200,
-  var spawnsPerTick: Int                   = 1,
-  var loopDur:       Int                   = 25,
-  var loopDelay:     Int                   = 0,
-  var loopCount:     Int                   = 0,
-  var particleTypes: Array<ParticleParams> = arrayOf(ParticleParams()),
+  var maxCount:      Int            = 200,
+  var spawnsPerTick: Int            = 1,
+  var loopDur:       Int            = 25,
+  var loopDelay:     Int            = 0,
+  var loopCount:     Int            = 0,
+  var particle:      ParticleParams = ParticleParams(),
 )
 {
   companion object Presets {
@@ -28,7 +28,7 @@ data class EmitterParams (
       25,
       0,
       0,
-      arrayOf(ParticleParams.DEFAULT)
+      ParticleParams.FIRE_GEYSER
     )
   }
 }
