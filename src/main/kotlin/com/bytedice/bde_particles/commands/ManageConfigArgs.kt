@@ -301,7 +301,8 @@ class ArgConfigParticleKeys {
   fun forceFields() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("ForceFields")
       .then(argAddForceField())
-  } // TODO
+      .then(argRemoveForceField())
+  }
   fun gravity() : LiteralArgumentBuilder<ServerCommandSource> {
     return CommandManager.literal("gravity")
       .then(CommandManager.argument("X", FloatArgumentType.floatArg())
@@ -498,6 +499,49 @@ fun argAddForceField() : LiteralArgumentBuilder<ServerCommandSource> {
 }
 
 
+fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
+  return CommandManager.literal("remove")
+    .then(CommandManager.argument("Force Field Name", StringArgumentType.string())
+      .suggests { context, builder ->
+        val particleId = StringArgumentType.getString(context, "Registered Emitter ID")
+        val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+        val params = getEmitterParams(particleId)
+        val forceFields = params!!.particleTypes[particleIndex].forceFields
+
+        forceFields.iterator().forEach {
+          builder.suggest(it.name)
+        }
+
+        CompletableFuture.completedFuture(builder.build())
+      }
+      .executes { context ->
+        val ffName = StringArgumentType.getString(context, "Force Field Name")
+        val particleId = StringArgumentType.getString(context, "Registered Emitter ID")
+        val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
+
+        val params = getEmitterParams(particleId)
+        val forceFields = params!!.particleTypes[particleIndex].forceFields
+        val newForceFields: MutableList<ForceField> = forceFields.toMutableList()
+
+        for (forceField in forceFields) {
+          if (forceField.name == ffName) {
+            newForceFields.remove(forceField)
+          }
+        }
+
+        val feedback = argUpdateParticleParam(
+          context,
+          particleIndex,
+          "forceFields",
+          newForceFields
+        )
+        context.source.sendFeedback( { feedback }, false)
+        Command.SINGLE_SUCCESS
+      }
+    )
+}
+
+
 fun forceFieldAddSphereExec(context: CommandContext<ServerCommandSource>) : Int {
   val particleIndex = IntegerArgumentType.getInteger(context, "Particle Index")
   val radius = FloatArgumentType.getFloat(context, "Radius")
@@ -562,7 +606,7 @@ fun forceFieldGenericParams(context: CommandContext<ServerCommandSource>, shape:
   val maxForce = FloatArgumentType.getFloat(context, "Max Force")
 
   return ForceField(
-    name,
+    name.replace(" ", "_"),
     Vector3f(posX, posY, posZ),
     Pair(minForce, maxForce),
     shape
