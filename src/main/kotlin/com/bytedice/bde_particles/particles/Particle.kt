@@ -8,6 +8,9 @@ import org.joml.Vector4f
 import kotlin.math.*
 
 
+// TODO: consider moving most params to emitter (such as shape, and forceFields) to store less data
+
+
 class Particle(private val particleParams: ParticleParams) {
   private val initOffset = Vector3f(-0.5f, -0.5f, -0.5f)
   private var offset     = Vector3f(0.0f, 0.0f, 0.0f)
@@ -41,27 +44,11 @@ class Particle(private val particleParams: ParticleParams) {
     val newSpawnPos: Vector3f
 
     when (shape) {
-      is SpawningShape.CIRCLE -> {
-        val posInCircle = randomInCircle(shape.radius)
-        newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y)
-      }
-
-      is SpawningShape.SPHERE -> {
-        newSpawnPos = randomInSphere(shape.radius)
-      }
-
-      is SpawningShape.RECT -> {
-        val posInRect = randomInRect(shape.size)
-        newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y)
-      }
-
-      is SpawningShape.CUBE -> {
-        newSpawnPos = randomInCube(shape.size)
-      }
-
-      null -> {
-        newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f)
-      }
+      is SpawningShape.CIRCLE -> { val posInCircle = randomInCircle(shape.radius); newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y) }
+      is SpawningShape.SPHERE -> { newSpawnPos = randomInSphere(shape.radius) }
+      is SpawningShape.RECT ->   { val posInRect = randomInRect(shape.size); newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y) }
+      is SpawningShape.CUBE ->   { newSpawnPos = randomInCube(shape.size) }
+      is SpawningShape.POINT ->  { newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f) }
     }
 
     offset = newSpawnPos
@@ -115,7 +102,6 @@ class Particle(private val particleParams: ParticleParams) {
   }
 
 
-  // TODO: forceFields
   private fun calcNewProperties() : DisplayEntityProperties {
 
     fun calcBlockCurve(timeAliveClamped: Float) : String {
@@ -130,7 +116,8 @@ class Particle(private val particleParams: ParticleParams) {
       val sdfVal        = sdfSphere(forceField.pos, shape.radius, offset)
       val normalizedSdf = normalizeSdf(sdfVal, shape.radius)
       val velDir        = Vector3f(offset).sub(forceField.pos).normalize()
-      val velMul        = lerp(shape.force.second, shape.force.second, 1 - normalizedSdf)
+      val velMul = if (sdfVal > 0) { 0.0f }
+      else { lerp(shape.force.second, shape.force.second, 1 - normalizedSdf) }
 
       return velDir.mul(velMul)
     }

@@ -17,7 +17,7 @@ data class EmitterParams (
   var loopDur:       Int            = 25,
   var loopDelay:     Int            = 0,
   var loopCount:     Int            = 0,
-  var particle:      ParticleParams = ParticleParams(),
+  var particle:      ParticleParams = ParticleParams.DEFAULT,
 )
 {
   companion object Presets {
@@ -29,6 +29,14 @@ data class EmitterParams (
       0,
       0,
       ParticleParams.FIRE_GEYSER
+    )
+    val RING_EXPLOSION = EmitterParams(
+      200,
+      150,
+      1,
+      0,
+      0,
+      ParticleParams.RING_EXPLOSION
     )
   }
 }

@@ -4,10 +4,11 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 
 sealed class SpawningShape {
-  data class CIRCLE(val radius: Float = 1.0f)                                 : SpawningShape()
-  data class RECT  (val size: Vector2f = Vector2f(1.0f, 1.0f))          : SpawningShape()
+  data class CIRCLE(val radius: Float = 1.0f) : SpawningShape()
+  data class RECT  (val size: Vector2f = Vector2f(1.0f, 1.0f)) : SpawningShape()
   data class CUBE  (val size: Vector3f = Vector3f(1.0f, 1.0f, 1.0f)) : SpawningShape()
-  data class SPHERE(val radius: Float = 1.0f)                                 : SpawningShape()
+  data class SPHERE(val radius: Float = 1.0f) : SpawningShape()
+  data object POINT : SpawningShape()
 }
 
 sealed class ForceFieldShape {

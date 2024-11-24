@@ -61,7 +61,15 @@ class Bde_particles : ModInitializer {
     })
 
     ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { _ ->
-      println("BDE_ParticleSys - Progress bar filled :3")
+      println("BPS - Progress bar filled :3")
+      println(
+        "\n____________  _____              _____ \n" +
+        "| ___ \\ ___ \\/  ___|         _  |____ |\n" +
+        "| |_/ / |_/ /\\ `--.         (_)     / /\n" +
+        "| ___ \\  __/  `--. \\                \\ \\\n" +
+        "| |_/ / |    /\\__/ /         _  .___/ /\n" +
+        "\\____/\\_|    \\____/         (_) \\____/ \n"
+      )
     })
   }
 }
@@ -70,6 +78,7 @@ class Bde_particles : ModInitializer {
 fun init() {
   addToEmitterRegister("DEFAULT", EmitterParams.DEFAULT)
   addToEmitterRegister("FIRE_GEYSER", EmitterParams.FIRE_GEYSER)
+  addToEmitterRegister("RING_EXPLOSION", EmitterParams.RING_EXPLOSION)
 }
 
 
@@ -98,7 +107,7 @@ fun tick(server: MinecraftServer) {
 fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedActionResult<ItemStack> {
   val handItem = player.getStackInHand(hand)
   val (isEmitterTool, emitterId) = ParticleEmitterTool.getToolDetails(handItem)
-  val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 50.0)
+  val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 200.0)
   val emitterParams = getEmitterParams(emitterId)
 
   if (

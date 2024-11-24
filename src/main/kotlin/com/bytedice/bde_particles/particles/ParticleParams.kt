@@ -22,14 +22,14 @@ import org.joml.Vector3f
  * @param sizeCurve A curve which the size gets multiplied by during the particle's lifetime.
  */
 data class ParticleParams (
-  var shape:        SpawningShape?           = SpawningShape.CIRCLE(3.0f),
-  var blockCurve:   Array<String>            = arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
+  var shape:        SpawningShape            = SpawningShape.CIRCLE(3.0f),
+  var blockCurve:   Array<String>            = arrayOf("minecraft:purple_concrete", "minecraft:purple_stained_glass"),
   var rotRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
   var rotVelRandom: Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
   var sizeRandom:   Pair<Vector3f, Vector3f> = Pair(Vector3f(0.5f, 0.5f, 0.5f), Vector3f(1.0f, 1.0f, 1.0f)),
   var uniformSize:  Boolean                  = true,
-  var velRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.1f, 0.4f, -0.1f), Vector3f(0.1f, 0.8f, 0.1f)),
-  var forceFields:  Array<ForceField>        = arrayOf(ForceField()),
+  var velRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.1f, 0.3f, -0.1f), Vector3f(0.1f, 0.6f, 0.1f)),
+  var forceFields:  Array<ForceField>        = emptyArray(),
   var gravity:      Vector3f                 = Vector3f(0.0f, -0.01f, 0.0f),
   var drag:         Float                    = 0.075f,
   var minVel:       Float                    = 0.0f,
@@ -40,7 +40,7 @@ data class ParticleParams (
   companion object Presets {
     val DEFAULT = ParticleParams()
     val FIRE_GEYSER = ParticleParams(
-      null,
+      SpawningShape.POINT,
       arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
       Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
       Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
@@ -54,6 +54,22 @@ data class ParticleParams (
       Pair(15, 45),
       Triple(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.0f, 0.0f, 0.0f), InterpolationCurves.SQRT),
       Triple(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.5f, 0.5f, 0.5f), InterpolationCurves.SQRT)
+    )
+    val RING_EXPLOSION = ParticleParams(
+      SpawningShape.CIRCLE(0.1f),
+      arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
+      Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
+      Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),
+      Pair(Vector3f(10.0f, 10.0f, 10.0f), Vector3f(15.0f, 15.0f, 15.0f)),
+      true,
+      Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, 0.0f, 0.0f)),
+      arrayOf(ForceField("init", Vector3f(0.0f, -0.0001f, 0.0f), ForceFieldShape.SPHERE(0.1f, Pair(4.0f, 4.0f)))),
+      Vector3f(0.0f,  0.0f, 0.0f),
+      0.0075f,
+      0.0f,
+      Pair(50, 100),
+      Triple(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(0.0f, 0.0f, 0.0f), InterpolationCurves.SQRT),
+      Triple(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(3.0f, 3.0f, 3.0f), InterpolationCurves.SQRT)
     )
   }
 }

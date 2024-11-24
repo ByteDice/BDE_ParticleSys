@@ -50,7 +50,15 @@ class Bde_particlesClient : ClientModInitializer {
     })
 
     ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { _ ->
-      println("BDE_ParticleSys - Progress bar filled :3")
+      println("BPS - Progress bar filled :3")
+      println(
+        "\n____________  _____              _____ \n" +
+        "| ___ \\ ___ \\/  ___|         _  |____ |\n" +
+        "| |_/ / |_/ /\\ `--.         (_)     / /\n" +
+        "| ___ \\  __/  `--. \\                \\ \\\n" +
+        "| |_/ / |    /\\__/ /         _  .___/ /\n" +
+        "\\____/\\_|    \\____/         (_) \\____/ \n"
+      )
     })
   }
 }

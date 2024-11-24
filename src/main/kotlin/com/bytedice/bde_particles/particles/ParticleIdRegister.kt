@@ -113,7 +113,7 @@ fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramVa
   val newParams = params.copy()
 
   when (paramName) {
-    "shape"        -> newParams.shape        = value as SpawningShape?
+    "shape"        -> newParams.shape        = value as SpawningShape
     "blockCurve"   -> newParams.blockCurve   = value as Array<String>
     "rotRandom"    -> newParams.rotRandom    = value as Pair<Vector3f, Vector3f>
     "rotVelRandom" -> newParams.rotVelRandom = value as Pair<Vector3f, Vector3f>

@@ -45,7 +45,6 @@ fun updateEmitterParam(context: CommandContext<ServerCommandSource>, paramName: 
 
 fun updateParticleParam(context: CommandContext<ServerCommandSource>, paramName: String, typeValue: Any) : MutableText {
   val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
-  val particle = getEmitterParams(emitterIdVal)?.particle
   val success = updateSingleParticleParam(emitterIdVal, paramName, typeValue)
 
   val feedback = if (success) {
@@ -172,6 +171,13 @@ class ArgConfigParticleKeys {
             Command.SINGLE_SUCCESS
           }
         )
+      )
+      .then(CommandManager.literal("point")
+        .executes { context ->
+          val feedback = updateParticleParam(context, "shape", SpawningShape.POINT)
+          context.source.sendFeedback( { feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       )
   }
   fun blockCurve() : LiteralArgumentBuilder<ServerCommandSource> {
@@ -443,23 +449,23 @@ fun argAddForceField() : LiteralArgumentBuilder<ServerCommandSource> {
       .then(CommandManager.argument("X Pos", FloatArgumentType.floatArg())
         .then(CommandManager.argument("Y Pos", FloatArgumentType.floatArg())
           .then(CommandManager.argument("Z Pos", FloatArgumentType.floatArg())
-            .then(CommandManager.argument("Min Force", FloatArgumentType.floatArg())
-              .then(CommandManager.argument("Max Force", FloatArgumentType.floatArg())
-                .then(CommandManager.literal("sphere")
-                  .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
+            .then(CommandManager.literal("sphere")
+              .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Min Force", FloatArgumentType.floatArg())
+                  .then(CommandManager.argument("Max Force", FloatArgumentType.floatArg())
                     .executes { context -> forceFieldAddSphereExec(context) }
                   )
                 )
-                .then(CommandManager.literal("cube")
-                  .then(CommandManager.argument("X Size", FloatArgumentType.floatArg())
-                    .then(CommandManager.argument("Y Size", FloatArgumentType.floatArg())
-                      .then(CommandManager.argument("Z Size", FloatArgumentType.floatArg())
-                        .then(CommandManager.argument("X Force", FloatArgumentType.floatArg())
-                          .then(CommandManager.argument("Y Force", FloatArgumentType.floatArg())
-                            .then(CommandManager.argument("Z Force", FloatArgumentType.floatArg())
-                              .executes { context -> forceFieldAddCubeExec(context) }
-                            )
-                          )
+              )
+            )
+            .then(CommandManager.literal("cube")
+              .then(CommandManager.argument("X Size", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Y Size", FloatArgumentType.floatArg())
+                  .then(CommandManager.argument("Z Size", FloatArgumentType.floatArg())
+                    .then(CommandManager.argument("X Force", FloatArgumentType.floatArg())
+                      .then(CommandManager.argument("Y Force", FloatArgumentType.floatArg())
+                        .then(CommandManager.argument("Z Force", FloatArgumentType.floatArg())
+                          .executes { context -> forceFieldAddCubeExec(context) }
                         )
                       )
                     )
@@ -474,7 +480,7 @@ fun argAddForceField() : LiteralArgumentBuilder<ServerCommandSource> {
 }
 
 
-fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
+fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> { // TODO fix this error somehow
   return CommandManager.literal("remove")
     .then(CommandManager.argument("Force Field Name", StringArgumentType.string())
       .suggests { context, builder ->
@@ -483,8 +489,8 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
         val params = getEmitterParams(emitterIdVal)
         val forceFields = params!!.particle.forceFields
 
-        forceFields.iterator().forEach {
-          builder.suggest(it.name)
+        for (forceField in forceFields) {
+          builder.suggest(forceField.name)
         }
 
         CompletableFuture.completedFuture(builder.build())
@@ -497,19 +503,29 @@ fun argRemoveForceField() : LiteralArgumentBuilder<ServerCommandSource> {
         val forceFields = params!!.particle.forceFields
         val newForceFields: MutableList<ForceField> = forceFields.toMutableList()
 
-        for (forceField in forceFields) {
-          if (forceField.name == ffName) {
-            newForceFields.remove(forceField)
-          }
+        if (forceFields.isEmpty()) {
+          val feedback = Text.literal("BPS - There are no force fields for Emitter ID \"$emitterIdVal\".")
+            .setStyle(Style.EMPTY.withColor(Color(200, 0, 0).rgb))
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+
         }
 
-        val feedback = updateParticleParam(
-          context,
-          "forceFields",
-          newForceFields
-        )
-        context.source.sendFeedback( { feedback }, false)
-        Command.SINGLE_SUCCESS
+        else {
+          for (forceField in forceFields) {
+            if (forceField.name == ffName) {
+              newForceFields.apply { remove(forceField) }
+            }
+          }
+
+          val feedback = updateParticleParam(
+            context,
+            "forceFields",
+            newForceFields.toTypedArray()
+          )
+          context.source.sendFeedback({ feedback }, false)
+          Command.SINGLE_SUCCESS
+        }
       }
     )
 }
@@ -527,11 +543,12 @@ fun forceFieldAddSphereExec(context: CommandContext<ServerCommandSource>) : Int 
 
   val currentParams = getEmitterParams(emitterIdVal)
   val forceFields = currentParams!!.particle.forceFields
+  val addedArray = forceFields.toMutableList().apply { add(forceField) }.toTypedArray()
 
   val feedback = updateParticleParam(
     context,
     "forceFields",
-    forceFields.toMutableList().add(forceField)
+    addedArray
   )
 
   context.source.sendFeedback({ feedback }, false)
@@ -555,11 +572,13 @@ fun forceFieldAddCubeExec(context: CommandContext<ServerCommandSource>) : Int {
 
   val currentParams = getEmitterParams(emitterIdVal)
   val forceFields = currentParams!!.particle.forceFields
+  val addedArray = forceFields.toMutableList().apply { add(forceField) }.toTypedArray()
+
 
   val feedback = updateParticleParam(
     context,
     "forceFields",
-    forceFields.toMutableList().add(forceField)
+    addedArray
   )
 
   context.source.sendFeedback({ feedback }, false)
