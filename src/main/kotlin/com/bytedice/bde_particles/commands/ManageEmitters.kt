@@ -88,46 +88,42 @@ val particleConfigKeys = ArgConfigParticleKeys()
   // output -> register new emitter with a preset
 fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("create")
-    .then(
-      // [emitter id]
-      CommandManager.argument("Emitter ID", StringArgumentType.string())
-        .then(
-        // [preset emitter id]
-        emitterIdSuggestion
-            .executes { context ->
-              val emitterIdVal = StringArgumentType.getString(context, "Emitter ID")
-              val emitterPresetVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "DEFAULT"
-              val emitterPresetParams = getEmitterParams(emitterPresetVal)
+    .then(CommandManager.argument("Emitter ID", StringArgumentType.string())
+      .then(emitterIdSuggestion
+        .executes { context ->
+          val emitterIdVal = StringArgumentType.getString(context, "Emitter ID")
+          val emitterPresetVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "DEFAULT"
+          val emitterPresetParams = getEmitterParams(emitterPresetVal)
 
-              var newEmitterId = "NULL"
-              val emitterRegisterData: Pair<String, Boolean>
+          var newEmitterId = "NULL"
+          val emitterRegisterData: Pair<String, Boolean>
 
-              if (emitterPresetParams != null) {
-                emitterRegisterData = addToEmitterRegister(emitterIdVal, emitterPresetParams)
-                newEmitterId = emitterRegisterData.first
-              }
-              else { emitterRegisterData = Pair("NULL", false) }
+          if (emitterPresetParams != null) {
+            emitterRegisterData = addToEmitterRegister(emitterIdVal, emitterPresetParams)
+            newEmitterId = emitterRegisterData.first
+          }
+          else { emitterRegisterData = Pair("NULL", false) }
 
-              val feedback = if (emitterRegisterData.second) {
-                Text.literal("BPS - Created particle emitter with ID \"$newEmitterId\".\n" +
-                        "BPS - This emitter will be removed on server restart! Use \"/ManageEmitters copy\" to save the data to your clipboard!")
-                  .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
-              }
-              else if (newEmitterId !in allEmitterIds) {
-                Text.literal("BPS - Preset Emitter ID \"$emitterPresetVal\" doesn't exist!\n" +
-                        "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
-                  .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
-              }
-              else {
-                Text.literal("BPS - Emitter ID \"$newEmitterId\" already exists\n" +
-                        "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
-                  .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
-              }
+          val feedback = if (emitterRegisterData.second) {
+            Text.literal("BPS - Created particle emitter with ID \"$newEmitterId\".\n" +
+                    "BPS - This emitter will be removed on server restart! Use \"/ManageEmitters copy\" to save the data to your clipboard!")
+              .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
+          }
+          else if (newEmitterId !in allEmitterIds) {
+            Text.literal("BPS - Preset Emitter ID \"$emitterPresetVal\" doesn't exist!\n" +
+                    "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
+              .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
+          }
+          else {
+            Text.literal("BPS - Emitter ID \"$newEmitterId\" already exists\n" +
+                    "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
+              .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
+          }
 
-              context.source.sendFeedback( { feedback }, false )
-              Command.SINGLE_SUCCESS
-            }
-        )
+          context.source.sendFeedback( { feedback }, false )
+          Command.SINGLE_SUCCESS
+        }
+      )
     )
 }
 
@@ -136,26 +132,24 @@ fun argCreate() : LiteralArgumentBuilder<ServerCommandSource> {
   // output -> removes the particle with that id
 fun argRemove() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("remove")
-    .then(
-      // [emitter id]
-      emitterIdSuggestion
-        .executes { context ->
-          val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "NULL"
-          val isRemoved = removeFromEmitterRegister(emitterIdVal)
+    .then(emitterIdSuggestion
+      .executes { context ->
+        val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID") ?: "NULL"
+        val isRemoved = removeFromEmitterRegister(emitterIdVal)
 
-          val feedback = if (isRemoved) {
-            Text.literal("BPS - Removed particle emitter with ID \"$emitterIdVal\".")
-              .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
-          }
-          else {
-            Text.literal("BPS - Emitter ID \"$emitterIdVal\" doesn't exist or is reserved!\n" +
-                    "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
-              .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
-          }
-
-          context.source.sendFeedback( { feedback }, false )
-          Command.SINGLE_SUCCESS
+        val feedback = if (isRemoved) {
+          Text.literal("BPS - Removed particle emitter with ID \"$emitterIdVal\".")
+            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
         }
+        else {
+          Text.literal("BPS - Emitter ID \"$emitterIdVal\" doesn't exist or is reserved!\n" +
+                  "BPS - Use \"/ManageEmitters list\" to view all Emitter ID's.")
+            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(200, 0, 0).rgb)))
+        }
+
+        context.source.sendFeedback( { feedback }, false )
+        Command.SINGLE_SUCCESS
+      }
     )
 }
 
@@ -184,37 +178,35 @@ fun argList() : LiteralArgumentBuilder<ServerCommandSource> {
   // output -> give player a command block with the particle params (should be paste-able in kotlin)
 fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("copy")
-    .then(
-      // [emitter id]
-      emitterIdSuggestion
-        .executes { context ->
-          val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
-          val commandBlock = makeCommandBlock(
-            emitterParamsToJson(
-              getEmitterParams(
-                emitterIdVal
-              )!!
-            )
+    .then(emitterIdSuggestion
+      .executes { context ->
+        val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
+        val commandBlock = makeCommandBlock(
+          emitterParamsToJson(
+            getEmitterParams(
+              emitterIdVal
+            )!!
           )
+        )
 
-          val feedback: MutableText
+        val feedback: MutableText
 
-          if (context.source.server.areCommandBlocksEnabled()) {
-            feedback = Text.literal("BPS - Copied Emitter data as a JSON. Place down the command block and copy it to your clipboard to use the value.")
-              .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
-          }
-          else {
-            feedback = Text.literal("BPS - Could not copy Emitter data: Command blocks aren't enabled. Go to server.properties and enable command blocks before retrying.")
-              .setStyle(Style.EMPTY.withColor(Color(200, 0, 0).rgb))
+        if (context.source.server.areCommandBlocksEnabled()) {
+          feedback = Text.literal("BPS - Copied Emitter data as a JSON. Place down the command block and copy it to your clipboard to use the value.")
+            .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
+        }
+        else {
+          feedback = Text.literal("BPS - Could not copy Emitter data: Command blocks aren't enabled. Go to server.properties and enable command blocks before retrying.")
+            .setStyle(Style.EMPTY.withColor(Color(200, 0, 0).rgb))
 
-            Command.SINGLE_SUCCESS
-          }
-
-
-          context.source.player?.inventory?.insertStack(commandBlock)
-          context.source.sendFeedback({ feedback }, false)
           Command.SINGLE_SUCCESS
         }
+
+
+        context.source.player?.inventory?.insertStack(commandBlock)
+        context.source.sendFeedback({ feedback }, false)
+        Command.SINGLE_SUCCESS
+      }
     )
 }
 
@@ -226,42 +218,39 @@ fun argCopy() : LiteralArgumentBuilder<ServerCommandSource> {
   // output -> update the selected parameter of the selected emitter id to the new value
 fun argConfig() : LiteralArgumentBuilder<ServerCommandSource> {
   return CommandManager.literal("config")
-    .then(
-      emitterIdSuggestion
-        .then(
-          CommandManager.literal("EMITTER")
-            .then(emitterConfigKeys.maxCount())
-            .then(emitterConfigKeys.spawnsPerTick())
-            .then(emitterConfigKeys.loopDur())
-            .then(emitterConfigKeys.loopDelay())
-            .then(emitterConfigKeys.loopCount())
-        )
-        .then(
-          CommandManager.argument("Particle Index", IntegerArgumentType.integer())
-            .suggests { context, builder ->
-              val emitterId = StringArgumentType.getString(context, "Registered Emitter ID")
+    .then(emitterIdSuggestion
+      .then(CommandManager.literal("EMITTER")
+        .then(emitterConfigKeys.maxCount())
+        .then(emitterConfigKeys.spawnsPerTick())
+        .then(emitterConfigKeys.loopDur())
+        .then(emitterConfigKeys.loopDelay())
+        .then(emitterConfigKeys.loopCount())
+      )
+      .then(CommandManager.argument("Particle Index", IntegerArgumentType.integer())
+        .suggests { context, builder ->
+          val emitterId = StringArgumentType.getString(context, "Registered Emitter ID")
 
-              getEmitterParams(emitterId)?.particleTypes?.indices?.forEach {
-                builder.suggest(it)
-              }
+          getEmitterParams(emitterId)?.particleTypes?.indices?.forEach {
+            builder.suggest(it)
+          }
 
-              CompletableFuture.completedFuture(builder.build())
-            }
-            .then(particleConfigKeys.shape())
-            .then(particleConfigKeys.blockCurve())
-            .then(particleConfigKeys.rotRandom())
-            .then(particleConfigKeys.rotVelRandom())
-            .then(particleConfigKeys.sizeRandom())
-            .then(particleConfigKeys.uniformSize())
-            .then(particleConfigKeys.velRandom())
-            //.then(particleConfigKeys.forceFields())
-            .then(particleConfigKeys.gravity())
-            .then(particleConfigKeys.drag())
-            .then(particleConfigKeys.minVel())
-            .then(particleConfigKeys.lifeTime())
-            .then(particleConfigKeys.rotVelCurve())
-            .then(particleConfigKeys.sizeCurve())
-        )
+          CompletableFuture.completedFuture(builder.build())
+        }
+        .then(particleConfigKeys.shape())
+        .then(particleConfigKeys.blockCurve())
+        .then(particleConfigKeys.rotRandom())
+        .then(particleConfigKeys.rotVelRandom())
+        .then(particleConfigKeys.sizeRandom())
+        .then(particleConfigKeys.uniformSize())
+        .then(particleConfigKeys.velRandom())
+        //.then(particleConfigKeys.forceFields())
+        .then(particleConfigKeys.gravity())
+        .then(particleConfigKeys.drag())
+        .then(particleConfigKeys.minVel())
+        .then(particleConfigKeys.lifeTime())
+        .then(particleConfigKeys.rotVelCurve())
+        .then(particleConfigKeys.sizeCurve())
+      )
     )
 }
 

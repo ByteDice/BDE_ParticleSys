@@ -42,21 +42,21 @@ class Particle(private val particleParams: ParticleParams) {
     val newSpawnPos: Vector3f
 
     when (shape) {
-      is SpawningShape.Circle -> {
+      is SpawningShape.CIRCLE -> {
         val posInCircle = randomInCircle(shape.radius)
         newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y)
       }
 
-      is SpawningShape.Sphere -> {
+      is SpawningShape.SPHERE -> {
         newSpawnPos = randomInSphere(shape.radius)
       }
 
-      is SpawningShape.Rect -> {
+      is SpawningShape.RECT -> {
         val posInRect = randomInRect(shape.size)
         newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y)
       }
 
-      is SpawningShape.Cube -> {
+      is SpawningShape.CUBE -> {
         newSpawnPos = randomInCube(shape.size)
       }
 

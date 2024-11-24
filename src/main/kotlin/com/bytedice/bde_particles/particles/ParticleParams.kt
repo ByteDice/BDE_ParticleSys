@@ -22,7 +22,7 @@ import org.joml.Vector3f
  * @param sizeCurve A curve which the size gets multiplied by during the particle's lifetime.
  */
 data class ParticleParams (
-  var shape:        SpawningShape?           = SpawningShape.Circle(3.0f),
+  var shape:        SpawningShape?           = SpawningShape.CIRCLE(3.0f),
   var blockCurve:   Array<String>            = arrayOf("minecraft:shroomlight", "minecraft:orange_concrete", "minecraft:orange_stained_glass", "minecraft:gray_stained_glass", "minecraft:light_gray_stained_glass"),
   var rotRandom:    Pair<Vector3f, Vector3f> = Pair(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(360.0f, 360.0f, 360.0f)),
   var rotVelRandom: Pair<Vector3f, Vector3f> = Pair(Vector3f(-0.2f, -0.2f, -0.2f), Vector3f(0.2f, 0.2f, 0.2f)),

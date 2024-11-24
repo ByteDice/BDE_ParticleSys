@@ -15,18 +15,17 @@ object KillAllEmitters {
       .requires { source -> source.hasPermissionLevel(4) }
 
     dispatcher.register(
-      command
-        .executes { context ->
-          for (emitter in ALL_PARTICLE_EMITTERS) {
-            emitter.kill()
-          }
-
-          val feedback = Text.literal("BPS - Killed all living Emitters.")
-            .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
-
-          context.source.sendFeedback({ feedback }, false)
-          Command.SINGLE_SUCCESS
+      command.executes { context ->
+        for (emitter in ALL_PARTICLE_EMITTERS) {
+          emitter.kill()
         }
+
+        val feedback = Text.literal("BPS - Killed all living Emitters.")
+          .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
+
+        context.source.sendFeedback({ feedback }, false)
+        Command.SINGLE_SUCCESS
+      }
     )
   }
 }

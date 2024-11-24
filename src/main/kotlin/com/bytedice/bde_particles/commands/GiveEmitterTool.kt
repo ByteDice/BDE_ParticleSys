@@ -34,24 +34,25 @@ object GiveEmitterTool {
       }
 
     dispatcher.register(
-      command.then(
-        itemNameArg.then(
-          itemTypeArg.then(
-            emitterIdSuggestion.executes { context ->
-              val name = StringArgumentType.getString(context, "Item Name")
-              val item = ItemStackArgumentType.getItemStackArgument(context, "Item Type")
-              val emitterId = StringArgumentType.getString(context, "Emitter ID")
+      command
+        .then(itemNameArg
+          .then(itemTypeArg
+            .then(emitterIdSuggestion
+              .executes { context ->
+                val name = StringArgumentType.getString(context, "Item Name")
+                val item = ItemStackArgumentType.getItemStackArgument(context, "Item Type")
+                val emitterId = StringArgumentType.getString(context, "Emitter ID")
 
-              val feedback = Text.literal("BPS - You like fancy particles. Don't you?\nBPS - gave particle emitter, bound to ID: \"${emitterId}\".")
-                .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
+                val feedback = Text.literal("BPS - You like fancy particles. Don't you?\nBPS - gave particle emitter, bound to ID: \"${emitterId}\".")
+                  .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Color(0, 200, 0).rgb)))
 
-              context.source.player?.inventory?.insertStack(ParticleEmitterTool.makeData(item.item, name, emitterId))
-              context.source.sendFeedback({ feedback }, false)
-              Command.SINGLE_SUCCESS
-            }
+                context.source.player?.inventory?.insertStack(ParticleEmitterTool.makeData(item.item, name, emitterId))
+                context.source.sendFeedback({ feedback }, false)
+                Command.SINGLE_SUCCESS
+              }
+            )
           )
         )
-      )
     )
   }
 }

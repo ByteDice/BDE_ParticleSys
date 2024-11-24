@@ -1,11 +1,10 @@
 package com.bytedice.bde_particles.particles
 
-data class ForceField (
-  val x:        Float           = 0.0f,
-  val y:        Float           = 0.0f,
-  val z:        Float           = 0.0f,
-  val minForce: Float           = 0.0f,
-  val maxForce: Float           = 0.0f,
-  val shape:    ForceFieldShape = ForceFieldShape.Sphere()
-)
+import org.joml.Vector3f
 
+data class ForceField (
+  val name:  String             = "DEFAULT",
+  val pos:   Vector3f           = Vector3f(0.0f, 0.0f, 0.0f),
+  val force: Pair<Float, Float> = Pair(0.0f, 1.0f),
+  val shape: ForceFieldShape = ForceFieldShape.SPHERE()
+)
