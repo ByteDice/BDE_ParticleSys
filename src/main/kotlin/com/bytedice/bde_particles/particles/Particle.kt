@@ -11,7 +11,7 @@ import kotlin.math.*
 // TODO: consider moving most params to emitter (such as shape, and forceFields) to store less data
 
 
-class Particle(private val particleParams: ParticleParams) {
+class Particle(private val emitterParams: EmitterParams) {
   private val initOffset = Vector3f(-0.5f, -0.5f, -0.5f)
   private var offset     = Vector3f(0.0f, 0.0f, 0.0f)
   private var pos        = Vec3d(0.0, 0.0, 0.0)
@@ -44,11 +44,11 @@ class Particle(private val particleParams: ParticleParams) {
     val newSpawnPos: Vector3f
 
     when (shape) {
-      is SpawningShape.CIRCLE -> { val posInCircle = randomInCircle(shape.radius); newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y) }
-      is SpawningShape.SPHERE -> { newSpawnPos = randomInSphere(shape.radius) }
-      is SpawningShape.RECT ->   { val posInRect = randomInRect(shape.size); newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y) }
-      is SpawningShape.CUBE ->   { newSpawnPos = randomInCube(shape.size) }
-      is SpawningShape.POINT ->  { newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f) }
+      is SpawningShape.Circle -> { val posInCircle = randomInCircle(shape.radius); newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y) }
+      is SpawningShape.Sphere -> { newSpawnPos = randomInSphere(shape.radius) }
+      is SpawningShape.Rect ->   { val posInRect = randomInRect(shape.size); newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y) }
+      is SpawningShape.Cube ->   { newSpawnPos = randomInCube(shape.size) }
+      is SpawningShape.Point ->  { newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f) }
     }
 
     offset = newSpawnPos
@@ -110,7 +110,7 @@ class Particle(private val particleParams: ParticleParams) {
     }
 
     fun sphereSdfVel(forceField: ForceField) : Vector3f {
-      if (forceField.shape !is ForceFieldShape.SPHERE) { return Vector3f(0.0f, 0.0f, 0.0f) }
+      if (forceField.shape !is ForceFieldShape.Sphere) { return Vector3f(0.0f, 0.0f, 0.0f) }
       val shape = forceField.shape
 
       val sdfVal        = sdfSphere(forceField.pos, shape.radius, offset)
@@ -123,7 +123,7 @@ class Particle(private val particleParams: ParticleParams) {
     }
 
     fun cubeSdfVel(forceField: ForceField) : Vector3f {
-      if (forceField.shape !is ForceFieldShape.CUBE) { return Vector3f(0.0f, 0.0f, 0.0f) }
+      if (forceField.shape !is ForceFieldShape.Cube) { return Vector3f(0.0f, 0.0f, 0.0f) }
       val shape = forceField.shape
 
       val sdfVal = sdfCube(forceField.pos, shape.size, offset)
@@ -176,8 +176,8 @@ class Particle(private val particleParams: ParticleParams) {
     rot    = newRot
 
     for (forceField in particleParams.forceFields) {
-      if (forceField.shape is ForceFieldShape.SPHERE) { vel.add(sphereSdfVel(forceField)) }
-      else if (forceField.shape is ForceFieldShape.CUBE) { vel.add(cubeSdfVel(forceField)) }
+      if (forceField.shape is ForceFieldShape.Sphere) { vel.add(sphereSdfVel(forceField)) }
+      else if (forceField.shape is ForceFieldShape.Cube) { vel.add(cubeSdfVel(forceField)) }
     }
 
     val (quatRot, transformOffset) = calcTransformOffset(newRot, initOffset, newScale)

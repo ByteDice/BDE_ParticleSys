@@ -1,42 +1,60 @@
 package com.bytedice.bde_particles.particles
 
+import com.bytedice.bde_particles.LerpCurves
+import org.joml.Vector3f
+
+
 /**
  * EmitterParams defines the parameters for controlling how particles are emitted,
  * including settings for looping, spawn frequency, and maximum particle count.
  *
- * @param maxCount The maximum number of particles that can exist. If set to 0 or below, no particles will spawn.
- * @param spawnsPerTick The number of particles spawned per tick. If set to 0 or below, no particles will spawn.
- * @param loopDur The duration for which the loop runs, in ticks. A value 0 or below means the loop is infinite, and `loopDelay` and `loopCount` will be ignored.
- * @param loopDelay The delay between each loop cycle, in ticks. Negative values are treated as 0, meaning no delay.
- * @param loopCount The number of times the loop will repeat. 0 means it will shoot a single burst of particles. A value below 0 means it will repeat indefinitely.
- * @param particle The particle params of the particle that will spawn.
+ * @param maxCount The maximum number of particles that can exist at any time. If set to 0 or below, no particles will spawn.
+ * @param spawnRate The number of particles to spawn each tick. If set to 0 or below, no particles will spawn.
+ * @param spawnChance The chance for a particle to spawn. 0.5 means a particle has a 50% chance of spawning. Values are between 0.0 and 1.0.
+ * @param loopDur The duration, in ticks, that each emission loop lasts. A value of 0 or below makes the loop infinite, ignoring `loopDelay` and `loopCount`.
+ * @param loopDelay The delay, in ticks, between consecutive loops. Negative values are treated as 0 (no delay).
+ * @param loopCount The number of times the loop repeats. A value of 0 results in a single burst of particles. Values below 0 make the loop repeat indefinitely.
+ * @param shape The spawning shape for the particles, such as `SpawningShape.Sphere()`.
+ * @param initRot Specifies the initial random rotation range for the particles, in degrees, for the X, Y, and Z axes.
+ * @param rotVel Specifies the random range for rotational velocity, in degrees per tick, for the X, Y, and Z axes.
+ * @param rotTowardVel If true, particles will face the direction of velocity. It uses `initRot` as an offset rotation and ignores `rotVel`.
+ * @param initVel Specifies the random range for the initial velocity, in units per tick, for the X, Y, and Z axes.
+ * @param initScale Defines the random range for the initial particle size.
+ * @param scaleTowardVel If true, particles will scale to the direction of velocity.
+ * @param forceFields An array of force fields applied to particles, affecting their motion during their lifetime.
+ * @param constVel A constant velocity vector applied to particles each tick, useful for effects like gravity.
+ * @param drag A drag coefficient that slows down particle velocity over time. Calculated as `velocity * (1.0 - drag)`.
+ * @param minVel The minimum speed a particle must maintain. Particles slower than this value are stopped. Values <= 0 disable this check.
+ * @param lifeTime Specifies the range for particle lifetime, in ticks. Values below 1 prevent particles from spawning.
+ * @param rotVelCurve A curve defining how rotational velocity evolves during the particle's lifetime. Multiplies the `rotVel` values.
+ * @param sizeCurve A curve defining how the particle's size evolves over its lifetime. Multiplies the `initScale` values.
+ * @param blockCurve Specifies an array of block names that the particle transitions through during its lifetime, combined with a curve to control transitions. Defaults to "minecraft:air" if empty.
  */
 data class EmitterParams (
-  var maxCount:      Int            = 200,
-  var spawnsPerTick: Int            = 1,
-  var loopDur:       Int            = 25,
-  var loopDelay:     Int            = 0,
-  var loopCount:     Int            = 0,
-  var particle:      ParticleParams = ParticleParams.DEFAULT,
+  var maxCount:       Int                    = 200,
+  var spawnRate:      Int                    = 1,
+  var spawnChance:    Float                  = 1.0f,
+  var loopDur:        Int                    = 25,
+  var loopDelay:      Int                    = 0,
+  var loopCount:      Int                    = 0,
+  var shape:          SpawningShape          = SpawningShape.Circle(3.0f),
+  var initRot:        ParamClasses.PairVec3f = ParamClasses.PairVec3f(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+  var rotVel:         ParamClasses.PairVec3f = ParamClasses.PairVec3f(-0.2f, -0.2f, -0.2f, 0.2f, 0.2f, 0.2f),
+  var rotTowardVel:   Boolean                = true,
+  var initVel:        ParamClasses.PairVec3f = ParamClasses.PairVec3f(-0.1f, 0.3f, -0.1f, 0.1f, 0.6f, 0.1f),
+  var initScale:      ParamClasses.RandScale = ParamClasses.RandScale.Uniform(),
+  var scaleTowardVel: Boolean                = true,
+  var forceFields:    Array<ForceField>      = emptyArray(),
+  var constVel:       Vector3f               = Vector3f(0.0f, -0.01f, 0.0f),
+  var drag:           Float                  = 0.075f,
+  var minVel:         Float                  = 0.0f,
+  var lifeTime:       ParamClasses.PairVec2i = ParamClasses.PairVec2i(0, 0, 1, 1),
+  var rotVelCurve:    ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
+  var sizeCurve:      ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.5f, LerpCurves.Linear),
+  var blockCurve:     Pair<Array<String>, LerpCurves> = Pair(arrayOf("minecraft:purple_concrete", "minecraft:purple_stained_glass"), LerpCurves.Sqrt),
 )
 {
   companion object Presets {
     val DEFAULT = EmitterParams()
-    val FIRE_GEYSER = EmitterParams(
-      200,
-      1,
-      25,
-      0,
-      0,
-      ParticleParams.FIRE_GEYSER
-    )
-    val RING_EXPLOSION = EmitterParams(
-      200,
-      150,
-      1,
-      0,
-      0,
-      ParticleParams.RING_EXPLOSION
-    )
   }
 }

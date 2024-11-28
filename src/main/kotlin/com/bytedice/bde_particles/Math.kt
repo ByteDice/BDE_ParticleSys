@@ -12,18 +12,18 @@ import kotlin.math.*
 import kotlin.random.Random
 
 
-class InterpolationCurves(val function: (Float) -> Float) {
+class LerpCurves(val function: (Float) -> Float) {
   companion object {
-    val LINEAR = InterpolationCurves { y -> y }
-    val SQRT = InterpolationCurves { y -> sqrt(y) }
-    val EXPONENT = InterpolationCurves { y -> y.pow(2.0f) }
-    val CUBIC = InterpolationCurves { y -> y.pow(3.0f) }
-    val SINE = InterpolationCurves { y -> sin(y * PI.toFloat() / 2) }
-    val COSINE = InterpolationCurves { y -> 1 - cos(y * PI.toFloat() / 2) }
-    val INVERSE = InterpolationCurves { y -> 1 - y }
-    val LOG = InterpolationCurves { y -> if (y > 0) ln(y + 1) else 0f }
-    val EXP = InterpolationCurves { y -> exp(y) - 1 }
-    val BOUNCE = InterpolationCurves { y ->
+    val Linear = LerpCurves { y -> y }
+    val Sqrt = LerpCurves { y -> sqrt(y) }
+    val Exponent = LerpCurves { y -> y.pow(2.0f) }
+    val Cubic = LerpCurves { y -> y.pow(3.0f) }
+    val Sine = LerpCurves { y -> sin(y * PI.toFloat() / 2) }
+    val Cosine = LerpCurves { y -> 1 - cos(y * PI.toFloat() / 2) }
+    val Inverse = LerpCurves { y -> 1 - y }
+    val Log = LerpCurves { y -> if (y > 0) ln(y + 1) else 0f }
+    val Exp = LerpCurves { y -> exp(y) - 1 }
+    val Bounce = LerpCurves { y ->
       val n1 = 7.5625f
       val d1 = 2.75f
       when {
@@ -43,7 +43,7 @@ class InterpolationCurves(val function: (Float) -> Float) {
       }
     }
 
-    fun custom(equation: (Float) -> Float) = InterpolationCurves(equation)
+    fun custom(equation: (Float) -> Float) = LerpCurves(equation)
   }
 }
 
@@ -209,7 +209,7 @@ fun lerp(x: Float, y: Float, t: Float) : Float {
 }
 
 
-fun interpolateCurve(start: Vector3f, end: Vector3f, t: Float, curve: InterpolationCurves): Vector3f {
+fun interpolateCurve(start: Vector3f, end: Vector3f, t: Float, curve: LerpCurves): Vector3f {
   val clampedT = t.coerceIn(0.0f, 1.0f)
 
   val curvedT = curve.function(clampedT)

@@ -27,6 +27,37 @@ import net.minecraft.world.World
 import java.util.*
 
 
+// TODO:
+// Allowing the use of regular Minecraft particles instead of just BDEs.
+// Better command auto-completion. (and change names of args)
+  // force field "config" option
+  // blockCurve array not needing "minecraft:"
+
+// Adding a parameter for an initial velocity from an origin point (you currently have to use force fields)
+  // Pair<Pair<Vec3f, Vec3f>, Pair<Vec3f, Vec3f>>
+    // "min center vel", "max center vel", "min edge vel", "max edge vel"
+
+// Parameters
+  // localOffset (Vec3f)
+    // velocity based, relative coordinate based, or rotation based
+  // localOffsetCurve (curve)
+  // spawnOffset (Vec3f)
+  // velRot (bool)
+    // rotates the particle to face the velocity
+  // spawnChance (Float)
+
+// Move most (if not all) particle params to emitters.
+// 3D curves (curves for all X Y Z)
+// Custom curve equation command args (parse from strings)
+// Cylinder and cone force field shape.
+// Better particle performance.
+// Global max particles variable.
+  // gamerule max particles
+
+// Emitter groups (multiple emitters for EmitterTool)
+// Private functions/classes
+
+
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 val sessionUuid: UUID = UUID.randomUUID()
 

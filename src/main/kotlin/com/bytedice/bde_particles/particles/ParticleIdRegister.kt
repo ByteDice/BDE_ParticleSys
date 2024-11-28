@@ -2,7 +2,7 @@
 
 package com.bytedice.bde_particles.particles
 
-import com.bytedice.bde_particles.InterpolationCurves
+import com.bytedice.bde_particles.LerpCurves
 import org.joml.Vector3f
 
 
@@ -103,8 +103,8 @@ fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramVa
     "drag"         -> paramValue as Float
     "minVel"       -> paramValue as Float
     "lifeTime"     -> paramValue as Pair<Int, Int>
-    "rotVelCurve"  -> paramValue as Triple<Vector3f, Vector3f, InterpolationCurves>
-    "sizeCurve"    -> paramValue as Triple<Vector3f, Vector3f, InterpolationCurves>
+    "rotVelCurve"  -> paramValue as Triple<Vector3f, Vector3f, LerpCurves>
+    "sizeCurve"    -> paramValue as Triple<Vector3f, Vector3f, LerpCurves>
     else           -> null
   }
 
@@ -125,8 +125,8 @@ fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramVa
     "drag"         -> newParams.drag         = value as Float
     "minVel"       -> newParams.minVel       = value as Float
     "lifeTime"     -> newParams.lifeTime     = value as Pair<Int, Int>
-    "rotVelCurve"  -> newParams.rotVelCurve  = value as Triple<Vector3f, Vector3f, InterpolationCurves>
-    "sizeCurve"    -> newParams.sizeCurve    = value as Triple<Vector3f, Vector3f, InterpolationCurves>
+    "rotVelCurve"  -> newParams.rotVelCurve  = value as Triple<Vector3f, Vector3f, LerpCurves>
+    "sizeCurve"    -> newParams.sizeCurve    = value as Triple<Vector3f, Vector3f, LerpCurves>
     else           -> return Pair(params, false)
   }
 

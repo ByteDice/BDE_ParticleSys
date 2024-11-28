@@ -1,6 +1,6 @@
 package com.bytedice.bde_particles.commands
 
-import com.bytedice.bde_particles.InterpolationCurves
+import com.bytedice.bde_particles.LerpCurves
 import com.bytedice.bde_particles.particles.*
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.BoolArgumentType
@@ -127,7 +127,7 @@ class ArgConfigParticleKeys {
         .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
           .executes { context ->
             val radius = FloatArgumentType.getFloat(context, "Radius")
-            val feedback = updateParticleParam(context, "shape", SpawningShape.CIRCLE(radius))
+            val feedback = updateParticleParam(context, "shape", SpawningShape.Circle(radius))
             context.source.sendFeedback( { feedback }, false)
             Command.SINGLE_SUCCESS
           }
@@ -139,7 +139,7 @@ class ArgConfigParticleKeys {
             .executes { context ->
               val w = FloatArgumentType.getFloat(context, "Width")
               val h = FloatArgumentType.getFloat(context, "Height")
-              val feedback = updateParticleParam(context, "shape", SpawningShape.RECT(Vector2f(w, h)))
+              val feedback = updateParticleParam(context, "shape", SpawningShape.Rect(Vector2f(w, h)))
               context.source.sendFeedback( { feedback }, false)
               Command.SINGLE_SUCCESS
             }
@@ -154,7 +154,7 @@ class ArgConfigParticleKeys {
                 val x = FloatArgumentType.getFloat(context, "X")
                 val y = FloatArgumentType.getFloat(context, "Y")
                 val z = FloatArgumentType.getFloat(context, "Z")
-                val feedback = updateParticleParam(context, "shape", SpawningShape.CUBE(Vector3f(x, y, z)))
+                val feedback = updateParticleParam(context, "shape", SpawningShape.Cube(Vector3f(x, y, z)))
                 context.source.sendFeedback( { feedback }, false)
                 Command.SINGLE_SUCCESS
               }
@@ -166,7 +166,7 @@ class ArgConfigParticleKeys {
         .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
           .executes { context ->
             val radius = FloatArgumentType.getFloat(context, "Radius")
-            val feedback = updateParticleParam(context, "shape", SpawningShape.SPHERE(radius))
+            val feedback = updateParticleParam(context, "shape", SpawningShape.Sphere(radius))
             context.source.sendFeedback( { feedback }, false)
             Command.SINGLE_SUCCESS
           }
@@ -174,7 +174,7 @@ class ArgConfigParticleKeys {
       )
       .then(CommandManager.literal("point")
         .executes { context ->
-          val feedback = updateParticleParam(context, "shape", SpawningShape.POINT)
+          val feedback = updateParticleParam(context, "shape", SpawningShape.Point)
           context.source.sendFeedback( { feedback }, false)
           Command.SINGLE_SUCCESS
         }
@@ -415,19 +415,19 @@ class ArgConfigParticleKeys {
 }
 
 
-fun getCurveByString(str: String) : InterpolationCurves {
+fun getCurveByString(str: String) : LerpCurves {
   return when (str) {
-    "LINEAR"   -> InterpolationCurves.LINEAR
-    "SQRT"     -> InterpolationCurves.SQRT
-    "EXPONENT" -> InterpolationCurves.EXPONENT
-    "CUBIC"    -> InterpolationCurves.CUBIC
-    "SINE"     -> InterpolationCurves.SINE
-    "COSINE"   -> InterpolationCurves.COSINE
-    "INVERSE"  -> InterpolationCurves.INVERSE
-    "LOG"      -> InterpolationCurves.LOG
-    "EXP"      -> InterpolationCurves.EXP
-    "BOUNCE"   -> InterpolationCurves.BOUNCE
-    else       -> InterpolationCurves.LINEAR
+    "LINEAR"   -> LerpCurves.Linear
+    "SQRT"     -> LerpCurves.Sqrt
+    "EXPONENT" -> LerpCurves.Exponent
+    "CUBIC"    -> LerpCurves.Cubic
+    "SINE"     -> LerpCurves.Sine
+    "COSINE"   -> LerpCurves.Cosine
+    "INVERSE"  -> LerpCurves.Inverse
+    "LOG"      -> LerpCurves.Log
+    "EXP"      -> LerpCurves.Exp
+    "BOUNCE"   -> LerpCurves.Bounce
+    else       -> LerpCurves.Linear
   }
 }
 
@@ -538,7 +538,7 @@ fun forceFieldAddSphereExec(context: CommandContext<ServerCommandSource>) : Int 
   val minForce = FloatArgumentType.getFloat(context, "Min Force")
   val maxForce = FloatArgumentType.getFloat(context, "Max Force")
 
-  val shape = ForceFieldShape.SPHERE(radius, Pair(minForce, maxForce))
+  val shape = ForceFieldShape.Sphere(radius, Pair(minForce, maxForce))
   val forceField = forceFieldGenericParams(context, shape)
 
   val currentParams = getEmitterParams(emitterIdVal)
@@ -567,7 +567,7 @@ fun forceFieldAddCubeExec(context: CommandContext<ServerCommandSource>) : Int {
   val zForce = FloatArgumentType.getFloat(context, "Z Force")
   val emitterIdVal = StringArgumentType.getString(context, "Registered Emitter ID")
 
-  val shape = ForceFieldShape.CUBE(Vector3f(xSize, ySize, zSize), Vector3f(xForce, yForce, zForce))
+  val shape = ForceFieldShape.Cube(Vector3f(xSize, ySize, zSize), Vector3f(xForce, yForce, zForce))
   val forceField = forceFieldGenericParams(context, shape)
 
   val currentParams = getEmitterParams(emitterIdVal)
