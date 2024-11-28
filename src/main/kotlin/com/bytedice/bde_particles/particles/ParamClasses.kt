@@ -62,6 +62,12 @@ class ParamClasses {
       )
     }
   }
+  class PairInt (
+    private val min: Int = 0,
+    private val max: Int = 1,
+  ) {
+    fun randomize() : Int { return randomIntBetween(min, max) }
+  }
   sealed class LerpVal {
     class LerpVec3f(
       private val fromX: Float = 0.0f,
@@ -104,6 +110,17 @@ class ParamClasses {
     ) : LerpVal() {
       fun lerp(t: Float): Float {
         return com.bytedice.bde_particles.lerp(from, to, t) * curve.function(t)
+      }
+    }
+
+    fun lerpToVector3f(t: Float) : Vector3f {
+      when (this) {
+        is LerpVec3f -> return this.lerp(t)
+        is MultiLerpVec3f -> return this.lerp(t)
+        is LerpUniform -> {
+          val x = this.lerp(t)
+          return Vector3f(x, x, x)
+        }
       }
     }
   }

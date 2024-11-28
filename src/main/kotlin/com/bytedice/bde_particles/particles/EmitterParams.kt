@@ -27,7 +27,7 @@ import org.joml.Vector3f
  * @param minVel The minimum speed a particle must maintain. Particles slower than this value are stopped. Values <= 0 disable this check.
  * @param lifeTime Specifies the range for particle lifetime, in ticks. Values below 1 prevent particles from spawning.
  * @param rotVelCurve A curve defining how rotational velocity evolves during the particle's lifetime. Multiplies the `rotVel` values.
- * @param sizeCurve A curve defining how the particle's size evolves over its lifetime. Multiplies the `initScale` values.
+ * @param scaleCurve A curve defining how the particle's size evolves over its lifetime. Multiplies the `initScale` values.
  * @param blockCurve Specifies an array of block names that the particle transitions through during its lifetime, combined with a curve to control transitions. Defaults to "minecraft:air" if empty.
  */
 data class EmitterParams (
@@ -48,9 +48,9 @@ data class EmitterParams (
   var constVel:       Vector3f               = Vector3f(0.0f, -0.01f, 0.0f),
   var drag:           Float                  = 0.075f,
   var minVel:         Float                  = 0.0f,
-  var lifeTime:       ParamClasses.PairVec2i = ParamClasses.PairVec2i(0, 0, 1, 1),
+  var lifeTime:       ParamClasses.PairInt   = ParamClasses.PairInt(25, 40),
   var rotVelCurve:    ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
-  var sizeCurve:      ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.5f, LerpCurves.Linear),
+  var scaleCurve:     ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.5f, LerpCurves.Linear),
   var blockCurve:     Pair<Array<String>, LerpCurves> = Pair(arrayOf("minecraft:purple_concrete", "minecraft:purple_stained_glass"), LerpCurves.Sqrt),
 )
 {

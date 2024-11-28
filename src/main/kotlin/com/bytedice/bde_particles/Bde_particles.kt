@@ -42,9 +42,11 @@ import java.util.*
     // velocity based, relative coordinate based, or rotation based
   // localOffsetCurve (curve)
   // spawnOffset (Vec3f)
+  // originOffset (Vec3f)
   // velRot (bool)
     // rotates the particle to face the velocity
   // spawnChance (Float)
+  // shape: spawnOnlyOnEdge (Boolean)
 
 // Move most (if not all) particle params to emitters.
 // 3D curves (curves for all X Y Z)
@@ -108,8 +110,6 @@ class Bde_particles : ModInitializer {
 
 fun init() {
   addToEmitterRegister("DEFAULT", EmitterParams.DEFAULT)
-  addToEmitterRegister("FIRE_GEYSER", EmitterParams.FIRE_GEYSER)
-  addToEmitterRegister("RING_EXPLOSION", EmitterParams.RING_EXPLOSION)
 }
 
 
@@ -156,7 +156,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
 }
 
 
-fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> {
+fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map to new params
   val allParticleParamsJSON: MutableList<Map<String, Any?>> = mutableListOf()
   val particle = params.particle
 

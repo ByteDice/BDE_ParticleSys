@@ -49,7 +49,7 @@ fun updateSingleEmitterParam(id: String, paramName: String, paramValue: Any) : B
 }
 
 
-fun updateSingleParticleParam(emitterId: String, paramName: String, paramValue: Any) : Boolean {
+fun updateSingleParticleParam(emitterId: String, paramName: String, paramValue: Any) : Boolean { // TODO: map to new params
   val emitter = getEmitterParams(emitterId) ?: return false
   val particle = emitter.particle
 
@@ -62,7 +62,7 @@ fun updateSingleParticleParam(emitterId: String, paramName: String, paramValue: 
 }
 
 
-fun updateSingleEmitterParam(params: EmitterParams, paramName: String, paramValue: Any) : Pair<EmitterParams, Boolean> {
+fun updateSingleEmitterParam(params: EmitterParams, paramName: String, paramValue: Any) : Pair<EmitterParams, Boolean> { // TODO: map to new params
   val value: Any? = when (paramName) {
     "maxCount"      -> paramValue as Int
     "spawnsPerTick" -> paramValue as Int
@@ -89,7 +89,7 @@ fun updateSingleEmitterParam(params: EmitterParams, paramName: String, paramValu
 }
 
 
-fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramValue: Any) : Pair<ParticleParams, Boolean> {
+fun updateSingleParticleParam(params: ParticleParams, paramName: String, paramValue: Any) : Pair<ParticleParams, Boolean> { // TODO: map to new params
   val value: Any? = when (paramName) {
     "shape"        -> paramValue as SpawningShape?
     "blockCurve"   -> paramValue as Array<String>

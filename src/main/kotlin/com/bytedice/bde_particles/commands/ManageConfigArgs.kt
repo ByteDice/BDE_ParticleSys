@@ -20,6 +20,9 @@ import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
 
+// TODO: completely redesign
+
+
 // CLOSE THIS FILE IMMEDIATELY, YOU ARE ENTERING EGYPTIAN (pyramid) AND ITALIAN (spaghetti) TERRITORY
 
 val curves = arrayOf("LINEAR", "SQRT", "EXPONENT", "CUBIC", "SINE", "COSINE", "INVERSE", "LOG", "EXP", "BOUNCE")

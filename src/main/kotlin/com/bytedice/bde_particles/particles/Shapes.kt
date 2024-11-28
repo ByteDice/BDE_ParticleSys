@@ -18,17 +18,17 @@ sealed class ForceFieldShape {
   ) : ForceFieldShape()
   data class Cube(
     val size: Vector3f = Vector3f(1.0f, 1.0f, 1.0f),
-    val dir: Vector3f = Vector3f(0.0f, 0.0f, -1.0f),
-    val force: Pair<Float, Float> = Pair(0.0f, 0.02f)
+    val dir: Vector3f = Vector3f(0.0f, 1.0f, 0.0f),
+    val force: Float = 0.02f
   ) : ForceFieldShape()
   data class Cone(
     val size: Vector2f = Vector2f(1.0f, 1.0f),
-    val dir: Vector3f = Vector3f(0.0f, 0.0f, -1.0f),
+    val dir: Vector3f = Vector3f(0.0f, 1.0f, 0.0f),
     val force: Pair<Float, Float> = Pair(0.0f, 0.02f)
   )
   data class Cylinder(
     val size: Vector3f = Vector3f(1.0f, 1.0f, 1.0f),
-    val dir: Vector3f = Vector3f(0.0f, 0.0f, -1.0f),
-    val force: Pair<Float, Float> = Pair(0.0f, 0.02f)
+    val dir: Vector3f = Vector3f(0.0f, 1.0f, 0.0f),
+    val force: Float = 0.02f
   )
 }

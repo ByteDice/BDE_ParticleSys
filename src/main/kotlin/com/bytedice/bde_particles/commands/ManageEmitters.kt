@@ -23,6 +23,9 @@ import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
 
+// TODO: completely redesign
+
+
 // ManageEmitters
 // <create / remove / config / list>
   // create
