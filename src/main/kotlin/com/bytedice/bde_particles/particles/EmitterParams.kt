@@ -31,30 +31,63 @@ import org.joml.Vector3f
  * @param blockCurve Specifies an array of block names that the particle transitions through during its lifetime, combined with a curve to control transitions. Defaults to "minecraft:air" if empty.
  */
 data class EmitterParams (
-  var maxCount:       Int                    = 200,
-  var spawnRate:      Int                    = 1,
-  var spawnChance:    Float                  = 1.0f,
-  var loopDur:        Int                    = 25,
-  var loopDelay:      Int                    = 0,
-  var loopCount:      Int                    = 0,
-  var shape:          SpawningShape          = SpawningShape.Circle(3.0f),
-  var initRot:        ParamClasses.PairVec3f = ParamClasses.PairVec3f(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-  var rotVel:         ParamClasses.PairVec3f = ParamClasses.PairVec3f(-0.2f, -0.2f, -0.2f, 0.2f, 0.2f, 0.2f),
-  var rotTowardVel:   Boolean                = true,
-  var initVel:        ParamClasses.PairVec3f = ParamClasses.PairVec3f(-0.1f, 0.3f, -0.1f, 0.1f, 0.6f, 0.1f),
-  var initScale:      ParamClasses.RandScale = ParamClasses.RandScale.Uniform(),
-  var scaleTowardVel: Boolean                = true,
-  var forceFields:    Array<ForceField>      = emptyArray(),
-  var constVel:       Vector3f               = Vector3f(0.0f, -0.01f, 0.0f),
-  var drag:           Float                  = 0.075f,
-  var minVel:         Float                  = 0.0f,
-  var lifeTime:       ParamClasses.PairInt   = ParamClasses.PairInt(25, 40),
-  var rotVelCurve:    ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
-  var scaleCurve:     ParamClasses.LerpVal   = ParamClasses.LerpVal.LerpUniform(1.0f, 0.5f, LerpCurves.Linear),
-  var blockCurve:     Pair<Array<String>, LerpCurves> = Pair(arrayOf("minecraft:purple_concrete", "minecraft:purple_stained_glass"), LerpCurves.Sqrt),
+  // spawning
+  var maxCount:       Int,
+  var spawnRate:      Int,
+  var spawnChance:    Float,
+  var spawnDuration:  ParamClasses.Duration,
+  var spawnPosOffset: Vector3f,
+  var lifeTime:       ParamClasses.PairInt,
+  var shape:          SpawningShape,
+  // init transforms
+  var offset:         ParamClasses.PairVec3f,
+  var initRot:        ParamClasses.PairVec3f,
+  var rotVel:         ParamClasses.PairVec3f,
+  var rotWithVel:     Boolean,
+  var initVel:        ParamClasses.PairVec3f,
+  var initCenterVel:  ParamClasses.PairFloat,
+  var initScale:      ParamClasses.PairVec3f,
+  var scaleWithVel:   Boolean,
+  // velocity
+  var forceFields:    Array<ForceField>,
+  var constVel:       Vector3f,
+  var drag:           Float,
+  var minVel:         Float,
+  // curves
+  var offsetCurve:    ParamClasses.LerpVal,
+  var rotVelCurve:    ParamClasses.LerpVal,
+  var scaleCurve:     ParamClasses.LerpVal,
+  var blockCurve:     Pair<Array<String>, LerpCurves>,
 )
 {
   companion object Presets {
-    val DEFAULT = EmitterParams()
+    val DEFAULT = EmitterParams(
+      maxCount = 200,
+      spawnRate = 1,
+      spawnChance = 1.0f,
+      spawnDuration = ParamClasses.Duration.SingleBurst(25),
+      spawnPosOffset = Vector3f(0.0f, 0.0f, 0.0f),
+      lifeTime = ParamClasses.PairInt(25, 40),
+      shape = SpawningShape.Circle(3.0f),
+      offset = ParamClasses.PairVec3f.Uniform(-0.5f, -0.5f),
+      initRot = ParamClasses.PairVec3f.Null,
+      rotVel = ParamClasses.PairVec3f.NonUniform(-0.2f, -0.2f, -0.2f, 0.2f, 0.2f, 0.2f),
+      rotWithVel = true,
+      initVel = ParamClasses.PairVec3f.Null,
+      initCenterVel = ParamClasses.PairFloat(0.1f, 0.3f),
+      initScale = ParamClasses.PairVec3f.Uniform(1.0f, 0.2f),
+      scaleWithVel = true,
+      forceFields = emptyArray(),
+      constVel = Vector3f(0.0f, -0.01f, 0.0f),
+      drag = 0.075f,
+      minVel = 0.0f,
+      offsetCurve = ParamClasses.LerpVal.NoLerpVec3f(Vector3f(-0.5f, -0.5f, -0.5f)),
+      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
+      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.5f, LerpCurves.Linear),
+      blockCurve = Pair(
+        arrayOf("minecraft:purple_concrete", "minecraft:purple_stained_glass"),
+        LerpCurves.Sqrt
+      ),
+    )
   }
 }

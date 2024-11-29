@@ -6,40 +6,24 @@ import com.bytedice.bde_particles.randomIntBetween
 import org.joml.Vector3f
 
 class ParamClasses {
-  class PairVec3f (
-    private val minX: Float = 0.0f,
-    private val minY: Float = 0.0f,
-    private val minZ: Float = 0.0f,
-    private val maxX: Float = 1.0f,
-    private val maxY: Float = 1.0f,
-    private val maxZ: Float = 1.0f,
-  ) {
-    fun randomize() : Vector3f {
-      return Vector3f(
-        randomFloatBetween(minX, maxX),
-        randomFloatBetween(minY, maxY),
-        randomFloatBetween(minZ, maxZ),
-      )
-    }
-  }
-  sealed class RandScale {
+  sealed class PairVec3f {
     class Uniform (
-      private val min: Float = 0.0f,
-      private val max: Float = 1.0f,
-    ) : RandScale() {
+      private val min: Float,
+      private val max: Float,
+    ) : PairVec3f() {
       fun randomize() : Vector3f {
         val x = randomFloatBetween(min, max)
         return Vector3f(x, x, x)
       }
     }
     class NonUniform (
-      private val minX: Float = 0.0f,
-      private val minY: Float = 0.0f,
-      private val minZ: Float = 0.0f,
-      private val maxX: Float = 1.0f,
-      private val maxY: Float = 1.0f,
-      private val maxZ: Float = 1.0f
-    ) : RandScale() {
+      private val minX: Float,
+      private val minY: Float,
+      private val minZ: Float,
+      private val maxX: Float,
+      private val maxY: Float,
+      private val maxZ: Float
+    ) : PairVec3f() {
       fun randomize(): Vector3f {
         return Vector3f(
           randomFloatBetween(minX, maxX),
@@ -48,35 +32,29 @@ class ParamClasses {
         )
       }
     }
-  }
-  class PairVec2i (
-    private val minX: Int = 0,
-    private val minY: Int = 0,
-    private val maxX: Int = 1,
-    private val maxY: Int = 1,
-  ) {
-    fun randomize() : Pair<Int, Int> {
-      return Pair(
-        randomIntBetween(minX, maxX),
-        randomIntBetween(minY, maxY),
-      )
-    }
+    data object Null : PairVec3f()
   }
   class PairInt (
-    private val min: Int = 0,
-    private val max: Int = 1,
+    private val min: Int,
+    private val max: Int,
   ) {
     fun randomize() : Int { return randomIntBetween(min, max) }
   }
+  class PairFloat(
+    private val min: Float,
+    private val max: Float,
+  ) {
+    fun randomize() : Float { return randomFloatBetween(min, max) }
+  }
   sealed class LerpVal {
     class LerpVec3f(
-      private val fromX: Float = 0.0f,
-      private val fromY: Float = 0.0f,
-      private val fromZ: Float = 0.0f,
-      private val toX: Float = 1.0f,
-      private val toY: Float = 1.0f,
-      private val toZ: Float = 1.0f,
-      private val curve: LerpCurves = LerpCurves.Linear,
+      private val fromX: Float,
+      private val fromY: Float,
+      private val fromZ: Float,
+      private val toX: Float,
+      private val toY: Float,
+      private val toZ: Float,
+      private val curve: LerpCurves,
     ) : LerpVal() {
       fun lerp(t: Float): Vector3f {
         val x = com.bytedice.bde_particles.lerp(fromX, toX, t) * curve.function(t)
@@ -86,15 +64,15 @@ class ParamClasses {
       }
     }
     class MultiLerpVec3f(
-      private val fromX: Float = 0.0f,
-      private val fromY: Float = 0.0f,
-      private val fromZ: Float = 0.0f,
-      private val toX: Float = 1.0f,
-      private val toY: Float = 1.0f,
-      private val toZ: Float = 1.0f,
-      private val curveX: LerpCurves = LerpCurves.Linear,
-      private val curveY: LerpCurves = LerpCurves.Linear,
-      private val curveZ: LerpCurves = LerpCurves.Linear
+      private val fromX: Float,
+      private val fromY: Float,
+      private val fromZ: Float,
+      private val toX: Float,
+      private val toY: Float,
+      private val toZ: Float,
+      private val curveX: LerpCurves,
+      private val curveY: LerpCurves,
+      private val curveZ: LerpCurves
     ) : LerpVal() {
       fun lerp(t: Float): Vector3f {
         val x = com.bytedice.bde_particles.lerp(fromX, toX, t) * curveX.function(t)
@@ -104,14 +82,15 @@ class ParamClasses {
       }
     }
     class LerpUniform(
-      private val from: Float = 0.0f,
-      private val to: Float = 1.0f,
-      private val curve: LerpCurves = LerpCurves.Linear,
+      private val from: Float,
+      private val to: Float,
+      private val curve: LerpCurves,
     ) : LerpVal() {
       fun lerp(t: Float): Float {
         return com.bytedice.bde_particles.lerp(from, to, t) * curve.function(t)
       }
     }
+    data class NoLerpVec3f(val value: Vector3f) : LerpVal()
 
     fun lerpToVector3f(t: Float) : Vector3f {
       when (this) {
@@ -121,7 +100,22 @@ class ParamClasses {
           val x = this.lerp(t)
           return Vector3f(x, x, x)
         }
+        is NoLerpVec3f -> return this.value
       }
     }
+  }
+  sealed class Duration {
+    data class SingleBurst(
+      val loopDur:        Int
+    ) : Duration()
+    data class MultiBurst(
+      val loopDur:        Int,
+      val loopDelay:      Int,
+      val loopCount:      Int,
+    ) : Duration()
+    data class InfiniteLoop(
+      val loopDur:        Int,
+      val loopDelay:      Int
+    ) : Duration()
   }
 }

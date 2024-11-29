@@ -1,7 +1,7 @@
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.items.ParticleEmitterTool
-import com.bytedice.bde_particles.particles.emitterIdRegister
+import com.bytedice.bde_particles.particles.idRegister
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -20,7 +20,7 @@ object GiveEmitterTool {
     val command = CommandManager.literal("GiveEmitterTool")
       .requires { source -> source.hasPermissionLevel(4) }
 
-    val allEmitterIds = emitterIdRegister.keys
+    val allEmitterIds = idRegister.keys
 
     val itemNameArg = CommandManager.argument("Item Name", StringArgumentType.string())
     val itemTypeArg = CommandManager.argument("Item Type", ItemStackArgumentType.itemStack(registryAccess))

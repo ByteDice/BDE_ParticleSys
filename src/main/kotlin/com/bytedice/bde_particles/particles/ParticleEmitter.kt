@@ -2,8 +2,10 @@ package com.bytedice.bde_particles.particles
 
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
+import org.joml.Vector2f
+import org.joml.Vector3f
 
-class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: ServerWorld, private val emitterParams: EmitterParams) {
+class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private val world: ServerWorld, private val params: EmitterParams) {
 
   private var allParticles: Array<Particle> = emptyArray()
 
@@ -33,12 +35,12 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
   private fun addParticle() {
     if (loopDelayActive) { return }
 
-    repeat(this.emitterParams.spawnsPerTick) {
-      if (allParticles.size >= emitterParams.maxCount) { return }
+    repeat(params.spawnRate) {
+      if (allParticles.size >= params.maxCount) { return }
 
-      val particle = Particle(emitterParams.particle)
-      particle.init(this.emitterPos)
-      particle.spawn(emitterWorld)
+      val particle = Particle(params)
+      particle.init(pos, rot)
+      particle.spawn(world)
 
       allParticles += particle
     }
@@ -50,30 +52,30 @@ class ParticleEmitter(private val emitterPos: Vec3d, private val emitterWorld: S
     // because im so damn good at cooking spaghetti
 
     // if max duration is 0 or less, skip counting, its infinite
-    if (emitterParams.loopDur <= 0) { return }
+    if (params.loopDur <= 0) { return }
 
     // if the duration is greater than max duration, add 1 loopCount
     // return if max loopCount is 0
     // if the delay is greater than 0 then enable it
-    if (loopDur >= emitterParams.loopDur) {
+    if (loopDur >= params.loopDur) {
       if (loopCount == 0) {
         isTicking = false
         return
       }
       loopCount += 1
       loopDur = 0
-      if (emitterParams.loopDelay > 0) { loopDelayActive = true }
+      if (params.loopDelay > 0) { loopDelayActive = true }
     }
 
     // if the delay is greater than max delay, disable the delay
-    else if (loopDelay >= emitterParams.loopDelay) {
+    else if (loopDelay >= params.loopDelay) {
       loopDelay = 0
       loopDelayActive = false
     }
 
     // if loopCount is greater than max loopCount then stop immediately
     // if max loopCount is below 0 then don't do anything, loop infinitely
-    if (loopCount > 0 && loopCount >= emitterParams.loopCount) {
+    if (loopCount > 0 && loopCount >= params.loopCount) {
       isTicking = false
       return
     }

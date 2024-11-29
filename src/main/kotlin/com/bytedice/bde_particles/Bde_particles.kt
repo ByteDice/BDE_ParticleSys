@@ -24,6 +24,7 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.World
+import org.joml.Vector2f
 import java.util.*
 
 
@@ -34,22 +35,19 @@ import java.util.*
   // blockCurve array not needing "minecraft:"
 
 // Adding a parameter for an initial velocity from an origin point (you currently have to use force fields)
-  // Pair<Pair<Vec3f, Vec3f>, Pair<Vec3f, Vec3f>>
-    // "min center vel", "max center vel", "min edge vel", "max edge vel"
 
 // Parameters
-  // localOffset (Vec3f)
-    // velocity based, relative coordinate based, or rotation based
-  // localOffsetCurve (curve)
-  // spawnOffset (Vec3f)
   // originOffset (Vec3f)
+    // velocity based, relative coordinate based, or rotation based
+
+  // originOffsetCurve (curve)
+  // spawnOffset (Vec3f)
   // velRot (bool)
     // rotates the particle to face the velocity
+
   // spawnChance (Float)
   // shape: spawnOnlyOnEdge (Boolean)
 
-// Move most (if not all) particle params to emitters.
-// 3D curves (curves for all X Y Z)
 // Custom curve equation command args (parse from strings)
 // Cylinder and cone force field shape.
 // Better particle performance.
@@ -109,7 +107,7 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToEmitterRegister("DEFAULT", EmitterParams.DEFAULT)
+  addToRegister("DEFAULT", EmitterParams.DEFAULT)
 }
 
 
@@ -139,7 +137,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
   val handItem = player.getStackInHand(hand)
   val (isEmitterTool, emitterId) = ParticleEmitterTool.getToolDetails(handItem)
   val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 200.0)
-  val emitterParams = getEmitterParams(emitterId)
+  val emitterParams = getParamsById(emitterId)
 
   if (
     !isEmitterTool
@@ -149,7 +147,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
     return TypedActionResult(ActionResult.PASS, handItem)
   }
 
-  val emitter = ParticleEmitter(hitResult.pos, world, emitterParams)
+  val emitter = ParticleEmitter(hitResult.pos, Vector2f(0.0f, 0.0f), world, emitterParams)
   ALL_PARTICLE_EMITTERS += emitter
 
   return TypedActionResult(ActionResult.PASS, handItem)
@@ -157,35 +155,16 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
 
 
 fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map to new params
-  val allParticleParamsJSON: MutableList<Map<String, Any?>> = mutableListOf()
-  val particle = params.particle
+  val allParamsJson: MutableList<Map<String, Any?>> = mutableListOf()
 
-  val particleParamsJSON = mapOf(
-    "shape"        to particle.shape,
-    "blockCurve"   to particle.blockCurve,
-    "rotRandom"    to particle.rotRandom,
-    "rotVelRandom" to particle.rotVelRandom,
-    "rotVelCurve"  to particle.rotVelCurve,
-    "sizeRandom"   to particle.sizeRandom,
-    "uniformSize"  to particle.uniformSize,
-    "sizeCurve"    to particle.sizeCurve,
-    "velRandom"    to particle.velRandom,
-    "forceFields"  to particle.forceFields,
-    "gravity"      to particle.gravity,
-    "drag"         to particle.drag,
-    "minVel"       to particle.minVel,
-    "lifeTime"     to particle.lifeTime
+  val paramsJson = mapOf(
+    "shape"        to params.shape
   )
 
-    allParticleParamsJSON.add(particleParamsJSON)
+    allParamsJson.add(paramsJson)
 
   val emitterParamsJSON = mapOf(
     "maxCount"      to params.maxCount,
-    "spawnsPerTick" to params.spawnsPerTick,
-    "loopDur"       to params.loopDur,
-    "loopDelay"     to params.loopDelay,
-    "loopCount"     to params.loopCount,
-    "particleTypes" to allParticleParamsJSON
   )
 
   return emitterParamsJSON

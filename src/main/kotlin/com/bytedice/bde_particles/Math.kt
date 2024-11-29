@@ -137,45 +137,6 @@ fun quatToEuler(quat: Vector4f): Vector3f {
 }
 
 
-fun randomInCircle(r: Float) : Vector2f {
-  val randRadius = r * sqrt(randomFloatBetween(0.0f, 1.0f))
-  val randAngle  = randomFloatBetween(0.0f, Math.PI.toFloat() * 2)
-
-  val randomPos = Vector2f(randRadius * cos(randAngle), randRadius * sin(randAngle))
-  return randomPos
-}
-
-
-fun randomInSphere(r: Float) : Vector3f {
-  val randRadius = r * Random.nextDouble().pow(1.0 / 3.0)
-
-  val phi = Random.nextDouble(0.0, 2 * Math.PI)
-
-  val cosTheta = Random.nextDouble(-1.0, 1.0)
-  val theta = acos(cosTheta)
-
-  val x = randRadius * sin(theta) * cos(phi)
-  val y = randRadius * sin(theta) * sin(phi)
-  val z = randRadius * cos(theta)
-
-  return Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
-}
-
-
-fun randomInRect(size: Vector2f) : Vector2f {
-  return Vector2f(randomFloatBetween(0.0f, size.x), randomFloatBetween(0.0f, size.y))
-}
-
-
-fun randomInCube(size: Vector3f) : Vector3f {
-  return Vector3f(
-    randomFloatBetween(0.0f, size.x),
-    randomFloatBetween(0.0f, size.y),
-    randomFloatBetween(0.0f, size.z)
-  )
-}
-
-
 fun transformOffsetByQuat(offset: Vector3f, rotation: Vector4f): Vector3f {
   val x = offset.x
   val y = offset.y
