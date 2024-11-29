@@ -5,12 +5,17 @@ import com.bytedice.bde_particles.commands.KillAllEmitters
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particles.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseItemCallback
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
@@ -23,6 +28,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
+import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import org.joml.Vector2f
 import java.util.*
@@ -34,19 +40,9 @@ import java.util.*
   // force field "config" option
   // blockCurve array not needing "minecraft:"
 
-// Adding a parameter for an initial velocity from an origin point (you currently have to use force fields)
-
 // Parameters
-  // originOffset (Vec3f)
-    // velocity based, relative coordinate based, or rotation based
-
-  // originOffsetCurve (curve)
-  // spawnOffset (Vec3f)
-  // velRot (bool)
-    // rotates the particle to face the velocity
-
-  // spawnChance (Float)
-  // shape: spawnOnlyOnEdge (Boolean)
+  // rotWithVel / scaleWithVel (bool)
+    // rotates/scales the particle to face the velocity
 
 // Custom curve equation command args (parse from strings)
 // Cylinder and cone force field shape.
@@ -59,7 +55,12 @@ import java.util.*
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
-val sessionUuid: UUID = UUID.randomUUID()
+val SESSION_UUID: UUID = UUID.randomUUID()
+val GLOBAL_MAX_PARTICLES = GameRuleRegistry.register(
+  "GlobalMaxParticles",
+  GameRules.Category.UPDATES,
+  GameRuleFactory.createIntRule(3000, 0)
+)
 
 
 class Bde_particles : ModInitializer {
@@ -112,17 +113,22 @@ fun init() {
 
 
 fun tick(server: MinecraftServer) {
-  for (world in server.worlds) {
-    for (entity in world.iterateEntities()) {
-      if (entity.type == EntityType.BLOCK_DISPLAY) {
-        if (displayEntityContainsTag(entity as BlockDisplayEntity, "BPS_UUID")
-          && !displayEntityContainsTag(entity, sessionUuid.toString())) {
+  runBlocking {
+    server.worlds.map { world ->
+      async {
+        val blockDisplayEntities = world.iterateEntities()
+          .filter { it.type == EntityType.BLOCK_DISPLAY }
+        for (entity in blockDisplayEntities) {
+          if (displayEntityContainsTag(entity as BlockDisplayEntity, "BPS_UUID")
+            && !displayEntityContainsTag(entity, SESSION_UUID.toString())) {
 
-          entity.kill()
+            entity.kill()
+          }
         }
       }
-    }
+    }.awaitAll()
   }
+
 
   for (emitter in ALL_PARTICLE_EMITTERS) {
     if (emitter.isDead) {
@@ -154,6 +160,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
 }
 
 
+/*
 fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map to new params
   val allParamsJson: MutableList<Map<String, Any?>> = mutableListOf()
 
@@ -161,7 +168,7 @@ fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map
     "shape"        to params.shape
   )
 
-    allParamsJson.add(paramsJson)
+  allParamsJson.add(paramsJson)
 
   val emitterParamsJSON = mapOf(
     "maxCount"      to params.maxCount,
@@ -169,6 +176,7 @@ fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map
 
   return emitterParamsJSON
 }
+*/
 
 
 fun displayEntityContainsTag(entity: BlockDisplayEntity, tag: String) : Boolean {

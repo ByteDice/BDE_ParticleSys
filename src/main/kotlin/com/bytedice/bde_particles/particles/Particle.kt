@@ -9,61 +9,77 @@ import org.joml.Vector4f
 import kotlin.math.*
 
 
-// TODO: consider moving most params to emitter (such as shape, and forceFields) to store less data
+// TODO: add logic for new params (goes for ParticleEmitter too)
+/* Changed or new params (haven't been implemented yet)
+rotWithVel:     Boolean (NEW)
+scaleWithVel:   Boolean (NEW)
+*/
 
 
-class Particle(private val emitterParams: EmitterParams) {
-  private val initOffset = Vector3f(-0.5f, -0.5f, -0.5f)
-  private var offset     = Vector3f(0.0f, 0.0f, 0.0f)
-  private var pos        = Vec3d(0.0, 0.0, 0.0)
-  private var entityRot  = Vector2f(0.0f, 0.0f)
+class Particle(private val emitterParams: EmitterParams, private var entityPos: Vec3d, private val entityRot: Vector2f) {
+  private var pos = Vector3f(0.0f, 0.0f, 0.0f)
+  private var blockDisplay: DisplayEntity = DisplayEntity(DisplayEntityProperties())
+  private var timeAlive = 0
+  private var isInit = false
+  var isDead = false
 
-  private var rot    = emitterParams.initRot.randomize()
-  private val rotVel = emitterParams.rotVel.randomize()
-  private var vel    = emitterParams.initVel.randomize()
-
-  private val scaleAny: Any = when (emitterParams.initScale) {
-    is ParamClasses.RandScale.Uniform -> { (emitterParams.initScale as ParamClasses.RandScale.Uniform).randomize() }
-    is ParamClasses.RandScale.NonUniform -> { (emitterParams.initScale as ParamClasses.RandScale.NonUniform).randomize() }
+  // params
+  private val originOffset = when (val offset = emitterParams.offset) {
+    is ParamClasses.PairVec3f.Uniform -> offset.randomize()
+    is ParamClasses.PairVec3f.NonUniform -> offset.randomize()
+    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
-  private var scale = if (scaleAny is Vector3f) { scaleAny } else { Vector3f(scaleAny as Float, scaleAny, scaleAny) }
 
-  private var blockDisplay: DisplayEntity? = null
+  private var rot = when (val initRot = emitterParams.initRot) {
+    is ParamClasses.PairVec3f.Uniform -> initRot.randomize()
+    is ParamClasses.PairVec3f.NonUniform -> initRot.randomize()
+    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+  }
+
+  private var rotVel = when (val initRotVel = emitterParams.rotVel) {
+    is ParamClasses.PairVec3f.Uniform -> initRotVel.randomize()
+    is ParamClasses.PairVec3f.NonUniform -> initRotVel.randomize()
+    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+  }
+
+  private var vel = when (val initVel = emitterParams.initVel) {
+    is ParamClasses.PairVec3f.Uniform -> initVel.randomize()
+    is ParamClasses.PairVec3f.NonUniform -> initVel.randomize()
+    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+  }
+
+  private var scale = when (val initScale = emitterParams.initScale) {
+    is ParamClasses.PairVec3f.Uniform -> initScale.randomize()
+    is ParamClasses.PairVec3f.NonUniform -> initScale.randomize()
+    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+  }
+
   private var lifeTime = emitterParams.lifeTime.randomize()
 
-  var isDead = false
-  private var timeAlive = 0
 
-  private var isInit = false
-
-
-  fun init(pos: Vec3d, rot: Vector2f) { // TODO: replace initOffset with originOffset param
-    this.pos = pos
-    this.entityRot = rot
+  fun init() {
+    val so = emitterParams.spawnPosOffset
+    entityPos = entityPos.add(so.x.toDouble(), so.y.toDouble(), so.z.toDouble())
 
     val shape = emitterParams.shape
-    val newSpawnPos: Vector3f
+    val newSpawnPos = shape.random(shape)
 
-    when (shape) {
-      is SpawningShape.Circle -> { val posInCircle = randomInCircle(shape.radius); newSpawnPos = Vector3f(posInCircle.x, 0.0f, posInCircle.y) }
-      is SpawningShape.Sphere -> { newSpawnPos = randomInSphere(shape.radius) }
-      is SpawningShape.Rect ->   { val posInRect = randomInRect(shape.size); newSpawnPos = Vector3f(posInRect.x, 0.0f, posInRect.y) }
-      is SpawningShape.Cube ->   { newSpawnPos = randomInCube(shape.size) }
-      is SpawningShape.Point ->  { newSpawnPos = Vector3f(0.0f, 0.0f, 0.0f) }
-    }
+    pos = newSpawnPos
 
-    offset = newSpawnPos
+    val dirFromCenter = entityPos.subtract(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()).normalize()
+    val forceFromCenter = dirFromCenter.multiply(emitterParams.initCenterVel.randomize().toDouble())
+    vel.add(forceFromCenter.x.toFloat(), forceFromCenter.y.toFloat(), forceFromCenter.z.toFloat())
 
-    val (quatRot, newOffset) = calcTransformOffset(this.rot, initOffset, scale)
+    val (quatRot, newPos) = calcTransformOffset(this.rot, originOffset, scale)
 
     val properties = DisplayEntityProperties(
-      pos          = this.pos,
-      rot          = rot,
-      blockType    = emitterParams.blockCurve.first[0], // TODO: curve this
-      translation  = newOffset.add(offset),
+      pos          = entityPos,
+      rot          = entityRot,
+      blockType    = lerpArray(emitterParams.blockCurve.first as Array<Any>, 0.0f, emitterParams.blockCurve.second) as String,
+      translation  = newPos.add(pos),
       leftRotation = quatRot,
       scale        = scale,
-      tags         = arrayOf("BPS_Particle", "BPS_UUID", sessionUuid.toString())
+      tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
     )
 
     blockDisplay = DisplayEntity(properties)
@@ -73,7 +89,7 @@ class Particle(private val emitterParams: EmitterParams) {
 
 
   fun spawn(world: ServerWorld) {
-    if (isInit) { blockDisplay?.spawn(world) }
+    if (isInit) { blockDisplay.spawn(world) }
     else { error("Particle is not initialized before being spawned. Please use Particle.init() to initialize it.") }
   }
 
@@ -83,9 +99,9 @@ class Particle(private val emitterParams: EmitterParams) {
 
     val newProperties = calcNewProperties()
 
-    blockDisplay?.updateProperties(newProperties)
+    blockDisplay.updateProperties(newProperties)
 
-    if (timeAlive > lifeTime) { isDead = true; blockDisplay?.kill() }
+    if (timeAlive > lifeTime) { isDead = true; blockDisplay.kill() }
 
     timeAlive += 1
   }
@@ -105,42 +121,36 @@ class Particle(private val emitterParams: EmitterParams) {
 
 
   private fun calcNewProperties() : DisplayEntityProperties {
-
     val timeAliveClamped = (timeAlive.toFloat() / lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
 
-    val newBlock            = calcBlockCurve(timeAliveClamped)
-    val (newVel, newOffset) = calcOffset()
-    val newRot              = calcRot(timeAliveClamped)
-    val newScale            = calcSize(timeAliveClamped)
+    val newBlock         = lerpArray(emitterParams.blockCurve.first as Array<Any>, timeAliveClamped, emitterParams.blockCurve.second) as String
+    val (newVel, newPos) = calcPos()
+    val newRot           = calcRot(timeAliveClamped)
+    val newScale         = calcScale(timeAliveClamped)
+    val newOriginOffset  = Vector3f(originOffset.mul(emitterParams.offsetCurve.lerpToVector3f(timeAliveClamped)))
 
-    vel    = newVel
-    offset = newOffset
-    rot    = newRot
+    vel = newVel
+    pos = newPos
+    rot = newRot
 
     for (forceField in emitterParams.forceFields) {
       if (forceField.shape is ForceFieldShape.Sphere) { vel.add(sphereSdfVel(forceField)) }
       else if (forceField.shape is ForceFieldShape.Cube) { vel.add(cubeSdfVel(forceField)) }
     }
 
-    val (quatRot, transformOffset) = calcTransformOffset(newRot, initOffset, newScale)
-    val combinedOffset = transformOffset.add(newOffset)
+    val (quatRot, transformOffset) = calcTransformOffset(newRot, originOffset, newScale)
+    val combinedOffset = transformOffset.add(newPos)
 
     val newProperties = DisplayEntityProperties(
-      pos          = pos,
+      pos          = entityPos,
       blockType    = newBlock,
       translation  = combinedOffset,
       leftRotation = quatRot,
       scale        = newScale,
-      tags         = arrayOf("BPS_Particle", "BPS_UUID", sessionUuid.toString())
+      tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
     )
 
     return newProperties
-  }
-
-
-  private fun calcBlockCurve(t: Float) : String {
-    val newBlockIdx = round(lerp(0.0f, emitterParams.blockCurve.first.lastIndex.toFloat(), t)).toInt()
-    return emitterParams.blockCurve.first[newBlockIdx]
   }
 
 
@@ -148,9 +158,9 @@ class Particle(private val emitterParams: EmitterParams) {
     if (forceField.shape !is ForceFieldShape.Sphere) { return Vector3f(0.0f, 0.0f, 0.0f) }
     val shape = forceField.shape
 
-    val sdfVal        = sdfSphere(forceField.pos, shape.radius, offset)
+    val sdfVal        = sdfSphere(forceField.pos, shape.radius, pos)
     val normalizedSdf = normalizeSdf(sdfVal, shape.radius)
-    val velDir        = Vector3f(offset).sub(forceField.pos).normalize()
+    val velDir        = Vector3f(pos).sub(forceField.pos).normalize()
     val velMul = if (sdfVal > 0) { 0.0f }
     else { lerp(shape.force.second, shape.force.second, 1 - normalizedSdf) }
 
@@ -162,7 +172,7 @@ class Particle(private val emitterParams: EmitterParams) {
     if (forceField.shape !is ForceFieldShape.Cube) { return Vector3f(0.0f, 0.0f, 0.0f) }
     val shape = forceField.shape
 
-    val sdfVal = sdfCube(forceField.pos, shape.size, offset)
+    val sdfVal = sdfCube(forceField.pos, shape.size, pos)
     val velDir = if (sdfVal < 0) { shape.dir.mul(shape.force) }
     else { Vector3f(0.0f, 0.0f, 0.0f) }
 
@@ -181,7 +191,7 @@ class Particle(private val emitterParams: EmitterParams) {
   }
 
 
-  private fun calcOffset() : Pair<Vector3f, Vector3f> {
+  private fun calcPos() : Pair<Vector3f, Vector3f> {
     var vel = Vector3f(vel)
     vel = vel.add(emitterParams.constVel)
     vel = vel.mul(1.0f - emitterParams.drag)
@@ -190,13 +200,13 @@ class Particle(private val emitterParams: EmitterParams) {
     if (abs(vel.y) < emitterParams.minVel) { vel.y = 0.0f }
     if (abs(vel.z) < emitterParams.minVel) { vel.z = 0.0f }
 
-    var newOffset = Vector3f(offset)
-    newOffset = newOffset.add(vel)
-    return Pair(vel, newOffset)
+    var newPos = Vector3f(pos)
+    newPos = newPos.add(vel)
+    return Pair(vel, newPos)
   }
 
 
-  private fun calcSize(t: Float) : Vector3f {
+  private fun calcScale(t: Float) : Vector3f {
     val newScale = Vector3f(scale)
     newScale.mul(emitterParams.scaleCurve.lerpToVector3f(t))
     return scale
@@ -204,6 +214,6 @@ class Particle(private val emitterParams: EmitterParams) {
 
 
   fun kill() {
-    if (!isDead) { blockDisplay?.kill() }
+    if (!isDead) { blockDisplay.kill() }
   }
 }

@@ -25,6 +25,37 @@ import java.util.concurrent.CompletableFuture
 // TODO: completely redesign
 
 
+/*
+// spawning
+maxCount:       Int,
+spawnRate:      Int,
+spawnChance:    Float,
+spawnDuration:  ParamClasses.Duration,
+spawnPosOffset: Vector3f,
+lifeTime:       ParamClasses.PairInt,
+shape:          SpawningShape,
+// init transforms
+offset:         ParamClasses.PairVec3f,
+initRot:        ParamClasses.PairVec3f,
+rotVel:         ParamClasses.PairVec3f,
+rotWithVel:     Boolean,
+initVel:        ParamClasses.PairVec3f,
+initCenterVel:  ParamClasses.PairFloat,
+initScale:      ParamClasses.PairVec3f,
+scaleWithVel:   Boolean,
+// velocity
+forceFields:    Array<ForceField>,
+constVel:       Vector3f,
+drag:           Float,
+minVel:         Float,
+// curves
+offsetCurve:    ParamClasses.LerpVal,
+rotVelCurve:    ParamClasses.LerpVal,
+scaleCurve:     ParamClasses.LerpVal,
+blockCurve:     Pair<Array<String>, LerpCurves>,
+*/
+
+
 // ManageEmitters
 // <create / remove / config / list>
   // create

@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package com.bytedice.bde_particles.particles
 
 
@@ -10,9 +8,13 @@ val forbiddenIds = arrayOf("", "NULL")
 fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
   val newId = replaceForbiddenChars(id.replace(" ", "_"))
 
-  if (idRegister.containsKey(newId)) { return Pair(newId, false) }
+  if (idRegister.containsKey(newId)) {
+    println("BPS - Failed to register Emitter ID \"$newId\" as it already exists!")
+    return Pair(newId, false)
+  }
 
   idRegister[id] = params
+  println("BPS - Registered Emitter ID \"$newId\".")
   return Pair(newId, true)
 }
 

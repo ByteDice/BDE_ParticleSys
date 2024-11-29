@@ -1,19 +1,18 @@
 package com.bytedice.bde_particles.particles
 
+import com.bytedice.bde_particles.randomFloatBetween
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
-import org.joml.Vector3f
 
 class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private val world: ServerWorld, private val params: EmitterParams) {
 
   private var allParticles: Array<Particle> = emptyArray()
 
   private var timeAlive = 0
-  private var loopCount = 0
-  private var loopDelay = 0
-  private var loopDur   = 0
-  private var loopDelayActive = false
+  private var timePaused = 0
+  private var timesLooped = 0
+  private var isPaused = false
 
   private var isTicking = true
 
@@ -33,13 +32,16 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
 
 
   private fun addParticle() {
-    if (loopDelayActive) { return }
+    if (isPaused) { return }
 
     repeat(params.spawnRate) {
       if (allParticles.size >= params.maxCount) { return }
 
-      val particle = Particle(params)
-      particle.init(pos, rot)
+      val randomSpawnChance = randomFloatBetween(0.0f, params.spawnChance.coerceIn(0.0f, 1.0f))
+      if (randomSpawnChance > params.spawnChance) { return }
+
+      val particle = Particle(params, pos, rot)
+      particle.init()
       particle.spawn(world)
 
       allParticles += particle
@@ -48,44 +50,30 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
 
 
   private fun count() {
-    // this is the only section I have comments
-    // because im so damn good at cooking spaghetti
+    if (params.spawnDuration is ParamClasses.Duration.SingleBurst) {
+      val loopDur = (params.spawnDuration as ParamClasses.Duration.SingleBurst).loopDur
+      if (timeAlive >= loopDur) { isTicking = false; return }
 
-    // if max duration is 0 or less, skip counting, its infinite
-    if (params.loopDur <= 0) { return }
-
-    // if the duration is greater than max duration, add 1 loopCount
-    // return if max loopCount is 0
-    // if the delay is greater than 0 then enable it
-    if (loopDur >= params.loopDur) {
-      if (loopCount == 0) {
-        isTicking = false
-        return
-      }
-      loopCount += 1
-      loopDur = 0
-      if (params.loopDelay > 0) { loopDelayActive = true }
+      timeAlive += 1
     }
 
-    // if the delay is greater than max delay, disable the delay
-    else if (loopDelay >= params.loopDelay) {
-      loopDelay = 0
-      loopDelayActive = false
+    else if (params.spawnDuration is ParamClasses.Duration.MultiBurst) {
+      val loopDur = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopDur
+      val loopDelay = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopDelay
+      val loopCount = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopCount
+
+      if (timeAlive >= loopDur && timesLooped >= loopCount) { isTicking = false; return }
+
+      if (timePaused >= loopDelay) { isPaused = false; timePaused = 0 }
+      if (timeAlive >= loopDur && loopDelay > 0) { isPaused = true; timeAlive = 0 }
+
+      if (!isPaused) { timeAlive += 1 }
+      else { timePaused += 1 }
     }
 
-    // if loopCount is greater than max loopCount then stop immediately
-    // if max loopCount is below 0 then don't do anything, loop infinitely
-    if (loopCount > 0 && loopCount >= params.loopCount) {
-      isTicking = false
+    else if (params.spawnDuration is ParamClasses.Duration.InfiniteLoop) {
       return
     }
-
-    // if delay isn't active, add 1 to duration
-    // if delay is active, add 1 to delay
-    if (!loopDelayActive) { loopDur += 1 }
-    else { loopDelay += 1 }
-
-    timeAlive += 1
   }
 
 
@@ -96,5 +84,8 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
     }
     isTicking = false
     isDead = true
+  }
+  fun stopTicking() {
+    isTicking = false
   }
 }

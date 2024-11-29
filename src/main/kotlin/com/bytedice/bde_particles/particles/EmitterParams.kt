@@ -4,32 +4,6 @@ import com.bytedice.bde_particles.LerpCurves
 import org.joml.Vector3f
 
 
-/**
- * EmitterParams defines the parameters for controlling how particles are emitted,
- * including settings for looping, spawn frequency, and maximum particle count.
- *
- * @param maxCount The maximum number of particles that can exist at any time. If set to 0 or below, no particles will spawn.
- * @param spawnRate The number of particles to spawn each tick. If set to 0 or below, no particles will spawn.
- * @param spawnChance The chance for a particle to spawn. 0.5 means a particle has a 50% chance of spawning. Values are between 0.0 and 1.0.
- * @param loopDur The duration, in ticks, that each emission loop lasts. A value of 0 or below makes the loop infinite, ignoring `loopDelay` and `loopCount`.
- * @param loopDelay The delay, in ticks, between consecutive loops. Negative values are treated as 0 (no delay).
- * @param loopCount The number of times the loop repeats. A value of 0 results in a single burst of particles. Values below 0 make the loop repeat indefinitely.
- * @param shape The spawning shape for the particles, such as `SpawningShape.Sphere()`.
- * @param initRot Specifies the initial random rotation range for the particles, in degrees, for the X, Y, and Z axes.
- * @param rotVel Specifies the random range for rotational velocity, in degrees per tick, for the X, Y, and Z axes.
- * @param rotTowardVel If true, particles will face the direction of velocity. It uses `initRot` as an offset rotation and ignores `rotVel`.
- * @param initVel Specifies the random range for the initial velocity, in units per tick, for the X, Y, and Z axes.
- * @param initScale Defines the random range for the initial particle size.
- * @param scaleTowardVel If true, particles will scale to the direction of velocity.
- * @param forceFields An array of force fields applied to particles, affecting their motion during their lifetime.
- * @param constVel A constant velocity vector applied to particles each tick, useful for effects like gravity.
- * @param drag A drag coefficient that slows down particle velocity over time. Calculated as `velocity * (1.0 - drag)`.
- * @param minVel The minimum speed a particle must maintain. Particles slower than this value are stopped. Values <= 0 disable this check.
- * @param lifeTime Specifies the range for particle lifetime, in ticks. Values below 1 prevent particles from spawning.
- * @param rotVelCurve A curve defining how rotational velocity evolves during the particle's lifetime. Multiplies the `rotVel` values.
- * @param scaleCurve A curve defining how the particle's size evolves over its lifetime. Multiplies the `initScale` values.
- * @param blockCurve Specifies an array of block names that the particle transitions through during its lifetime, combined with a curve to control transitions. Defaults to "minecraft:air" if empty.
- */
 data class EmitterParams (
   // spawning
   var maxCount:       Int,
@@ -68,7 +42,7 @@ data class EmitterParams (
       spawnDuration = ParamClasses.Duration.SingleBurst(25),
       spawnPosOffset = Vector3f(0.0f, 0.0f, 0.0f),
       lifeTime = ParamClasses.PairInt(25, 40),
-      shape = SpawningShape.Circle(3.0f),
+      shape = SpawningShape.Circle(3.0f, false),
       offset = ParamClasses.PairVec3f.Uniform(-0.5f, -0.5f),
       initRot = ParamClasses.PairVec3f.Null,
       rotVel = ParamClasses.PairVec3f.NonUniform(-0.2f, -0.2f, -0.2f, 0.2f, 0.2f, 0.2f),

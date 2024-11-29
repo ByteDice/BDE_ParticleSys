@@ -7,8 +7,8 @@ import org.joml.Vector3f
 import kotlin.math.*
 import kotlin.random.Random
 
-sealed class SpawningShape {
-  class Circle(val radius: Float = 1.0f) : SpawningShape() {
+sealed class SpawningShape() {
+  class Circle(private val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       val randRadius = radius * sqrt(randomFloatBetween(0.0f, 1.0f))
       val randAngle = randomFloatBetween(0.0f, Math.PI.toFloat() * 2)
@@ -23,7 +23,7 @@ sealed class SpawningShape {
     }
   }
 
-  class Rect(val size: Vector2f = Vector2f(1.0f, 1.0f)) : SpawningShape() {
+  class Rect(private val size: Vector2f, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       return Vector3f(randomFloatBetween(0.0f, size.x), 0.0f, randomFloatBetween(0.0f, size.y))
     }
@@ -41,7 +41,7 @@ sealed class SpawningShape {
     }
   }
 
-  class Cube(val size: Vector3f = Vector3f(1.0f, 1.0f, 1.0f)) : SpawningShape() {
+  class Cube(private val size: Vector3f, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       return Vector3f(
         randomFloatBetween(0.0f, size.x),
@@ -73,7 +73,7 @@ sealed class SpawningShape {
     }
   }
 
-  class Sphere(val radius: Float = 1.0f) : SpawningShape() {
+  class Sphere(private val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       val randRadius = radius * Random.nextDouble().pow(1.0 / 3.0)
 
@@ -103,6 +103,16 @@ sealed class SpawningShape {
   }
 
   data object Point : SpawningShape()
+
+  fun random(shape: SpawningShape) : Vector3f {
+    return when (shape) {
+      is Circle -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
+      is Sphere -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
+      is Rect   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
+      is Cube   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
+      is Point  -> Vector3f(0.0f, 0.0f, 0.0f)
+    }
+  }
 }
 
 
