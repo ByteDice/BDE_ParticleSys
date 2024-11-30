@@ -16,11 +16,13 @@ object KillAllEmitters {
 
     dispatcher.register(
       command.executes { context ->
+        var amountEmitters = 0
         for (emitter in ALL_PARTICLE_EMITTERS) {
           emitter.kill()
+          amountEmitters += 1
         }
 
-        val feedback = Text.literal("BPS - Killed all living Emitters.")
+        val feedback = Text.literal("BPS - Killed all living Emitters. [$amountEmitters]")
           .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
 
         context.source.sendFeedback({ feedback }, false)

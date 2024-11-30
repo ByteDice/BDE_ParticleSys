@@ -90,7 +90,7 @@ class ParamClasses {
         return com.bytedice.bde_particles.lerp(from, to, t) * curve.function(t)
       }
     }
-    data class NoLerpVec3f(val value: Vector3f) : LerpVal()
+    data object NoLerpVec3f : LerpVal()
 
     fun lerpToVector3f(t: Float) : Vector3f {
       when (this) {
@@ -100,7 +100,7 @@ class ParamClasses {
           val x = this.lerp(t)
           return Vector3f(x, x, x)
         }
-        is NoLerpVec3f -> return this.value
+        is NoLerpVec3f -> return Vector3f(1.0f, 1.0f, 1.0f)
       }
     }
   }
@@ -117,5 +117,10 @@ class ParamClasses {
       val loopDur:        Int,
       val loopDelay:      Int
     ) : Duration()
+  }
+  enum class TransformWithVel {
+    rotOnly,
+    scaleAndRot,
+    none
   }
 }

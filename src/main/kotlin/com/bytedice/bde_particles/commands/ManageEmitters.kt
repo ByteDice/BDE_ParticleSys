@@ -1,6 +1,5 @@
 package com.bytedice.bde_particles.commands
 
-import com.bytedice.bde_particles.emitterParamsToJson
 import com.bytedice.bde_particles.particles.*
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
@@ -81,7 +80,7 @@ blockCurve:     Pair<Array<String>, LerpCurves>,
     // <emitter id>
     // output -> give player a command block with the particle params (should be paste-able in kotlin)
 
-
+/*
 object ManageEmitters {
   fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
     val command = CommandManager.literal("ManageEmitters")
@@ -299,3 +298,4 @@ fun makeCommandBlock(emitterData: Map<String, Any>): ItemStack {
 
   return i
 }
+*/

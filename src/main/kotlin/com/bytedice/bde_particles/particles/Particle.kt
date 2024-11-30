@@ -66,7 +66,8 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
     pos = newSpawnPos
 
-    val dirFromCenter = entityPos.subtract(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()).normalize()
+    val posDouble = Vec3d(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+    val dirFromCenter = posDouble.normalize()
     val forceFromCenter = dirFromCenter.multiply(emitterParams.initCenterVel.randomize().toDouble())
     vel.add(forceFromCenter.x.toFloat(), forceFromCenter.y.toFloat(), forceFromCenter.z.toFloat())
 
@@ -89,7 +90,10 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
 
   fun spawn(world: ServerWorld) {
-    if (isInit) { blockDisplay.spawn(world) }
+    if (isInit) {
+      blockDisplay.spawn(world)
+      LIVING_PARTICLE_COUNT += 1
+    }
     else { error("Particle is not initialized before being spawned. Please use Particle.init() to initialize it.") }
   }
 
@@ -101,7 +105,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
     blockDisplay.updateProperties(newProperties)
 
-    if (timeAlive > lifeTime) { isDead = true; blockDisplay.kill() }
+    if (timeAlive > lifeTime) { kill() }
 
     timeAlive += 1
   }
@@ -144,7 +148,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
     val newProperties = DisplayEntityProperties(
       pos          = entityPos,
       blockType    = newBlock,
-      translation  = combinedOffset,
+      translation  = combinedOffset.add(newOriginOffset),
       leftRotation = quatRot,
       scale        = newScale,
       tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
@@ -183,11 +187,17 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
   private fun calcRot(t: Float) : Vector3f {
     val newRot = Vector3f(rot)
-    val newVel = Vector3f(rotVel)
 
-    newVel.mul(emitterParams.rotVelCurve.lerpToVector3f(t))
-    newRot.add(newVel)
-    return newRot
+    if (emitterParams.transformWithVel == ParamClasses.TransformWithVel.none) {
+      val newVel = Vector3f(rotVel)
+
+      newVel.mul(emitterParams.rotVelCurve.lerpToVector3f(t))
+      return newRot.add(newVel)
+    }
+    else {
+      val rotWithVel = velToRot(vel)
+      return newRot.add(rotWithVel)
+    }
   }
 
 
@@ -214,6 +224,10 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
 
   fun kill() {
-    if (!isDead) { blockDisplay.kill() }
+    if (!isDead) {
+      blockDisplay.kill()
+      LIVING_PARTICLE_COUNT -= 1
+      isDead = true
+    }
   }
 }

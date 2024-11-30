@@ -13,6 +13,18 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
     return Pair(newId, false)
   }
 
+  val newBlocks: MutableList<String> = mutableListOf()
+
+  for (block in params.blockCurve.first) {
+    val blockModIdRegex = ".*:".toRegex()
+    if (blockModIdRegex.containsMatchIn(block)) { break }
+    else {
+      newBlocks.add("minecraft:$block")
+    }
+  }
+
+  params.blockCurve = Pair(newBlocks.toTypedArray(), params.blockCurve.second)
+
   idRegister[id] = params
   println("BPS - Registered Emitter ID \"$newId\".")
   return Pair(newId, true)

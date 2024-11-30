@@ -2,7 +2,7 @@ package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.KillAllEmitters
-import com.bytedice.bde_particles.commands.ManageEmitters
+//import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particles.*
 import kotlinx.coroutines.async
@@ -47,23 +47,31 @@ import java.util.*
 // Custom curve equation command args (parse from strings)
 // Cylinder and cone force field shape.
 // Better particle performance.
-// Global max particles variable.
-  // gamerule max particles
 
 // Emitter groups (multiple emitters for EmitterTool)
 // Private functions/classes
+// Debug tools
+  // RenderParticleDebug gamerule
+  // render emitter origin
+  // render particle origin
+  // name-tag particle with its data
+  // render particle velocity direction
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
+var LIVING_PARTICLE_COUNT: Int = 0
 val SESSION_UUID: UUID = UUID.randomUUID()
-val GLOBAL_MAX_PARTICLES = GameRuleRegistry.register(
-  "GlobalMaxParticles",
-  GameRules.Category.UPDATES,
-  GameRuleFactory.createIntRule(3000, 0)
-)
 
 
 class Bde_particles : ModInitializer {
+  companion object {
+    val GLOBAL_MAX_PARTICLES: GameRules.Key<GameRules.IntRule> = GameRuleRegistry.register(
+      "GlobalMaxParticles",
+      GameRules.Category.UPDATES,
+      GameRuleFactory.createIntRule(3000, 0)
+    )
+  }
+
   override fun onInitialize() {
     if (FabricLoader.getInstance().environmentType != EnvType.SERVER) {
       return
@@ -71,17 +79,13 @@ class Bde_particles : ModInitializer {
 
     println("BPS - Initializing on ${FabricLoader.getInstance().environmentType}")
 
-    ServerLifecycleEvents.SERVER_STARTED.register { _ ->
-      init()
-    }
-
     ServerTickEvents.START_SERVER_TICK.register { server ->
       tick(server)
     }
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveEmitterTool.register(dispatcher, registryAccess)
-      ManageEmitters .register(dispatcher)
+      //ManageEmitters .register(dispatcher)
       KillAllEmitters.register(dispatcher)
     }
 
@@ -93,6 +97,8 @@ class Bde_particles : ModInitializer {
     })
 
     ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { _ ->
+      init()
+
       println("BPS - Progress bar filled :3")
       println(
         "\n____________  _____              _____ \n" +

@@ -1,5 +1,7 @@
 package com.bytedice.bde_particles.particles
 
+import com.bytedice.bde_particles.Bde_particles
+import com.bytedice.bde_particles.LIVING_PARTICLE_COUNT
 import com.bytedice.bde_particles.randomFloatBetween
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
@@ -36,6 +38,9 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
 
     repeat(params.spawnRate) {
       if (allParticles.size >= params.maxCount) { return }
+
+      val maxParticles = world.gameRules.getInt(Bde_particles.GLOBAL_MAX_PARTICLES)
+      if (LIVING_PARTICLE_COUNT >= maxParticles) { return }
 
       val randomSpawnChance = randomFloatBetween(0.0f, params.spawnChance.coerceIn(0.0f, 1.0f))
       if (randomSpawnChance > params.spawnChance) { return }
