@@ -45,7 +45,8 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
       val randomSpawnChance = randomFloatBetween(0.0f, params.spawnChance.coerceIn(0.0f, 1.0f))
       if (randomSpawnChance > params.spawnChance) { return }
 
-      val particle = Particle(params, pos, rot)
+      val debug = world.gameRules.getBoolean(Bde_particles.SHOW_PARTICLE_DEBUG)
+      val particle = Particle(params, pos, rot, debug)
       particle.init()
       particle.spawn(world)
 

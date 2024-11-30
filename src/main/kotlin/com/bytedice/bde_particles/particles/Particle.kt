@@ -16,9 +16,13 @@ scaleWithVel:   Boolean (NEW)
 */
 
 
-class Particle(private val emitterParams: EmitterParams, private var entityPos: Vec3d, private val entityRot: Vector2f) {
+class Particle(
+  private val emitterParams: EmitterParams,
+  private var entityPos: Vec3d,
+  private val entityRot: Vector2f,
+  private var debug: Boolean
+) {
   private var pos = Vector3f(0.0f, 0.0f, 0.0f)
-  private var blockDisplay: DisplayEntity = DisplayEntity(DisplayEntityProperties())
   private var timeAlive = 0
   private var isInit = false
   var isDead = false
@@ -56,6 +60,9 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
   private var lifeTime = emitterParams.lifeTime.randomize()
 
+  private lateinit var particleEntity: DisplayEntity
+  private lateinit var debugOriginEntity: DisplayEntity
+  private lateinit var debugVelEntity: DisplayEntity
 
   fun init() {
     val so = emitterParams.spawnPosOffset
@@ -76,14 +83,14 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
     val properties = DisplayEntityProperties(
       pos          = entityPos,
       rot          = entityRot,
-      blockType    = lerpArray(emitterParams.blockCurve.first as Array<Any>, 0.0f, emitterParams.blockCurve.second) as String,
+      model        = lerpArray(emitterParams.modelCurve.first as Array<Any>, 0.0f, emitterParams.modelCurve.second) as String,
       translation  = newPos.add(pos),
       leftRotation = quatRot,
       scale        = scale,
       tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
     )
 
-    blockDisplay = DisplayEntity(properties)
+    particleEntity = DisplayEntity(properties)
 
     isInit = true
   }
@@ -91,7 +98,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
   fun spawn(world: ServerWorld) {
     if (isInit) {
-      blockDisplay.spawn(world)
+      particleEntity.spawn(world)
       LIVING_PARTICLE_COUNT += 1
     }
     else { error("Particle is not initialized before being spawned. Please use Particle.init() to initialize it.") }
@@ -103,7 +110,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
     val newProperties = calcNewProperties()
 
-    blockDisplay.updateProperties(newProperties)
+    particleEntity.updateProperties(newProperties)
 
     if (timeAlive > lifeTime) { kill() }
 
@@ -127,7 +134,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
   private fun calcNewProperties() : DisplayEntityProperties {
     val timeAliveClamped = (timeAlive.toFloat() / lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
 
-    val newBlock         = lerpArray(emitterParams.blockCurve.first as Array<Any>, timeAliveClamped, emitterParams.blockCurve.second) as String
+    val newModel         = lerpArray(emitterParams.modelCurve.first as Array<Any>, timeAliveClamped, emitterParams.modelCurve.second) as String
     val (newVel, newPos) = calcPos()
     val newRot           = calcRot(timeAliveClamped)
     val newScale         = calcScale(timeAliveClamped)
@@ -147,7 +154,7 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
 
     val newProperties = DisplayEntityProperties(
       pos          = entityPos,
-      blockType    = newBlock,
+      model        = newModel,
       translation  = combinedOffset.add(newOriginOffset),
       leftRotation = quatRot,
       scale        = newScale,
@@ -223,9 +230,28 @@ class Particle(private val emitterParams: EmitterParams, private var entityPos: 
   }
 
 
+  private fun spawnDebug() {
+    // spawn cube at particle origin
+    // show arrow pointing toward particle direction
+    // name-tag its data
+
+
+  }
+
+
+  private fun updateDebug() {
+
+  }
+
+
+  private fun calcDebug() {
+
+  }
+
+
   fun kill() {
     if (!isDead) {
-      blockDisplay.kill()
+      particleEntity.kill()
       LIVING_PARTICLE_COUNT -= 1
       isDead = true
     }

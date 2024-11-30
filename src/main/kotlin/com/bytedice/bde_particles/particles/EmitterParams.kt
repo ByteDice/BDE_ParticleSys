@@ -30,7 +30,7 @@ data class EmitterParams (
   var offsetCurve: ParamClasses.LerpVal,
   var rotVelCurve: ParamClasses.LerpVal,
   var scaleCurve:  ParamClasses.LerpVal,
-  var blockCurve:  Pair<Array<String>, LerpCurves>,
+  var modelCurve:  Pair<Array<String>, LerpCurves>,
 )
 {
   companion object Presets {
@@ -42,7 +42,7 @@ data class EmitterParams (
       spawnPosOffset = Vector3f(0.0f, 0.0f, 0.0f),
       lifeTime = ParamClasses.PairInt(25, 40),
       shape = SpawningShape.Sphere(1.0f, true),
-      offset = ParamClasses.PairVec3f.Uniform(-0.5f, -0.5f),
+      offset = ParamClasses.PairVec3f.Uniform(0.0f, 0.0f),
       initRot = ParamClasses.PairVec3f.NonUniform(0.0f, 0.0f, 0.0f, 360.0f, 360.0f, 360.0f),
       rotVel = ParamClasses.PairVec3f.NonUniform(-0.2f, -0.2f, -0.2f, 0.2f, 0.2f, 0.2f),
       initVel = ParamClasses.PairVec3f.Null,
@@ -56,8 +56,8 @@ data class EmitterParams (
       offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
       rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
       scaleCurve = ParamClasses.LerpVal.LerpUniform(0.0f, 2.0f, LerpCurves.Linear),
-      blockCurve = Pair(
-        arrayOf("shroomlight", "orange_concrete", "orange_stained_glass", "gray_wool", "gray_stained_glass", "light_gray_stained_glass"),
+      modelCurve = Pair(
+        arrayOf("shroomlight", "orange_concrete", "orange_stained_glass", "gray_wool", "gray_stained_glass", "light_gray_stained_glass", "light_gray_stained_glass_pane"),
         LerpCurves.Sqrt
       ),
     )

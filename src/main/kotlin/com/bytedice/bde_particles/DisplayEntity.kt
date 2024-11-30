@@ -1,21 +1,26 @@
 package com.bytedice.bde_particles
 
+import net.minecraft.component.Component
+import net.minecraft.component.ComponentType
 import net.minecraft.entity.EntityType
-import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
+import net.minecraft.entity.decoration.DisplayEntity.ItemDisplayEntity
+import net.minecraft.item.Item
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtFloat
 import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.server.world.ServerWorld
 
 class DisplayEntity(private var properties: DisplayEntityProperties?) {
   private var hasSpawned = false
-  private var entity: BlockDisplayEntity? = null
+  private var entity: ItemDisplayEntity? = null
 
   fun spawn(world: ServerWorld) {
     if (hasSpawned || properties == null) { return }
 
-    entity = BlockDisplayEntity(EntityType.BLOCK_DISPLAY, world)
+    entity = ItemDisplayEntity(EntityType.ITEM_DISPLAY, world)
     updateProperties(properties!!)
 
     world.spawnEntity(entity)
@@ -25,6 +30,21 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
 
   fun updateProperties(properties: DisplayEntityProperties) {
+    val customModelRegex = "^([^/]+)(?:/([0-9]+))?$".toRegex()
+    val matchResult = customModelRegex.find(properties.model)
+
+    val modelName: String
+    val customModelNum: Int
+
+    if (matchResult != null) {
+      modelName = matchResult.groupValues[1]
+      customModelNum = matchResult.groupValues[2].toInt()
+    }
+    else {
+      modelName = properties.model
+      customModelNum = 0
+    }
+
     val nbt = NbtCompound().apply {
       val tagList = NbtList()
 
@@ -34,7 +54,11 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
       put("Tags", tagList)
 
-      put("block_state", NbtCompound().apply { putString("Name", properties.blockType) })
+      put("item", NbtCompound().apply {
+        putString("id", modelName)
+        putInt("count", 1)
+        put("components", NbtCompound().apply { putInt("minecraft:custom_model_data", customModelNum) })
+      })
 
       put("transformation", NbtCompound().apply {
         val offsetList = NbtList().apply {
@@ -65,6 +89,9 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
         put("scale", scaleList)
         put("right_rotation", rightRotList)
       })
+
+      put("view_range", NbtCompound().apply { properties.viewRange })
+
     }
 
     entity?.readNbt(nbt)

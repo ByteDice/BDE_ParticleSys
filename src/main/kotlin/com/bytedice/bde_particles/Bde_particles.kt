@@ -18,7 +18,7 @@ import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.entity.EntityType
-import net.minecraft.entity.decoration.DisplayEntity.BlockDisplayEntity
+import net.minecraft.entity.decoration.DisplayEntity.ItemDisplayEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
@@ -38,7 +38,6 @@ import java.util.*
 // Allowing the use of regular Minecraft particles instead of just BDEs.
 // Better command auto-completion. (and change names of args)
   // force field "config" option
-  // blockCurve array not needing "minecraft:"
 
 // Parameters
   // rotWithVel / scaleWithVel (bool)
@@ -69,6 +68,11 @@ class Bde_particles : ModInitializer {
       "GlobalMaxParticles",
       GameRules.Category.UPDATES,
       GameRuleFactory.createIntRule(3000, 0)
+    )
+    val SHOW_PARTICLE_DEBUG: GameRules.Key<GameRules.BooleanRule> = GameRuleRegistry.register(
+      "ShowParticleDebug",
+      GameRules.Category.UPDATES,
+      GameRuleFactory.createBooleanRule(false)
     )
   }
 
@@ -122,10 +126,10 @@ fun tick(server: MinecraftServer) {
   runBlocking {
     server.worlds.map { world ->
       async {
-        val blockDisplayEntities = world.iterateEntities()
-          .filter { it.type == EntityType.BLOCK_DISPLAY }
-        for (entity in blockDisplayEntities) {
-          if (displayEntityContainsTag(entity as BlockDisplayEntity, "BPS_UUID")
+        val displayEntities = world.iterateEntities()
+          .filter { it.type == EntityType.ITEM_DISPLAY }
+        for (entity in displayEntities) {
+          if (displayEntityContainsTag(entity as ItemDisplayEntity, "BPS_UUID")
             && !displayEntityContainsTag(entity, SESSION_UUID.toString())) {
 
             entity.kill()
@@ -185,7 +189,7 @@ fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map
 */
 
 
-fun displayEntityContainsTag(entity: BlockDisplayEntity, tag: String) : Boolean {
+fun displayEntityContainsTag(entity: ItemDisplayEntity, tag: String) : Boolean {
   val nbt = NbtCompound()
   entity.writeNbt(nbt)
   val tagsNbtList = nbt.getList("Tags", 8)
