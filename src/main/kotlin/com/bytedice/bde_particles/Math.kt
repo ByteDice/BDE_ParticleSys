@@ -14,6 +14,7 @@ import kotlin.random.Random
 
 class LerpCurves(val function: (Float) -> Float) {
   companion object {
+    val Constant = LerpCurves { _ -> 1.0f }
     val Linear = LerpCurves { y -> y }
     val Sqrt = LerpCurves { y -> sqrt(y) }
     val Exponent = LerpCurves { y -> y.pow(2.0f) }
@@ -166,7 +167,8 @@ fun transformOffsetByScale(offset: Vector3f, scale: Vector3f): Vector3f {
 
 
 fun lerp(x: Float, y: Float, t: Float) : Float {
-  return x + (y - x) * t
+  val clampedT = t.coerceIn(0f, 1f)
+  return x + (y - x) * clampedT
 }
 
 

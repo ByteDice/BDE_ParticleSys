@@ -119,8 +119,8 @@ class ParamClasses {
     ) : Duration()
   }
   enum class TransformWithVel {
-    rotOnly,
-    scaleAndRot,
-    none
+    RotOnly,
+    ScaleAndRot,
+    None
   }
 }

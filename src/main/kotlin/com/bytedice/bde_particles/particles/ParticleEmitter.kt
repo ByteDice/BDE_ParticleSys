@@ -7,8 +7,13 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
 
-class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private val world: ServerWorld, private val params: EmitterParams) {
-
+class ParticleEmitter(
+  private val pos: Vec3d,
+  private val rot: Vector2f,
+  private val world: ServerWorld,
+  private val params: EmitterParams,
+  private val debug: Boolean
+) {
   private var allParticles: Array<Particle> = emptyArray()
 
   private var timeAlive = 0
@@ -28,7 +33,7 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
 
     for (particle in allParticles) {
       if (particle.isDead) { allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray() }
-      else { particle.tick() }
+      else { particle.tick(world) }
     }
   }
 
@@ -45,7 +50,6 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
       val randomSpawnChance = randomFloatBetween(0.0f, params.spawnChance.coerceIn(0.0f, 1.0f))
       if (randomSpawnChance > params.spawnChance) { return }
 
-      val debug = world.gameRules.getBoolean(Bde_particles.SHOW_PARTICLE_DEBUG)
       val particle = Particle(params, pos, rot, debug)
       particle.init()
       particle.spawn(world)
@@ -91,6 +95,8 @@ class ParticleEmitter(private val pos: Vec3d, private val rot: Vector2f, private
     isTicking = false
     isDead = true
   }
+
+
   fun stopTicking() {
     isTicking = false
   }

@@ -163,7 +163,8 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
     return TypedActionResult(ActionResult.PASS, handItem)
   }
 
-  val emitter = ParticleEmitter(hitResult.pos, Vector2f(0.0f, 0.0f), world, emitterParams)
+  val debug = world.gameRules.getBoolean(Bde_particles.SHOW_PARTICLE_DEBUG)
+  val emitter = ParticleEmitter(hitResult.pos, Vector2f(0.0f, 0.0f), world, emitterParams, debug)
   ALL_PARTICLE_EMITTERS += emitter
 
   return TypedActionResult(ActionResult.PASS, handItem)

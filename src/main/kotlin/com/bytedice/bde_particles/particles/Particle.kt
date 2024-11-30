@@ -1,6 +1,7 @@
 package com.bytedice.bde_particles.particles
 
 import com.bytedice.bde_particles.*
+import net.minecraft.particle.DustParticleEffect
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
@@ -61,8 +62,6 @@ class Particle(
   private var lifeTime = emitterParams.lifeTime.randomize()
 
   private lateinit var particleEntity: DisplayEntity
-  private lateinit var debugOriginEntity: DisplayEntity
-  private lateinit var debugVelEntity: DisplayEntity
 
   fun init() {
     val so = emitterParams.spawnPosOffset
@@ -86,7 +85,7 @@ class Particle(
       model        = lerpArray(emitterParams.modelCurve.first as Array<Any>, 0.0f, emitterParams.modelCurve.second) as String,
       translation  = newPos.add(pos),
       leftRotation = quatRot,
-      scale        = scale,
+      scale        = Vector3f(scale).mul(emitterParams.scaleCurve.lerpToVector3f(0.0f)),
       tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
     )
 
@@ -105,7 +104,7 @@ class Particle(
   }
 
 
-  fun tick() {
+  fun tick(world: ServerWorld) {
     if (!isInit) { error("Particle is not initialized before being ticked. Please use Particle.init() to initialize it.") }
 
     val newProperties = calcNewProperties()
@@ -113,6 +112,10 @@ class Particle(
     particleEntity.updateProperties(newProperties)
 
     if (timeAlive > lifeTime) { kill() }
+
+    if (debug) {
+      tickDebug(world)
+    }
 
     timeAlive += 1
   }
@@ -195,7 +198,7 @@ class Particle(
   private fun calcRot(t: Float) : Vector3f {
     val newRot = Vector3f(rot)
 
-    if (emitterParams.transformWithVel == ParamClasses.TransformWithVel.none) {
+    if (emitterParams.transformWithVel == ParamClasses.TransformWithVel.None) {
       val newVel = Vector3f(rotVel)
 
       newVel.mul(emitterParams.rotVelCurve.lerpToVector3f(t))
@@ -225,27 +228,46 @@ class Particle(
 
   private fun calcScale(t: Float) : Vector3f {
     val newScale = Vector3f(scale)
-    newScale.mul(emitterParams.scaleCurve.lerpToVector3f(t))
-    return scale
+    return newScale.mul(emitterParams.scaleCurve.lerpToVector3f(t))
   }
 
 
-  private fun spawnDebug() {
-    // spawn cube at particle origin
-    // show arrow pointing toward particle direction
-    // name-tag its data
+  private fun tickDebug(world: ServerWorld) {
+    // spawn particle at particle origin
+    // show trail pointing toward particle direction
 
+    // origin debug
+    val greenDustEffect = DustParticleEffect(Vector3f(0.0f, 1.0f, 0.0f), 2.0f)
+    world.spawnParticles(
+      greenDustEffect,
+      entityPos.x + pos.x,
+      entityPos.y + pos.y,
+      entityPos.z + pos.z,
+      1,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    )
 
-  }
+    // vel debug
+    var timesLooped = 0
+    repeat(3) {
+      val redDustEffect = DustParticleEffect(Vector3f(1.0f, 0.0f, 0.0f), 1.0f)
+      world.spawnParticles(
+        redDustEffect,
+        entityPos.x + pos.x + originOffset.x + vel.x * timesLooped,
+        entityPos.y + pos.y + originOffset.y + vel.y * timesLooped,
+        entityPos.z + pos.z + originOffset.z + vel.z * timesLooped,
+        1,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      )
 
-
-  private fun updateDebug() {
-
-  }
-
-
-  private fun calcDebug() {
-
+      timesLooped += 1
+    }
   }
 
 

@@ -17,5 +17,6 @@ data class DisplayEntityProperties (
   val scale:         Vector3f = Vector3f(1.0f, 1.0f, 1.0f),
   val rightRotation: Vector4f = Vector4f(0.0f, 0.0f, 0.0f, 1.0f),
 
-  val viewRange: Float = 2.0f
+  val viewRange: Float = 2.0f,
+  var name: String? = null
 )

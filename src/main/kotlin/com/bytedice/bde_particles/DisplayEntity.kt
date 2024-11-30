@@ -1,16 +1,11 @@
 package com.bytedice.bde_particles
 
-import net.minecraft.component.Component
-import net.minecraft.component.ComponentType
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.decoration.DisplayEntity.ItemDisplayEntity
-import net.minecraft.item.Item
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtFloat
 import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
 import net.minecraft.server.world.ServerWorld
 
 class DisplayEntity(private var properties: DisplayEntityProperties?) {
@@ -38,7 +33,7 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
     if (matchResult != null) {
       modelName = matchResult.groupValues[1]
-      customModelNum = matchResult.groupValues[2].toInt()
+      customModelNum = matchResult.groupValues[2].toIntOrNull() ?: 0
     }
     else {
       modelName = properties.model
@@ -92,6 +87,10 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
       put("view_range", NbtCompound().apply { properties.viewRange })
 
+      if (properties.name != null) {
+        putString("CustomName", properties.name)
+        putByte("CustomNameVisible", 1)
+      }
     }
 
     entity?.readNbt(nbt)
