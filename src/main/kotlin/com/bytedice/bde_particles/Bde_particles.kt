@@ -36,12 +36,9 @@ import java.util.*
 
 // TODO:
 // Allowing the use of regular Minecraft particles instead of just BDEs.
+  // not implementing in v1.0. Maybe in v2.0.
 // Better command auto-completion. (and change names of args)
   // force field "config" option
-
-// Parameters
-  // rotWithVel / scaleWithVel (bool)
-    // rotates/scales the particle to face the velocity
 
 // Custom curve equation command args (parse from strings)
 // Cylinder and cone force field shape.
@@ -49,12 +46,6 @@ import java.util.*
 
 // Emitter groups (multiple emitters for EmitterTool)
 // Private functions/classes
-// Debug tools
-  // RenderParticleDebug gamerule
-  // render emitter origin
-  // render particle origin
-  // name-tag particle with its data
-  // render particle velocity direction
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
@@ -119,6 +110,8 @@ class Bde_particles : ModInitializer {
 
 fun init() {
   addToRegister("DEFAULT", EmitterParams.DEFAULT)
+  addToRegister("DEBUG", EmitterParams.DEBUG)
+  addToRegister("STRESS_TEST", EmitterParams.STRESS_TEST)
 }
 
 
@@ -139,12 +132,18 @@ fun tick(server: MinecraftServer) {
     }.awaitAll()
   }
 
-
-  for (emitter in ALL_PARTICLE_EMITTERS) {
-    if (emitter.isDead) {
-      ALL_PARTICLE_EMITTERS = ALL_PARTICLE_EMITTERS.toMutableList().apply { remove(emitter) }.toTypedArray()
-    }
-    else { emitter.tick() }
+  runBlocking {
+    ALL_PARTICLE_EMITTERS.map { emitter ->
+      async {
+        if (emitter.isDead) {
+          synchronized(ALL_PARTICLE_EMITTERS) {
+            ALL_PARTICLE_EMITTERS = ALL_PARTICLE_EMITTERS.toMutableList().apply { remove(emitter) }.toTypedArray()
+          }
+        } else {
+          emitter.tick()
+        }
+      }
+    }.awaitAll()
   }
 }
 

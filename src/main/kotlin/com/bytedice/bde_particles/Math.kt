@@ -83,19 +83,10 @@ fun randomIntBetween(min: Int, max: Int) : Int {
 }
 
 
-fun randomBetweenVector3f(min: Vector3f, max: Vector3f) : Vector3f {
-  return Vector3f(
-    randomFloatBetween(min.x, max.x),
-    randomFloatBetween(min.y, max.y),
-    randomFloatBetween(min.z, max.z)
-  )
-}
-
-
 fun eulerToQuat(euler: Vector3f): Vector4f {
-  val roll  = euler.x
-  val pitch = euler.y
-  val yaw   = euler.z
+  val roll  = euler.x * (Math.PI / 180).toFloat()
+  val pitch = euler.y * (Math.PI / 180).toFloat()
+  val yaw   = euler.z * (Math.PI / 180).toFloat()
 
   val cy = cos(yaw * 0.5)
   val sy = sin(yaw * 0.5)
@@ -216,22 +207,4 @@ fun sdfCube(pos: Vector3f, size: Vector3f, objectPos: Vector3f): Float {
 
 fun normalizeSdf(sdf: Float, radius: Float): Float {
   return if (sdf < 0) (sdf + radius) / radius else 0f
-}
-
-
-fun velToRot(velocity: Vector3f): Vector3f {
-  val normalizedVelocity = Vector3f(velocity).normalize()
-
-  val yaw = Math.toDegrees(atan2(normalizedVelocity.z.toDouble(), normalizedVelocity.x.toDouble())).toFloat()
-
-  val pitch = Math.toDegrees(
-    atan2(
-      -normalizedVelocity.y.toDouble(),
-      sqrt(
-        normalizedVelocity.x.toDouble().pow(2) + normalizedVelocity.z.toDouble().pow(2)
-      )
-    )
-  ).toFloat()
-
-  return Vector3f(pitch, yaw, 0f)
 }

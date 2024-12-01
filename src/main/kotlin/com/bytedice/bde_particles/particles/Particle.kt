@@ -10,13 +10,6 @@ import org.joml.Vector4f
 import kotlin.math.*
 
 
-// TODO: add logic for new params (goes for ParticleEmitter too)
-/* Changed or new params (haven't been implemented yet)
-rotWithVel:     Boolean (NEW)
-scaleWithVel:   Boolean (NEW)
-*/
-
-
 class Particle(
   private val emitterParams: EmitterParams,
   private var entityPos: Vec3d,
@@ -139,13 +132,30 @@ class Particle(
 
     val newModel         = lerpArray(emitterParams.modelCurve.first as Array<Any>, timeAliveClamped, emitterParams.modelCurve.second) as String
     val (newVel, newPos) = calcPos()
-    val newRot           = calcRot(timeAliveClamped)
-    val newScale         = calcScale(timeAliveClamped)
     val newOriginOffset  = Vector3f(originOffset.mul(emitterParams.offsetCurve.lerpToVector3f(timeAliveClamped)))
+
+    val newScale: Vector3f
+    val newRot: Vector3f
+
+    when (emitterParams.transformWithVel) {
+      is ParamClasses.TransformWithVel.RotOnly -> {
+        newScale = calcScale(timeAliveClamped)
+        newRot = (emitterParams.transformWithVel as ParamClasses.TransformWithVel.RotOnly).velToRot(vel)
+      }
+      is ParamClasses.TransformWithVel.ScaleAndRot -> {
+        newScale = Vector3f(scale).mul((emitterParams.transformWithVel as ParamClasses.TransformWithVel.ScaleAndRot).velToScale(vel))
+        newRot = (emitterParams.transformWithVel as ParamClasses.TransformWithVel.ScaleAndRot).velToRot(vel)
+      }
+      else -> {
+        newScale = calcScale(timeAliveClamped)
+        newRot = calcRot(timeAliveClamped)
+        rot = newRot
+      }
+    }
 
     vel = newVel
     pos = newPos
-    rot = newRot
+
 
     for (forceField in emitterParams.forceFields) {
       if (forceField.shape is ForceFieldShape.Sphere) { vel.add(sphereSdfVel(forceField)) }
@@ -197,17 +207,10 @@ class Particle(
 
   private fun calcRot(t: Float) : Vector3f {
     val newRot = Vector3f(rot)
+    val newVel = Vector3f(rotVel)
 
-    if (emitterParams.transformWithVel == ParamClasses.TransformWithVel.None) {
-      val newVel = Vector3f(rotVel)
-
-      newVel.mul(emitterParams.rotVelCurve.lerpToVector3f(t))
-      return newRot.add(newVel)
-    }
-    else {
-      val rotWithVel = velToRot(vel)
-      return newRot.add(rotWithVel)
-    }
+    newVel.mul(emitterParams.rotVelCurve.lerpToVector3f(t))
+    return newRot.add(newVel)
   }
 
 
@@ -233,9 +236,6 @@ class Particle(
 
 
   private fun tickDebug(world: ServerWorld) {
-    // spawn particle at particle origin
-    // show trail pointing toward particle direction
-
     // origin debug
     val greenDustEffect = DustParticleEffect(Vector3f(0.0f, 1.0f, 0.0f), 2.0f)
     world.spawnParticles(
@@ -251,23 +251,18 @@ class Particle(
     )
 
     // vel debug
-    var timesLooped = 0
-    repeat(3) {
-      val redDustEffect = DustParticleEffect(Vector3f(1.0f, 0.0f, 0.0f), 1.0f)
-      world.spawnParticles(
-        redDustEffect,
-        entityPos.x + pos.x + originOffset.x + vel.x * timesLooped,
-        entityPos.y + pos.y + originOffset.y + vel.y * timesLooped,
-        entityPos.z + pos.z + originOffset.z + vel.z * timesLooped,
-        1,
-        0.0,
-        0.0,
-        0.0,
-        0.0
-      )
-
-      timesLooped += 1
-    }
+    val redDustEffect = DustParticleEffect(Vector3f(1.0f, 0.0f, 0.0f), 1.0f)
+    world.spawnParticles(
+      redDustEffect,
+      entityPos.x + pos.x + originOffset.x + vel.x * 10,
+      entityPos.y + pos.y + originOffset.y + vel.y * 10,
+      entityPos.z + pos.z + originOffset.z + vel.z * 10,
+      1,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    )
   }
 
 

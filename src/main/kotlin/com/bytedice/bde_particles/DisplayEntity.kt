@@ -85,7 +85,7 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
         put("right_rotation", rightRotList)
       })
 
-      put("view_range", NbtCompound().apply { properties.viewRange })
+      putFloat("view_range", properties.viewRange)
 
       if (properties.name != null) {
         putString("CustomName", properties.name)
