@@ -34,18 +34,26 @@ import org.joml.Vector2f
 import java.util.*
 
 
-// TODO:
+// TODO: (future additions)
 // Allowing the use of regular Minecraft particles instead of just BDEs.
   // not implementing in v1.0. Maybe in v2.0.
+
 // Better command auto-completion. (and change names of args)
   // force field "config" option
 
 // Custom curve equation command args (parse from strings)
+
 // Cylinder and cone force field shape.
-// Better particle performance.
+  // not implementing in v1.0. Maybe in v2.0.
 
 // Emitter groups (multiple emitters for EmitterTool)
+
 // Private functions/classes
+
+
+// TODO: (project)
+// fix ManageEmitter command
+// add SpawnEmitter command for spawning emitters via commands
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()

@@ -185,7 +185,7 @@ class Particle(
     val sdfVal        = sdfSphere(forceField.pos, shape.radius, pos)
     val normalizedSdf = normalizeSdf(sdfVal, shape.radius)
     val velDir        = Vector3f(pos).sub(forceField.pos).normalize()
-    val velMul = if (sdfVal > 0) { 0.0f }
+    val velMul        = if (sdfVal > 0) { 0.0f }
     else { lerp(shape.force.second, shape.force.second, 1 - normalizedSdf) }
 
     return velDir.mul(velMul)
@@ -202,7 +202,6 @@ class Particle(
 
     return velDir
   }
-  // TODO: cone & cylinder SDF
 
 
   private fun calcRot(t: Float) : Vector3f {
