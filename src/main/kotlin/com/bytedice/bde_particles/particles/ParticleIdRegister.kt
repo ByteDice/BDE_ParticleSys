@@ -5,7 +5,7 @@ val idRegister: MutableMap<String, EmitterParams> = mutableMapOf()
 val forbiddenIds = arrayOf("", "NULL")
 
 
-fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
+fun addToRegister(id: String, params: EmitterParams, cacheLength: Int) : Pair<String, Boolean> {
   val newId = replaceForbiddenChars(id.replace(" ", "_"))
 
   if (idRegister.containsKey(newId)) {
@@ -40,7 +40,7 @@ fun removeFromRegister(id: String) : Boolean {
 }
 
 
-fun getParamsById(id: String) : EmitterParams? {
+fun getEmitterDataById(id: String) : EmitterParams? {
   return idRegister[id]
 }
 
@@ -51,7 +51,7 @@ fun updateRegistered(id: String, newParams: EmitterParams) {
 
 
 fun updateParam(id: String, paramName: String, paramValue: Any) : Boolean {
-  val emitter = getParamsById(id) ?: return false
+  val emitter = getEmitterDataById(id) ?: return false
   val updatedValues = updateParams(emitter, paramName, paramValue)
 
   return updatedValues.second

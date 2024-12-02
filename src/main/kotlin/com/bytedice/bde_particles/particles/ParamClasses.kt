@@ -4,7 +4,6 @@ import com.bytedice.bde_particles.LerpCurves
 import com.bytedice.bde_particles.randomFloatBetween
 import com.bytedice.bde_particles.randomIntBetween
 import org.joml.Vector3f
-import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt

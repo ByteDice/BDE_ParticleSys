@@ -8,6 +8,7 @@ import net.minecraft.world.World
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector4f
+import java.util.SplittableRandom
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -79,7 +80,7 @@ fun randomFloatBetween(min: Float, max: Float) : Float {
 
 
 fun randomIntBetween(min: Int, max: Int) : Int {
-  return Random.nextInt(min, max)
+  return Random.nextInt(max - min) + min
 }
 
 

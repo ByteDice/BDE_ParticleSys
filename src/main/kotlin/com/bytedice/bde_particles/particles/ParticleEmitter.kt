@@ -3,6 +3,9 @@ package com.bytedice.bde_particles.particles
 import com.bytedice.bde_particles.Bde_particles
 import com.bytedice.bde_particles.LIVING_PARTICLE_COUNT
 import com.bytedice.bde_particles.randomFloatBetween
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
@@ -26,15 +29,38 @@ class ParticleEmitter(
   var isDead = false
 
 
-  fun tick() {
+  suspend fun tick() {
     if (isTicking) { count() }
     if (isTicking) { addParticle() }
     if (!isTicking && allParticles.isEmpty()) { isDead = true }
 
-    for (particle in allParticles) {
-      if (particle.isDead) { allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray() }
-      else { particle.tick(world) }
+    processParticlesInBatches(world, 100)
+  }
+
+
+  private suspend fun processParticlesInBatches(
+    world: ServerWorld,
+    batchSize: Int
+  ) = coroutineScope {
+    val batches = allParticles.toMutableList().chunked(batchSize)
+
+    val jobs = batches.map { batch ->
+      async {
+        val toRemove = mutableListOf<Particle>()
+        batch.forEach { particle ->
+          if (particle.isDead) {
+            toRemove.add(particle)
+          } else {
+            particle.tick(world)
+          }
+        }
+        synchronized(allParticles) {
+          allParticles = allParticles.toMutableList().apply { removeAll(toRemove) }.toTypedArray()
+        }
+      }
     }
+
+    jobs.awaitAll()
   }
 
 

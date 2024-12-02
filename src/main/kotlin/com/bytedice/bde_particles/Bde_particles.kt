@@ -117,9 +117,9 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToRegister("DEFAULT", EmitterParams.DEFAULT)
-  addToRegister("DEBUG", EmitterParams.DEBUG)
-  addToRegister("STRESS_TEST", EmitterParams.STRESS_TEST)
+  addToRegister("DEFAULT", EmitterParams.DEFAULT, 137)
+  addToRegister("DEBUG", EmitterParams.DEBUG, 137)
+  addToRegister("STRESS_TEST", EmitterParams.STRESS_TEST, 1532)
 }
 
 
@@ -147,9 +147,8 @@ fun tick(server: MinecraftServer) {
           synchronized(ALL_PARTICLE_EMITTERS) {
             ALL_PARTICLE_EMITTERS = ALL_PARTICLE_EMITTERS.toMutableList().apply { remove(emitter) }.toTypedArray()
           }
-        } else {
-          emitter.tick()
         }
+        else { emitter.tick() }
       }
     }.awaitAll()
   }
@@ -160,7 +159,7 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
   val handItem = player.getStackInHand(hand)
   val (isEmitterTool, emitterId) = ParticleEmitterTool.getToolDetails(handItem)
   val hitResult = raycastFromPlayer(player as ServerPlayerEntity, 200.0)
-  val emitterParams = getParamsById(emitterId)
+  val emitterParams = getEmitterDataById(emitterId)
 
   if (
     !isEmitterTool
@@ -171,7 +170,13 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
   }
 
   val debug = world.gameRules.getBoolean(Bde_particles.SHOW_PARTICLE_DEBUG)
-  val emitter = ParticleEmitter(hitResult.pos, Vector2f(0.0f, 0.0f), world, emitterParams, debug)
+  val emitter = ParticleEmitter(
+    hitResult.pos,
+    Vector2f(0.0f, 0.0f),
+    world,
+    emitterParams,
+    debug
+  )
   ALL_PARTICLE_EMITTERS += emitter
 
   return TypedActionResult(ActionResult.PASS, handItem)
