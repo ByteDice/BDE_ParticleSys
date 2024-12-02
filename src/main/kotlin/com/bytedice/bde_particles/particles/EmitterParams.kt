@@ -104,9 +104,9 @@ data class EmitterParams (
     )
     val STRESS_TEST = EmitterParams(
       maxCount = 10000,
-      spawnRate = 5000,
+      spawnRate = 50,
       spawnChance = 1.0f,
-      spawnDuration = ParamClasses.Duration.SingleBurst(1),
+      spawnDuration = ParamClasses.Duration.SingleBurst(100),
       spawnPosOffset = Vector3f(0.0f, 0.0f, 0.0f),
       lifeTime = ParamClasses.PairInt(75, 100),
       shape = SpawningShape.Circle(10.0f, true),
