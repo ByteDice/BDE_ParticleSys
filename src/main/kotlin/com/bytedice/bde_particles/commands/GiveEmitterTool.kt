@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture
 object GiveEmitterTool {
   fun register(dispatcher: CommandDispatcher<ServerCommandSource>, registryAccess: CommandRegistryAccess) {
     val command = CommandManager.literal("GiveEmitterTool")
-      .requires { source -> source.hasPermissionLevel(4) }
+      .requires { source -> source.hasPermissionLevel(2) }
 
     val allEmitterIds = idRegister.keys
 

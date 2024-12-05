@@ -13,6 +13,11 @@ fun addToRegister(id: String, params: EmitterParams, cacheLength: Int) : Pair<St
     return Pair(newId, false)
   }
 
+  if (newId in forbiddenIds) {
+    println("BPS - Failed to register Emitter ID \"$newId\" as it's been reserved!")
+    return Pair(newId, false)
+  }
+
   val newModels: MutableList<String> = mutableListOf()
 
   for (model in params.modelCurve.first) {
