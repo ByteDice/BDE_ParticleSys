@@ -1,24 +1,18 @@
 package com.bytedice.bde_particles.commands
 
+import com.bytedice.bde_particles.emitterListArg
+import com.bytedice.bde_particles.negativeFeedback
 import com.bytedice.bde_particles.particles.*
+import com.bytedice.bde_particles.positiveFeedback
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.NbtComponent
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
-import net.minecraft.text.TextColor
 import java.awt.Color
-import java.util.concurrent.CompletableFuture
 
 
 // TODO: completely redesign
@@ -56,7 +50,7 @@ blockCurve:     Pair<Array<String>, LerpCurves>,
 
 
 // ManageEmitters
-// <create / remove / config / list>
+// <create / remove / config / list / copy>
   // create
     // <emitter id>
     // <preset emitter id>
@@ -68,7 +62,6 @@ blockCurve:     Pair<Array<String>, LerpCurves>,
 
   // config
     // <emitter id>
-    // <PARTICLE / EMITTER>
     // <param key>
     // <new param value>
     // output -> update the selected parameter of the selected emitter id to the new value
@@ -82,7 +75,6 @@ blockCurve:     Pair<Array<String>, LerpCurves>,
 
 
 object ManageEmitters {
-  val allEmitterIds = idRegister.keys
 
   fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
     val command = CommandManager.literal("ManageEmitters")
@@ -90,6 +82,102 @@ object ManageEmitters {
 
     dispatcher.register(
       command
+        .then(CommandManager.literal("create").then(create()))
+        .then(CommandManager.literal("remove").then(remove()))
+        .then(CommandManager.literal("config"))
+        .then(CommandManager.literal("list")
+          .executes { context ->
+            val emitterIdList = idRegister.keys.sorted().joinToString("   ")
+
+            val feedback = Text.literal("List of all registered Emitter IDs $emitterIdList")
+              .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
+
+            context.source.sendFeedback({ feedback }, false)
+            Command.SINGLE_SUCCESS
+          }
+        )
+        //.then(CommandManager.literal("copy"))
     )
   }
+
+  private fun create() : RequiredArgumentBuilder<ServerCommandSource, String> {
+    return CommandManager.argument("New Emitter ID", StringArgumentType.string())
+      .then(emitterListArg("Preset Emitter ID")
+        .executes { context ->
+          val newEmitterId = StringArgumentType.getString(context, "New Emitter ID")
+          val presetEmitterId = StringArgumentType.getString(context, "Preset Emitter ID")
+
+          val params = getEmitterDataById(presetEmitterId)
+          val usedDefault = params == null
+
+          val result = addToRegister(
+            newEmitterId,
+            if (usedDefault) { EmitterParams.DEFAULT } else { params!! },
+          )
+
+          if (usedDefault && result.second) {
+            positiveFeedback(
+              "Successfully added new Emitter with ID \"${result.first}\" to register.\n(DEFAULT params were used as a preset because the specified Preset Emitter ID wasn't valid.)",
+              context
+            )
+          }
+          else if (!usedDefault && result.second) {
+            positiveFeedback(
+              "Successfully added new Emitter with ID \"${result.first}\" and Preset Emitter ID \"$presetEmitterId\" to register.",
+              context
+            )
+          }
+          else {
+            negativeFeedback(
+              "Failed to add new Emitter with ID \"${result.first}\" to register.\nThe provided Emitter ID is either reserved for system use or already in use.",
+              context
+            )
+          }
+
+          Command.SINGLE_SUCCESS
+        }
+      )
+  }
+
+  private fun remove() : RequiredArgumentBuilder<ServerCommandSource, String> {
+    return emitterListArg("Emitter ID")
+      .executes { context ->
+        val emitterId = StringArgumentType.getString(context, "Emitter ID")
+
+        val result = removeFromRegister(emitterId)
+
+        if (result) {
+          positiveFeedback(
+            "Successfully removed Emitter ID \"$emitterId\" from register.",
+            context
+          )
+        }
+        else {
+          negativeFeedback(
+            "Failed to remove Emitter ID \"$emitterId\" from register.\nThe provided Emitter ID is either reserved for system use or already in use.",
+            context
+          )
+        }
+
+        Command.SINGLE_SUCCESS
+      }
+  }
+
+  /*private fun config() : RequiredArgumentBuilder<ServerCommandSource, String> {
+    return emitterList("Emitter ID")
+      .then(
+
+    )
+  }*/
+
+  // I am not going to torture myself by converting this to a json.
+  /*
+  private fun copy() : RequiredArgumentBuilder<ServerCommandSource, String> {
+    return emitterList("Emitter ID").executes { context ->
+      val emitterId = StringArgumentType.getString(context, "Emitter ID")
+
+      Command.SINGLE_SUCCESS
+    }
+  }
+  */
 }

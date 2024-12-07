@@ -5,7 +5,7 @@ val idRegister: MutableMap<String, EmitterParams> = mutableMapOf()
 val forbiddenIds = arrayOf("", "NULL")
 
 
-fun addToRegister(id: String, params: EmitterParams, cacheLength: Int) : Pair<String, Boolean> {
+fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
   val newId = replaceForbiddenChars(id.replace(" ", "_"))
 
   if (idRegister.containsKey(newId)) {
@@ -14,7 +14,7 @@ fun addToRegister(id: String, params: EmitterParams, cacheLength: Int) : Pair<St
   }
 
   if (newId in forbiddenIds) {
-    println("BPS - Failed to register Emitter ID \"$newId\" as it's been reserved!")
+    println("BPS - Failed to register Emitter ID \"$newId\" as it's been reserved for system use!")
     return Pair(newId, false)
   }
 

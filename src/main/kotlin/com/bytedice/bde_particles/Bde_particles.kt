@@ -2,9 +2,13 @@ package com.bytedice.bde_particles
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.KillAllEmitters
+import com.bytedice.bde_particles.commands.SpawnEmitter
 //import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particles.*
+import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.builder.RequiredArgumentBuilder
+import com.mojang.brigadier.context.CommandContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -23,37 +27,35 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.command.CommandManager
+import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
+import net.minecraft.text.Style
+import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.TypedActionResult
 import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import org.joml.Vector2f
+import java.awt.Color
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 
 // TODO: (future additions)
 // Allowing the use of regular Minecraft particles instead of just BDEs.
-  // not implementing in v1.0. Maybe in v2.0.
-
-// Better command auto-completion. (and change names of args)
-  // force field "config" option
-
-// Custom curve equation command args (parse from strings)
-
 // Cylinder and cone force field shape.
-  // not implementing in v1.0. Maybe in v2.0.
-
-// Emitter groups (multiple emitters for EmitterTool)
-
-// Private functions/classes
+// Copying particle params in-game
 
 
 // TODO: (project)
 // fix ManageEmitter command
 // add SpawnEmitter command for spawning emitters via commands
+// Custom curve equation command args (parse from strings)
+// Better command auto-completion. (and change names of args)
+  // force field "config" option
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
@@ -90,6 +92,7 @@ class Bde_particles : ModInitializer {
       GiveEmitterTool.register(dispatcher, registryAccess)
       //ManageEmitters .register(dispatcher)
       KillAllEmitters.register(dispatcher)
+      SpawnEmitter   .register(dispatcher)
     }
 
     UseItemCallback.EVENT.register(UseItemCallback { player: PlayerEntity, world: World, hand: Hand ->
@@ -117,9 +120,9 @@ class Bde_particles : ModInitializer {
 
 
 fun init() {
-  addToRegister("DEFAULT", EmitterParams.DEFAULT, 137)
-  addToRegister("DEBUG", EmitterParams.DEBUG, 137)
-  addToRegister("STRESS_TEST", EmitterParams.STRESS_TEST, 1532)
+  addToRegister("DEFAULT", EmitterParams.DEFAULT)
+  addToRegister("DEBUG", EmitterParams.DEBUG)
+  addToRegister("STRESS_TEST", EmitterParams.STRESS_TEST)
 }
 
 
@@ -177,29 +180,10 @@ fun onRightClick(player: PlayerEntity, world: ServerWorld, hand: Hand) : TypedAc
     emitterParams,
     debug
   )
-  ALL_PARTICLE_EMITTERS += emitter
+  spawnEmitter(emitter)
 
   return TypedActionResult(ActionResult.PASS, handItem)
 }
-
-
-/*
-fun emitterParamsToJson(params: EmitterParams) : Map<String, Any> { // TODO: map to new params
-  val allParamsJson: MutableList<Map<String, Any?>> = mutableListOf()
-
-  val paramsJson = mapOf(
-    "shape"        to params.shape
-  )
-
-  allParamsJson.add(paramsJson)
-
-  val emitterParamsJSON = mapOf(
-    "maxCount"      to params.maxCount,
-  )
-
-  return emitterParamsJSON
-}
-*/
 
 
 fun displayEntityContainsTag(entity: ItemDisplayEntity, tag: String) : Boolean {
@@ -208,4 +192,34 @@ fun displayEntityContainsTag(entity: ItemDisplayEntity, tag: String) : Boolean {
   val tagsNbtList = nbt.getList("Tags", 8)
 
   return tagsNbtList?.any { it.asString() == tag } == true
+}
+
+
+fun emitterListArg (argName: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
+  return CommandManager.argument(argName, StringArgumentType.string())
+    .suggests { _, builder ->
+      idRegister.keys.forEach { key ->
+        builder.suggest(key)
+      }
+      CompletableFuture.completedFuture(builder.build())
+    }
+}
+
+
+fun spawnEmitter(emitter: ParticleEmitter) {
+  ALL_PARTICLE_EMITTERS += emitter
+}
+
+fun positiveFeedback(text: String, context: CommandContext<ServerCommandSource>) {
+  val feedback = Text.literal("BPS - $text")
+    .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
+
+  context.source.sendFeedback({ feedback }, false)
+}
+
+fun negativeFeedback(text: String, context: CommandContext<ServerCommandSource>) {
+  val feedback = Text.literal("BPS - $text")
+    .setStyle(Style.EMPTY.withColor(Color(200, 0, 0).rgb))
+
+  context.source.sendFeedback({ feedback }, false)
 }
