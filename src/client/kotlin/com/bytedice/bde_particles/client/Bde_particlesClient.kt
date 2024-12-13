@@ -2,6 +2,7 @@ package com.bytedice.bde_particles.client
 
 import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.KillAllEmitters
+import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.commands.SpawnEmitter
 //import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.init
@@ -39,7 +40,7 @@ class Bde_particlesClient : ClientModInitializer {
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveEmitterTool.register(dispatcher, registryAccess)
-      //ManageEmitters .register(dispatcher)
+      ManageEmitters .register(dispatcher)
       KillAllEmitters.register(dispatcher)
       SpawnEmitter   .register(dispatcher)
     }

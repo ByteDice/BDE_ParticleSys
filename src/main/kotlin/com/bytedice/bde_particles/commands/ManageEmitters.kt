@@ -8,6 +8,7 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
+import com.mojang.brigadier.context.CommandContext
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Style
@@ -84,12 +85,12 @@ object ManageEmitters {
       command
         .then(CommandManager.literal("create").then(create()))
         .then(CommandManager.literal("remove").then(remove()))
-        .then(CommandManager.literal("config"))
+        .then(CommandManager.literal("config").then(config()))
         .then(CommandManager.literal("list")
           .executes { context ->
             val emitterIdList = idRegister.keys.sorted().joinToString("   ")
 
-            val feedback = Text.literal("List of all registered Emitter IDs $emitterIdList")
+            val feedback = Text.literal("List of all registered Emitter IDs:\n$emitterIdList")
               .setStyle(Style.EMPTY.withColor(Color(0, 200, 0).rgb))
 
             context.source.sendFeedback({ feedback }, false)
@@ -107,36 +108,45 @@ object ManageEmitters {
           val newEmitterId = StringArgumentType.getString(context, "New Emitter ID")
           val presetEmitterId = StringArgumentType.getString(context, "Preset Emitter ID")
 
-          val params = getEmitterDataById(presetEmitterId)
-          val usedDefault = params == null
-
-          val result = addToRegister(
-            newEmitterId,
-            if (usedDefault) { EmitterParams.DEFAULT } else { params!! },
-          )
-
-          if (usedDefault && result.second) {
-            positiveFeedback(
-              "Successfully added new Emitter with ID \"${result.first}\" to register.\n(DEFAULT params were used as a preset because the specified Preset Emitter ID wasn't valid.)",
-              context
-            )
-          }
-          else if (!usedDefault && result.second) {
-            positiveFeedback(
-              "Successfully added new Emitter with ID \"${result.first}\" and Preset Emitter ID \"$presetEmitterId\" to register.",
-              context
-            )
-          }
-          else {
-            negativeFeedback(
-              "Failed to add new Emitter with ID \"${result.first}\" to register.\nThe provided Emitter ID is either reserved for system use or already in use.",
-              context
-            )
-          }
-
+          createExec(context, newEmitterId, presetEmitterId)
           Command.SINGLE_SUCCESS
         }
       )
+      .executes { context ->
+        val newEmitterId = StringArgumentType.getString(context, "New Emitter ID")
+
+        createExec(context, newEmitterId, "")
+        Command.SINGLE_SUCCESS
+      }
+  }
+
+  private fun createExec(context: CommandContext<ServerCommandSource>, newEmitterId: String, presetEmitterId: String) {
+    val params = getEmitterDataById(presetEmitterId)
+    val usedDefault = params == null
+
+    val result = addToRegister(
+      newEmitterId,
+      if (usedDefault) { EmitterParams.DEFAULT } else { params!! },
+    )
+
+    if (usedDefault && result.second) {
+      positiveFeedback(
+        "Successfully added new Emitter with ID \"${result.first}\" to register.\n(DEFAULT params were used as a preset because the specified Preset Emitter ID wasn't valid.)",
+        context
+      )
+    }
+    else if (!usedDefault && result.second) {
+      positiveFeedback(
+        "Successfully added new Emitter with ID \"${result.first}\" and Preset Emitter ID \"$presetEmitterId\" to register.",
+        context
+      )
+    }
+    else {
+      negativeFeedback(
+        "Failed to add new Emitter with ID \"${result.first}\" to register.\nThe provided Emitter ID is either reserved for system use or already in use.",
+        context
+      )
+    }
   }
 
   private fun remove() : RequiredArgumentBuilder<ServerCommandSource, String> {
@@ -163,12 +173,13 @@ object ManageEmitters {
       }
   }
 
-  /*private fun config() : RequiredArgumentBuilder<ServerCommandSource, String> {
-    return emitterList("Emitter ID")
-      .then(
+  private fun config() : RequiredArgumentBuilder<ServerCommandSource, String> {
+    var emitterList = emitterListArg("Emitter ID")
 
-    )
-  }*/
+    emitterList = listConfigArgs(dataClassToArray(EmitterParams::class), emitterList) as RequiredArgumentBuilder<ServerCommandSource, String>
+
+    return emitterList
+  }
 
   // I am not going to torture myself by converting this to a json.
   /*

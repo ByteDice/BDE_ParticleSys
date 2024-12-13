@@ -1,5 +1,10 @@
 package com.bytedice.bde_particles.particles
 
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
+
 
 val idRegister: MutableMap<String, EmitterParams> = mutableMapOf()
 val forbiddenIds = arrayOf("", "NULL")
@@ -37,10 +42,17 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
 
 
 fun removeFromRegister(id: String) : Boolean {
-  if (id in forbiddenIds) { return false }
-  if (!idRegister.containsKey(id)) { return false }
+  if (!idRegister.containsKey(id)) {
+    println("BPS - Failed to remove Emitter ID \"$id\" as it doesn't exist!")
+    return false
+  }
+  if (id in forbiddenIds) {
+    println("BPS - Failed to remove Emitter ID \"$id\" as it's been reserved for system use!")
+    return false
+  }
 
   idRegister.remove(id)
+  println("BPS - Removed Emitter ID \"$id\" from register.")
   return true
 }
 
@@ -55,22 +67,26 @@ fun updateRegistered(id: String, newParams: EmitterParams) {
 }
 
 
-fun updateParam(id: String, paramName: String, paramValue: Any) : Boolean {
+fun updateParam(id: String, paramAccess: KProperty1<EmitterParams, *>, paramValue: Any) : Boolean {
   val emitter = getEmitterDataById(id) ?: return false
-  val updatedValues = updateParams(emitter, paramName, paramValue)
+  val updatedValues = updateParams(emitter, paramAccess as KProperty1<EmitterParams, Any>, paramValue)
+
+  updateRegistered(id, updatedValues.first)
 
   return updatedValues.second
 }
 
 
-fun updateParams(params: EmitterParams, paramName: String, paramValue: Any) : Pair<EmitterParams, Boolean> { // TODO: map to new params
+fun updateParams(params: EmitterParams, paramAccess: KProperty1<EmitterParams, Any>, paramValue: Any): Pair<EmitterParams, Boolean> {
   val newParams = params.copy()
 
-  when (paramName) {
-    "maxCount"      -> newParams.maxCount = paramValue as Int
+  if (paramAccess.returnType.classifier == paramValue::class) {
+    paramAccess as KMutableProperty1<EmitterParams, Any>
+    paramAccess.set(newParams, paramValue)
+    return Pair(newParams, true)
   }
 
-  return Pair(newParams, true)
+  return Pair(params, false)
 }
 
 
