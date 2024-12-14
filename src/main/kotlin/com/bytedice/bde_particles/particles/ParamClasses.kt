@@ -1,6 +1,7 @@
 package com.bytedice.bde_particles.particles
 
 import com.bytedice.bde_particles.LerpCurves
+import com.bytedice.bde_particles.lerpArray
 import com.bytedice.bde_particles.randomFloatBetween
 import com.bytedice.bde_particles.randomIntBetween
 import org.joml.Vector3f
@@ -60,9 +61,9 @@ class ParamClasses {
       private val curve: LerpCurves,
     ) : LerpVal() {
       fun lerp(t: Float): Vector3f {
-        val x = com.bytedice.bde_particles.lerp(fromX, toX, t) * curve.function(t)
-        val y = com.bytedice.bde_particles.lerp(fromY, toY, t) * curve.function(t)
-        val z = com.bytedice.bde_particles.lerp(fromZ, toZ, t) * curve.function(t)
+        val x = com.bytedice.bde_particles.lerp(fromX, toX, curve.function(t))
+        val y = com.bytedice.bde_particles.lerp(fromY, toY, curve.function(t))
+        val z = com.bytedice.bde_particles.lerp(fromZ, toZ, curve.function(t))
         return Vector3f(x, y, z)
       }
     }
@@ -78,9 +79,9 @@ class ParamClasses {
       private val curveZ: LerpCurves
     ) : LerpVal() {
       fun lerp(t: Float): Vector3f {
-        val x = com.bytedice.bde_particles.lerp(fromX, toX, t) * curveX.function(t)
-        val y = com.bytedice.bde_particles.lerp(fromY, toY, t) * curveY.function(t)
-        val z = com.bytedice.bde_particles.lerp(fromZ, toZ, t) * curveZ.function(t)
+        val x = com.bytedice.bde_particles.lerp(fromX, toX, curveX.function(t))
+        val y = com.bytedice.bde_particles.lerp(fromY, toY, curveY.function(t))
+        val z = com.bytedice.bde_particles.lerp(fromZ, toZ, curveZ.function(t))
         return Vector3f(x, y, z)
       }
     }
@@ -89,8 +90,8 @@ class ParamClasses {
       private val to: Float,
       private val curve: LerpCurves,
     ) : LerpVal() {
-      fun lerp(t: Float): Float {
-        return com.bytedice.bde_particles.lerp(from, to, t) * curve.function(t)
+      fun lerp(t: Float) : Float {
+        return com.bytedice.bde_particles.lerp(from, to, curve.function(t))
       }
     }
     data object NoLerpVec3f : LerpVal()
@@ -154,5 +155,11 @@ class ParamClasses {
       }
     }
     data object None : TransformWithVel()
+  }
+  class StringCurve (
+    var array: Array<String>,
+    var curve: LerpCurves
+  ) {
+    fun lerp(t: Float) : String { return lerpArray(array as Array<Any>, t, curve) as String }
   }
 }

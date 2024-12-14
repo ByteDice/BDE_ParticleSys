@@ -49,12 +49,11 @@ import java.util.concurrent.CompletableFuture
 // Allowing the use of regular Minecraft particles instead of just BDEs.
 // Cylinder and cone force field shape.
 // Copying particle params in-game
+// Custom curve equation command args (parse from strings)
 
 
 // TODO: (project)
 // fix ManageEmitter command
-// add SpawnEmitter command for spawning emitters via commands
-// Custom curve equation command args (parse from strings)
 // Better command auto-completion. (and change names of args)
   // force field "config" option
 
@@ -91,7 +90,7 @@ class Bde_particles : ModInitializer {
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveEmitterTool.register(dispatcher, registryAccess)
-      ManageEmitters .register(dispatcher)
+      ManageEmitters .register(dispatcher, registryAccess)
       KillAllEmitters.register(dispatcher)
       SpawnEmitter   .register(dispatcher)
     }
@@ -196,7 +195,7 @@ fun displayEntityContainsTag(entity: ItemDisplayEntity, tag: String) : Boolean {
 }
 
 
-fun emitterListArg (argName: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
+fun emitterListArg(argName: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
   return CommandManager.argument(argName, StringArgumentType.string())
     .suggests { _, builder ->
       idRegister.keys.forEach { key ->
@@ -204,6 +203,23 @@ fun emitterListArg (argName: String) : RequiredArgumentBuilder<ServerCommandSour
       }
       CompletableFuture.completedFuture(builder.build())
     }
+}
+
+
+fun curveListArg(argName: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
+  return CommandManager.argument(argName, StringArgumentType.string())
+    .suggests { _, builder ->
+      LerpCurves::class.nestedClasses.forEach { nestClass ->
+        builder.suggest(nestClass.simpleName)
+      }
+      CompletableFuture.completedFuture(builder.build())
+    }
+}
+
+
+fun stringToCurve(curveName: String): LerpCurves? {
+  return LerpCurves::class.members
+    .filter { it.name == curveName }.firstNotNullOfOrNull { it.call(LerpCurves) as? LerpCurves }
 }
 
 

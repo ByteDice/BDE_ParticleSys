@@ -1,7 +1,9 @@
 package com.bytedice.bde_particles.particles
 
+import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -80,7 +82,10 @@ fun updateParam(id: String, paramAccess: KProperty1<EmitterParams, *>, paramValu
 fun updateParams(params: EmitterParams, paramAccess: KProperty1<EmitterParams, Any>, paramValue: Any): Pair<EmitterParams, Boolean> {
   val newParams = params.copy()
 
-  if (paramAccess.returnType.classifier == paramValue::class) {
+  if (paramAccess.returnType.classifier == paramValue::class
+    || (paramAccess.returnType.classifier as? KClass<*>)?.let { paramValue::class.isSubclassOf(it) } == true
+    )
+  {
     paramAccess as KMutableProperty1<EmitterParams, Any>
     paramAccess.set(newParams, paramValue)
     return Pair(newParams, true)

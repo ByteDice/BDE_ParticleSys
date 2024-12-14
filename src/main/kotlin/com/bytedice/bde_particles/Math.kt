@@ -15,7 +15,6 @@ import kotlin.random.Random
 
 class LerpCurves(val function: (Float) -> Float) {
   companion object {
-    val Constant = LerpCurves { _ -> 1.0f }
     val Linear = LerpCurves { y -> y }
     val Sqrt = LerpCurves { y -> sqrt(y) }
     val Exponent = LerpCurves { y -> y.pow(2.0f) }

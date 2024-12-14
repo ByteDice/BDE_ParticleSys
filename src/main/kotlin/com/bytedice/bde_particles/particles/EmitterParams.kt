@@ -30,7 +30,7 @@ data class EmitterParams (
   var offsetCurve: ParamClasses.LerpVal,
   var rotVelCurve: ParamClasses.LerpVal,
   var scaleCurve:  ParamClasses.LerpVal,
-  var modelCurve:  Pair<Array<String>, LerpCurves>,
+  var modelCurve:  ParamClasses.StringCurve,
 )
 {
   companion object Presets {
@@ -55,8 +55,8 @@ data class EmitterParams (
       minVel = 0.0f,
       offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
       rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 2.5f, LerpCurves.Constant),
-      modelCurve = Pair(
+      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 2.5f, LerpCurves.Linear),
+      modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
           "orange_concrete",
@@ -88,9 +88,9 @@ data class EmitterParams (
       drag = 0.075f,
       minVel = 0.0f,
       offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
-      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Constant),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.0f, LerpCurves.Constant),
-      modelCurve = Pair(
+      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
+      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.0f, LerpCurves.Linear),
+      modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
           "orange_concrete",
@@ -99,7 +99,7 @@ data class EmitterParams (
           "gray_stained_glass",
           "light_gray_stained_glass"
         ),
-        LerpCurves.Constant
+        LerpCurves.Linear
       )
     )
     val STRESS_TEST = EmitterParams(
@@ -126,9 +126,9 @@ data class EmitterParams (
       drag = 0.075f,
       minVel = 0.0f,
       offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
-      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Constant),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.5f, LerpCurves.Constant),
-      modelCurve = Pair(
+      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
+      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.5f, LerpCurves.Linear),
+      modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
           "orange_concrete",
@@ -137,7 +137,7 @@ data class EmitterParams (
           "gray_stained_glass",
           "light_gray_stained_glass"
         ),
-        LerpCurves.Constant
+        LerpCurves.Linear
       )
     )
   }

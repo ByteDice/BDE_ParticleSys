@@ -98,10 +98,17 @@ class ParticleEmitter(
       val loopDelay = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopDelay
       val loopCount = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopCount
 
-      if (timeAlive >= loopDur && timesLooped >= loopCount) { isTicking = false; return }
+      if (timeAlive >= loopDur && timesLooped + 1 >= loopCount) { isTicking = false; return }
 
-      if (timePaused >= loopDelay) { isPaused = false; timePaused = 0 }
-      if (timeAlive >= loopDur && loopDelay > 0) { isPaused = true; timeAlive = 0 }
+      if (timePaused >= loopDelay) {
+        isPaused = false
+        timePaused = 0
+        timesLooped += 1
+      }
+      if (timeAlive >= loopDur && loopDelay > 0) {
+        isPaused = true
+        timeAlive = 0
+      }
 
       if (!isPaused) { timeAlive += 1 }
       else { timePaused += 1 }

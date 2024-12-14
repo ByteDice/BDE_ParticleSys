@@ -9,6 +9,7 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Style
@@ -77,7 +78,7 @@ blockCurve:     Pair<Array<String>, LerpCurves>,
 
 object ManageEmitters {
 
-  fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
+  fun register(dispatcher: CommandDispatcher<ServerCommandSource>, registryAccess: CommandRegistryAccess) {
     val command = CommandManager.literal("ManageEmitters")
       .requires { source -> source.hasPermissionLevel(2) }
 
@@ -85,7 +86,7 @@ object ManageEmitters {
       command
         .then(CommandManager.literal("create").then(create()))
         .then(CommandManager.literal("remove").then(remove()))
-        .then(CommandManager.literal("config").then(config()))
+        .then(CommandManager.literal("config").then(config(registryAccess)))
         .then(CommandManager.literal("list")
           .executes { context ->
             val emitterIdList = idRegister.keys.sorted().joinToString("   ")
@@ -173,10 +174,10 @@ object ManageEmitters {
       }
   }
 
-  private fun config() : RequiredArgumentBuilder<ServerCommandSource, String> {
+  private fun config(registryAccess: CommandRegistryAccess) : RequiredArgumentBuilder<ServerCommandSource, String> {
     var emitterList = emitterListArg("Emitter ID")
 
-    emitterList = listConfigArgs(dataClassToArray(EmitterParams::class), emitterList) as RequiredArgumentBuilder<ServerCommandSource, String>
+    emitterList = listConfigArgs(dataClassToArray(EmitterParams::class), emitterList, registryAccess) as RequiredArgumentBuilder<ServerCommandSource, String>
 
     return emitterList
   }
