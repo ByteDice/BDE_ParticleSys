@@ -94,7 +94,7 @@ class ParamClasses {
         return com.bytedice.bde_particles.lerp(from, to, curve.function(t))
       }
     }
-    data object NoLerpVec3f : LerpVal()
+    data object Null : LerpVal()
 
     fun lerpToVector3f(t: Float) : Vector3f {
       when (this) {
@@ -104,7 +104,7 @@ class ParamClasses {
           val x = this.lerp(t)
           return Vector3f(x, x, x)
         }
-        is NoLerpVec3f -> return Vector3f(1.0f, 1.0f, 1.0f)
+        is Null -> return Vector3f(1.0f, 1.0f, 1.0f)
       }
     }
   }
@@ -162,4 +162,7 @@ class ParamClasses {
   ) {
     fun lerp(t: Float) : String { return lerpArray(array as Array<Any>, t, curve) as String }
   }
+  data class ForceFieldArray (
+    val array: Array<ForceField>
+  )
 }

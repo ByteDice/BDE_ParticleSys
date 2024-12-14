@@ -27,7 +27,7 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
 
   val newModels: MutableList<String> = mutableListOf()
 
-  for (model in params.modelCurve.first) {
+  for (model in params.modelCurve.array) {
     val modelModIdRegex = ".*:".toRegex()
     if (modelModIdRegex.containsMatchIn(model)) { break }
     else {
@@ -35,7 +35,7 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
     }
   }
 
-  params.modelCurve = Pair(newModels.toTypedArray(), params.modelCurve.second)
+  params.modelCurve = ParamClasses.StringCurve(newModels.toTypedArray(), params.modelCurve.curve)
 
   idRegister[id] = params
   println("BPS - Registered Emitter ID \"$newId\".")

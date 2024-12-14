@@ -22,7 +22,6 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import kotlin.reflect.*
 import kotlin.reflect.full.memberProperties
-import net.minecraft.server.command.GiveCommand
 
 
 typealias CommandArgumentBuilder = KFunction<ArgumentBuilder<ServerCommandSource, *>>
@@ -72,7 +71,6 @@ fun parseArgNameToAccess(name: String) : KProperty1<EmitterParams, *>? {
   return access
 }
 
-// TODO: add forceField & implement rest of args
 fun parseArgTypeToFunc(type: KType) : CommandArgumentBuilder? {
   return when (type.classifier) {
     Int::class                           -> ::intArg
@@ -86,7 +84,8 @@ fun parseArgTypeToFunc(type: KType) : CommandArgumentBuilder? {
     ParamClasses.PairFloat::class        -> ::pairFloatArg
     ParamClasses.TransformWithVel::class -> ::transformWithVelArg
     ParamClasses.StringCurve::class      -> ::stringCurveArg
-    ParamClasses.LerpVal::class          -> null
+    ParamClasses.LerpVal::class          -> ::lerpValArg
+    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg
     else                                 -> null
   }
 }
@@ -507,6 +506,215 @@ fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
   else if (modelCurve != null) {
     modelCurve.array.toMutableList().apply { removeAt(index.coerceIn(0, modelCurve.array.lastIndex)) }.toTypedArray()
     updateParam(id, access, modelCurve)
+  }
+
+  successText(access, "--item at $index", id, context)
+}
+
+fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
+               configArg: LiteralArgumentBuilder<ServerCommandSource>
+              ) : LiteralArgumentBuilder<ServerCommandSource>
+{
+  return configArg
+    .then(CommandManager.literal("LerpVec3f")
+      .then(CommandManager.argument("Min X", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Min Y", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Min Z", FloatArgumentType.floatArg())
+            .then(CommandManager.argument("Max X", FloatArgumentType.floatArg())
+              .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
+                  .then(curveListArg("Curve")
+                    .executes { context ->
+                      val id = StringArgumentType.getString(context, "Emitter ID")
+                      val minX = FloatArgumentType.getFloat(context, "Min X")
+                      val minY = FloatArgumentType.getFloat(context, "Min Y")
+                      val minZ = FloatArgumentType.getFloat(context, "Min Z")
+                      val maxX = FloatArgumentType.getFloat(context, "Max X")
+                      val maxY = FloatArgumentType.getFloat(context, "Max Y")
+                      val maxZ = FloatArgumentType.getFloat(context, "Max Z")
+                      val curveName = StringArgumentType.getString(context, "Curve")
+
+                      val curve = stringToCurve(curveName)
+
+                      updateParam(id, access, ParamClasses.LerpVal.LerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curve!!))
+
+                      successText(access, "LerpVec3f", id, context)
+                      Command.SINGLE_SUCCESS
+                    }
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    .then(CommandManager.literal("MultiLerpVec3f")
+      .then(CommandManager.argument("Min X", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Min Y", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Min Z", FloatArgumentType.floatArg())
+            .then(CommandManager.argument("Max X", FloatArgumentType.floatArg())
+              .then(CommandManager.argument("Max Y", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Max Z", FloatArgumentType.floatArg())
+                  .then(curveListArg("CurveX")
+                    .then(curveListArg("CurveY")
+                      .then(curveListArg("CurveZ")
+                        .executes { context ->
+                          val id = StringArgumentType.getString(context, "Emitter ID")
+                          val minX = FloatArgumentType.getFloat(context, "Min X")
+                          val minY = FloatArgumentType.getFloat(context, "Min Y")
+                          val minZ = FloatArgumentType.getFloat(context, "Min Z")
+                          val maxX = FloatArgumentType.getFloat(context, "Max X")
+                          val maxY = FloatArgumentType.getFloat(context, "Max Y")
+                          val maxZ = FloatArgumentType.getFloat(context, "Max Z")
+                          val curveNameX = StringArgumentType.getString(context, "CurveX")
+                          val curveNameY = StringArgumentType.getString(context, "CurveY")
+                          val curveNameZ = StringArgumentType.getString(context, "CurveZ")
+
+                          val curveX = stringToCurve(curveNameX)
+                          val curveY = stringToCurve(curveNameY)
+                          val curveZ = stringToCurve(curveNameZ)
+
+                          updateParam(id, access, ParamClasses.LerpVal.MultiLerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curveX!!, curveY!!, curveZ!!))
+
+                          successText(access, "MultiLerpVec3f", id, context)
+                          Command.SINGLE_SUCCESS
+                        }
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    .then(CommandManager.literal("Null")
+      .executes { context ->
+        val id = StringArgumentType.getString(context, "Emitter ID")
+
+        updateParam(id, access, ParamClasses.LerpVal.Null)
+
+        successText(access, "Null", id, context)
+        Command.SINGLE_SUCCESS
+      }
+    )
+}
+
+
+fun forceFieldArg(access: KProperty1<EmitterParams,ParamClasses.ForceFieldArray>,
+                  configArg: LiteralArgumentBuilder<ServerCommandSource>
+                 ) : LiteralArgumentBuilder<ServerCommandSource>
+{
+  return configArg
+    .then(CommandManager.literal("Add")
+      .then(CommandManager.argument("X", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Y", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Z", FloatArgumentType.floatArg())
+            .then(CommandManager.literal("Sphere")
+              .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Min Force", FloatArgumentType.floatArg())
+                  .then(CommandManager.argument("Max Force", FloatArgumentType.floatArg())
+                    .executes { context ->
+                      forceFieldAddArg(context, access, "Sphere")
+                      Command.SINGLE_SUCCESS
+                    }
+                  )
+                )
+              )
+            )
+            .then(CommandManager.literal("Cube")
+              .then(CommandManager.argument("Size X", FloatArgumentType.floatArg())
+                .then(CommandManager.argument("Size Y", FloatArgumentType.floatArg())
+                  .then(CommandManager.argument("Size Z", FloatArgumentType.floatArg())
+                    .then(CommandManager.argument("Dir X", FloatArgumentType.floatArg())
+                      .then(CommandManager.argument("Dir Y", FloatArgumentType.floatArg())
+                        .then(CommandManager.argument("Dir Z", FloatArgumentType.floatArg())
+                          .then(CommandManager.argument("Force", FloatArgumentType.floatArg())
+                            .executes { context ->
+                              forceFieldAddArg(context, access, "Cube")
+                              Command.SINGLE_SUCCESS
+                            }
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+
+
+
+    .then(CommandManager.literal("Remove")
+      .then(CommandManager.argument("Index", IntegerArgumentType.integer())
+        .executes { context ->
+          val index = IntegerArgumentType.getInteger(context, "Index")
+          forceFieldRemoveArg(context, access, index)
+          Command.SINGLE_SUCCESS
+        }
+      )
+      .executes { context ->
+        forceFieldRemoveArg(context, access, -1)
+        Command.SINGLE_SUCCESS
+      }
+    )
+}
+
+fun forceFieldAddArg(context: CommandContext<ServerCommandSource>,
+                     access: KProperty1<EmitterParams, ParamClasses.ForceFieldArray>,
+                     shape: String
+) {
+  val id = StringArgumentType.getString(context, "Emitter ID")
+  val x = FloatArgumentType.getFloat(context, "X")
+  val y = FloatArgumentType.getFloat(context, "Y")
+  val z = FloatArgumentType.getFloat(context, "Z")
+
+
+  val forceFields = getEmitterDataById(id)?.forceFields
+  var forceField: ForceField? = null
+
+  if (shape == "Sphere") {
+    val radius = FloatArgumentType.getFloat(context, "Radius")
+    val minForce = FloatArgumentType.getFloat(context, "Min Force")
+    val maxForce = FloatArgumentType.getFloat(context, "Max Force")
+
+    forceField = ForceField(
+      Vector3f(x, y, z),
+      ForceFieldShape.Sphere(radius, Pair(minForce, maxForce))
+    )
+  }
+
+  if (forceFields != null &&  forceField != null) {
+    forceFields.array.toMutableList().apply { add(forceField) }.toTypedArray()
+    updateParam(id, access, forceFields)
+    successText(access, "++ForceField", id, context)
+  }
+  else {
+    negativeFeedback("Failed to update param \"forceFields\"! The Emitter ID is most likely invalid!", context)
+  }
+}
+
+fun forceFieldRemoveArg(context: CommandContext<ServerCommandSource>,
+                         access: KProperty1<EmitterParams, ParamClasses.ForceFieldArray>,
+                         index: Int
+) {
+  val id = StringArgumentType.getString(context, "Emitter ID")
+
+  val forceFields = getEmitterDataById(id)?.forceFields
+
+  if (index == -1 && forceFields != null) {
+    forceFields.array.toMutableList().apply { removeLast() }.toTypedArray()
+    updateParam(id, access, forceFields)
+  }
+  else if (forceFields != null) {
+    forceFields.array.toMutableList().apply { removeAt(index.coerceIn(0, forceFields.array.lastIndex)) }.toTypedArray()
+    updateParam(id, access, forceFields)
   }
 
   successText(access, "--item at $index", id, context)

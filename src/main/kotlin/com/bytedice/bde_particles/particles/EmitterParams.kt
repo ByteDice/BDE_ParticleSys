@@ -22,7 +22,7 @@ data class EmitterParams (
   var initScale:        ParamClasses.PairVec3f,
   var transformWithVel: ParamClasses.TransformWithVel,
   // velocity
-  var forceFields: Array<ForceField>,
+  var forceFields: ParamClasses.ForceFieldArray,
   var constVel:    Vector3f,
   var drag:        Float,
   var minVel:      Float,
@@ -49,11 +49,11 @@ data class EmitterParams (
       initCenterVel = ParamClasses.PairFloat(0.4f, 0.5f),
       initScale = ParamClasses.PairVec3f.Uniform(0.5f, 1.5f),
       transformWithVel = ParamClasses.TransformWithVel.None,
-      forceFields = emptyArray(),
+      forceFields = ParamClasses.ForceFieldArray(emptyArray()),
       constVel = Vector3f(0.0f, 0.0f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
+      offsetCurve = ParamClasses.LerpVal.Null,
       rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
       scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 2.5f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(
@@ -83,11 +83,11 @@ data class EmitterParams (
       initCenterVel = ParamClasses.PairFloat(1.5f, 1.5f),
       initScale = ParamClasses.PairVec3f.Uniform(2.0f, 2.0f),
       transformWithVel = ParamClasses.TransformWithVel.ScaleAndRot(0.75f),
-      forceFields = emptyArray(),
+      forceFields = ParamClasses.ForceFieldArray(emptyArray()),
       constVel = Vector3f(0.0f, -0.05f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
+      offsetCurve = ParamClasses.LerpVal.Null,
       rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
       scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.0f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(
@@ -117,15 +117,16 @@ data class EmitterParams (
       initCenterVel = ParamClasses.PairFloat(-1.5f, -1.5f),
       initScale = ParamClasses.PairVec3f.Uniform(10.0f, 15.0f),
       transformWithVel = ParamClasses.TransformWithVel.None,
-      forceFields = arrayOf(ForceField(
-        "MUSHROOM_HEAD",
-        Vector3f(0.0f, 75.0f, 0.0f),
-        ForceFieldShape.Sphere(15.0f, Pair(0.1f, 0.2f))
-      )),
+      forceFields = ParamClasses.ForceFieldArray(
+        arrayOf(ForceField(
+          Vector3f(0.0f, 75.0f, 0.0f),
+          ForceFieldShape.Sphere(15.0f, Pair(0.1f, 0.2f))
+        ))
+      ),
       constVel = Vector3f(0.0f, 0.001f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.NoLerpVec3f,
+      offsetCurve = ParamClasses.LerpVal.Null,
       rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
       scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.5f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(

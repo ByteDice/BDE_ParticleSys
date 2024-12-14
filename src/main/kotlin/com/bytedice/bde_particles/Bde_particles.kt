@@ -50,12 +50,7 @@ import java.util.concurrent.CompletableFuture
 // Cylinder and cone force field shape.
 // Copying particle params in-game
 // Custom curve equation command args (parse from strings)
-
-
-// TODO: (project)
-// fix ManageEmitter command
-// Better command auto-completion. (and change names of args)
-  // force field "config" option
+// force field "config" option
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()

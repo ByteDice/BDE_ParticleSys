@@ -157,7 +157,7 @@ class Particle(
     pos = newPos
 
 
-    for (forceField in emitterParams.forceFields) {
+    for (forceField in emitterParams.forceFields.array) {
       if (forceField.shape is ForceFieldShape.Sphere) { vel.add(sphereSdfVel(forceField)) }
       else if (forceField.shape is ForceFieldShape.Cube) { vel.add(cubeSdfVel(forceField)) }
     }
