@@ -115,7 +115,20 @@ class ParticleEmitter(
     }
 
     else if (params.spawnDuration is ParamClasses.Duration.InfiniteLoop) {
-      return
+      val loopDur = (params.spawnDuration as ParamClasses.Duration.InfiniteLoop).loopDur
+      val loopDelay = (params.spawnDuration as ParamClasses.Duration.InfiniteLoop).loopDelay
+
+      if (timePaused >= loopDelay) {
+        isPaused = false
+        timePaused = 0
+      }
+      if (timeAlive >= loopDur && loopDelay > 0) {
+        isPaused = true
+        timeAlive = 0
+      }
+
+      if (!isPaused) { timeAlive += 1 }
+      else { timePaused += 1 }
     }
   }
 

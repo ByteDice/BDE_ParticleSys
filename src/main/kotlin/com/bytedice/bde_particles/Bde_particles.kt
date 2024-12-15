@@ -201,12 +201,15 @@ fun emitterListArg(argName: String) : RequiredArgumentBuilder<ServerCommandSourc
 }
 
 
-fun curveListArg(argName: String) : RequiredArgumentBuilder<ServerCommandSource, String> {
+fun curveListArg(argName: String): RequiredArgumentBuilder<ServerCommandSource, String> {
   return CommandManager.argument(argName, StringArgumentType.string())
     .suggests { _, builder ->
-      LerpCurves::class.nestedClasses.forEach { nestClass ->
-        builder.suggest(nestClass.simpleName)
-      }
+      LerpCurves.Companion::class.members
+        .filterIsInstance<kotlin.reflect.KProperty1<LerpCurves.Companion, *>>()
+        .filter { it.returnType.classifier == LerpCurves::class }
+        .forEach { property ->
+          builder.suggest(property.name)
+        }
       CompletableFuture.completedFuture(builder.build())
     }
 }

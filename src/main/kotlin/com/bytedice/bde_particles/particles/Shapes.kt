@@ -23,7 +23,7 @@ sealed class SpawningShape() {
     }
   }
 
-  class Rect(private val size: Vector2f, val spawnOnEdge: Boolean) : SpawningShape() {
+  class Rect(val size: Vector2f, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       return Vector3f(randomFloatBetween(0.0f, size.x), 0.0f, randomFloatBetween(0.0f, size.y))
     }
@@ -41,7 +41,7 @@ sealed class SpawningShape() {
     }
   }
 
-  class Cube(private val size: Vector3f, val spawnOnEdge: Boolean) : SpawningShape() {
+  class Cube(val size: Vector3f, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       return Vector3f(
         randomFloatBetween(0.0f, size.x),
@@ -108,8 +108,8 @@ sealed class SpawningShape() {
     return when (shape) {
       is Circle -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
       is Sphere -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
-      is Rect   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
-      is Cube   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }
+      is Rect   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }.sub(Vector3f(shape.size.x, 0.0f, shape.size.y).div(2.0f))
+      is Cube   -> if (!shape.spawnOnEdge) { shape.randomWithin() } else { shape.randomOnEdge() }.sub(Vector3f(shape.size.x, shape.size.y, shape.size.z).div(2.0f))
       is Point  -> Vector3f(0.0f, 0.0f, 0.0f)
     }
   }

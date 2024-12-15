@@ -81,11 +81,14 @@ fun parseArgTypeToFunc(type: KType) : CommandArgumentBuilder? {
     ParamClasses.PairInt::class          -> ::pairIntArg
     SpawningShape::class                 -> ::shapeArg
     ParamClasses.PairVec3f::class        -> ::pairVec3fArg
-    ParamClasses.PairFloat::class        -> ::pairFloatArg
+    ParamClasses.PairFloat::class        -> ::pairFloatArg // unexpected error
     ParamClasses.TransformWithVel::class -> ::transformWithVelArg
-    ParamClasses.StringCurve::class      -> ::stringCurveArg
-    ParamClasses.LerpVal::class          -> ::lerpValArg
-    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg
+    ParamClasses.StringCurve::class      -> ::stringCurveArg // curve suggestion is only "companion" (bypassing doesn't work)
+                                                             // doesn't add items (added items result with a space: "acacia boat" instead of "acacia_boat")
+                                                             // doesn't remove items
+    ParamClasses.LerpVal::class          -> ::lerpValArg // curve suggestion (see above)
+    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg // doesn't add force fields
+                                                            // removing gives unexpected error (because index error)
     else                                 -> null
   }
 }
@@ -272,12 +275,14 @@ fun shapeArgExec(paramName: String, access: KProperty1<EmitterParams, SpawningSh
       val radius = FloatArgumentType.getFloat(context, "Radius")
       val onEdge = BoolArgumentType.getBool(context, "Spawn On Edge")
       updateParam(id, access, SpawningShape.Circle(radius, onEdge))
+      successText(access, "Circle", id, context)
     }
     "Rect"   -> {
       val onEdge = BoolArgumentType.getBool(context, "Spawn On Edge")
       val x = FloatArgumentType.getFloat(context, "X")
       val y = FloatArgumentType.getFloat(context, "Y")
       updateParam(id, access, SpawningShape.Rect(Vector2f(x, y), onEdge))
+      successText(access, "Rect", id, context)
     }
     "Cube"   -> {
       val onEdge = BoolArgumentType.getBool(context, "Spawn On Edge")
@@ -285,18 +290,19 @@ fun shapeArgExec(paramName: String, access: KProperty1<EmitterParams, SpawningSh
       val y = FloatArgumentType.getFloat(context, "Y")
       val z = FloatArgumentType.getFloat(context, "Z")
       updateParam(id, access, SpawningShape.Cube(Vector3f(x, y, z), onEdge))
+      successText(access, "Cube", id, context)
     }
     "Sphere" -> {
       val radius = FloatArgumentType.getFloat(context, "Radius")
       val onEdge = BoolArgumentType.getBool(context, "Spawn On Edge")
       updateParam(id, access, SpawningShape.Sphere(radius, onEdge))
+      successText(access, "Sphere", id, context)
     }
     "Point"  -> {
       updateParam(id, access, SpawningShape.Point)
+      successText(access, "Point", id, context)
     }
   }
-
-  successText(access, access::class.simpleName ?: "UNKNOWN", id, context)
 }
 
 fun pairVec3fArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
