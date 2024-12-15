@@ -40,7 +40,7 @@ class Bde_particlesClient : ClientModInitializer {
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
       GiveEmitterTool.register(dispatcher, registryAccess)
-      ManageEmitters .register(dispatcher)
+      ManageEmitters .register(dispatcher, registryAccess)
       KillAllEmitters.register(dispatcher)
       SpawnEmitter   .register(dispatcher)
     }

@@ -416,14 +416,15 @@ fun transformWithVelArg(access: KProperty1<EmitterParams, ParamClasses.Transform
     )
 }
 
+
 fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
                    configArg: LiteralArgumentBuilder<ServerCommandSource>,
-                   registryAccess: CommandRegistryAccess
+                   //registryAccess: CommandRegistryAccess
                   ) : LiteralArgumentBuilder<ServerCommandSource>
 {
   return configArg
     .then(CommandManager.literal("Add")
-      .then(CommandManager.argument("Item", ItemStackArgumentType.itemStack(registryAccess))
+      .then(CommandManager.argument("Item", FloatArgumentType.floatArg())//ItemStackArgumentType.itemStack(registryAccess))
         .then(CommandManager.argument("Index", IntegerArgumentType.integer())
           .executes { context ->
             val index = IntegerArgumentType.getInteger(context, "Index")
@@ -474,6 +475,8 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
       )
     )
 }
+
+
 
 fun stringCurveAddArg(context: CommandContext<ServerCommandSource>,
                       access: KProperty1<EmitterParams, ParamClasses.StringCurve>,

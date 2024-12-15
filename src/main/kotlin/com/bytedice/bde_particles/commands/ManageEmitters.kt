@@ -177,11 +177,11 @@ object ManageEmitters {
   }
 
   private fun config(registryAccess: CommandRegistryAccess) : RequiredArgumentBuilder<ServerCommandSource, String> {
-    var emitterList = emitterListArg("Emitter ID")
+    val emitterList = emitterListArg("Emitter ID")
 
-    emitterList = listConfigArgs(dataClassToArray(EmitterParams::class), emitterList, registryAccess) as RequiredArgumentBuilder<ServerCommandSource, String>
+    val configArg = listConfigArgs(dataClassToArray(EmitterParams::class), emitterList, registryAccess) as RequiredArgumentBuilder<ServerCommandSource, String>
 
-    return emitterList
+    return configArg
   }
 
   // I am not going to torture myself by converting this to a json.

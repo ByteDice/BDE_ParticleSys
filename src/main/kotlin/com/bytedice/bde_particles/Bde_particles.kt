@@ -4,7 +4,6 @@ import com.bytedice.bde_particles.commands.GiveEmitterTool
 import com.bytedice.bde_particles.commands.KillAllEmitters
 import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.commands.SpawnEmitter
-//import com.bytedice.bde_particles.commands.ManageEmitters
 import com.bytedice.bde_particles.items.ParticleEmitterTool
 import com.bytedice.bde_particles.particles.*
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -46,7 +45,6 @@ import java.util.concurrent.CompletableFuture
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.isAccessible
 
 
 // TODO: (future additions)
@@ -88,8 +86,9 @@ class Bde_particles : ModInitializer {
     }
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
-      GiveEmitterTool.register(dispatcher, registryAccess)
-      ManageEmitters .register(dispatcher, registryAccess)
+      val registryClone = registryAccess
+      GiveEmitterTool.register(dispatcher, registryClone)
+      ManageEmitters .register(dispatcher, registryClone)
       KillAllEmitters.register(dispatcher)
       SpawnEmitter   .register(dispatcher)
     }

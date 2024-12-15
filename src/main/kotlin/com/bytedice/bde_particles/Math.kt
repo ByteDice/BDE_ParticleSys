@@ -5,10 +5,8 @@ import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.World
-import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector4f
-import java.util.SplittableRandom
 import kotlin.math.*
 import kotlin.random.Random
 

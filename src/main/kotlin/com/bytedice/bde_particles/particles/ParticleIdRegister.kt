@@ -4,8 +4,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 
 val idRegister: MutableMap<String, EmitterParams> = mutableMapOf()
