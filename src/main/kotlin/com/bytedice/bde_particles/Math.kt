@@ -165,7 +165,7 @@ fun lerp(x: Float, y: Float, t: Float) : Float {
 
 fun lerpArray(array: Array<Any>, t: Float, curve: LerpCurves = LerpCurves.Linear) : Any {
   val idx = round(lerp(0.0f, array.lastIndex.toFloat(), t) * curve.function(t)).toInt()
-  return array[idx]
+  return array[idx.coerceIn(0, array.lastIndex)]
 }
 
 

@@ -16,6 +16,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.command.argument.ItemStackArgumentType
+import net.minecraft.registry.Registries
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import org.joml.Vector2f
@@ -81,14 +82,11 @@ fun parseArgTypeToFunc(type: KType) : CommandArgumentBuilder? {
     ParamClasses.PairInt::class          -> ::pairIntArg
     SpawningShape::class                 -> ::shapeArg
     ParamClasses.PairVec3f::class        -> ::pairVec3fArg
-    ParamClasses.PairFloat::class        -> ::pairFloatArg // unexpected error
+    ParamClasses.PairFloat::class        -> ::pairFloatArg
     ParamClasses.TransformWithVel::class -> ::transformWithVelArg
-    ParamClasses.StringCurve::class      -> ::stringCurveArg // curve suggestion is only "companion" (bypassing doesn't work)
-                                                             // doesn't add items (added items result with a space: "acacia boat" instead of "acacia_boat")
-                                                             // doesn't remove items
-    ParamClasses.LerpVal::class          -> ::lerpValArg // curve suggestion (see above)
-    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg // doesn't add force fields
-                                                            // removing gives unexpected error (because index error)
+    ParamClasses.StringCurve::class      -> ::stringCurveArg
+    ParamClasses.LerpVal::class          -> ::lerpValArg
+    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg
     else                                 -> null
   }
 }
@@ -371,8 +369,8 @@ fun pairFloatArg(access: KProperty1<EmitterParams, ParamClasses.PairInt>) : Requ
     .then(CommandManager.argument("Max Float", FloatArgumentType.floatArg())
       .executes { context ->
         val id = StringArgumentType.getString(context, "Emitter ID")
-        val valueX = FloatArgumentType.getFloat(context, "Min Int")
-        val valueY = FloatArgumentType.getFloat(context, "Max Int")
+        val valueX = FloatArgumentType.getFloat(context, "Min Float")
+        val valueY = FloatArgumentType.getFloat(context, "Max Float")
 
         updateParam(id, access, ParamClasses.PairFloat(valueX, valueY))
         successText(access, "[$valueX, $valueY]", id, context)
@@ -468,7 +466,8 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
             Command.SINGLE_SUCCESS
           }
           else {
-            negativeFeedback("Failed to update param \"modelCurve.curve\"! The curve is most likely invalid!", context)
+            println("$modelCurve, $curve, $curveName")
+            negativeFeedback("Failed to update param \"modelCurve.curve\"! The curve is invalid!", context)
             Command.SINGLE_SUCCESS
           }
         }
@@ -481,16 +480,17 @@ fun stringCurveAddArg(context: CommandContext<ServerCommandSource>,
                       index: Int
 ) {
   val id = StringArgumentType.getString(context, "Emitter ID")
-  val item = ItemStackArgumentType.getItemStackArgument(context, "Item").item.name.string
+  val item = ItemStackArgumentType.getItemStackArgument(context, "Item").item
+  val itemId = Registries.ITEM.getId(item).toString()
 
   val modelCurve = getEmitterDataById(id)?.modelCurve
 
   if (index == -1 && modelCurve != null) {
-    modelCurve.array.toMutableList().apply { add(item) }.toTypedArray()
+    modelCurve.array = modelCurve.array.toMutableList().apply { add(itemId) }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
   else if (modelCurve != null) {
-    modelCurve.array.toMutableList().apply { add(index.coerceIn(0, modelCurve.array.lastIndex), item) }.toTypedArray()
+    modelCurve.array = modelCurve.array.toMutableList().apply { add(index.coerceIn(0, modelCurve.array.lastIndex), itemId) }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
 
@@ -505,16 +505,24 @@ fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
 
   val modelCurve = getEmitterDataById(id)?.modelCurve
 
-  if (index == -1 && modelCurve != null) {
-    modelCurve.array.toMutableList().apply { removeLast() }.toTypedArray()
+  val item: String
+
+  if (index == -1 && modelCurve != null && modelCurve.array.isNotEmpty()) {
+    item = modelCurve.array.last()
+    modelCurve.array = modelCurve.array.toMutableList().apply { removeLast() }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
-  else if (modelCurve != null) {
-    modelCurve.array.toMutableList().apply { removeAt(index.coerceIn(0, modelCurve.array.lastIndex)) }.toTypedArray()
+  else if (modelCurve != null && modelCurve.array.isNotEmpty()) {
+    item = modelCurve.array[index.coerceIn(0, modelCurve.array.lastIndex)]
+    modelCurve.array = modelCurve.array.toMutableList().apply { removeAt(index.coerceIn(0, modelCurve.array.lastIndex)) }.toTypedArray()
     updateParam(id, access, modelCurve)
+  }
+  else {
+    negativeFeedback("Couldn't remove model. There are no models in the Emitter.", context)
+    return
   }
 
-  successText(access, "--item at $index", id, context)
+  successText(access, "--$item", id, context)
 }
 
 fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
@@ -695,9 +703,23 @@ fun forceFieldAddArg(context: CommandContext<ServerCommandSource>,
       ForceFieldShape.Sphere(radius, Pair(minForce, maxForce))
     )
   }
+  else if (shape == "Cube") {
+    val sizeX = FloatArgumentType.getFloat(context, "Size X")
+    val sizeY = FloatArgumentType.getFloat(context, "Size Y")
+    val sizeZ = FloatArgumentType.getFloat(context, "Size Z")
+    val dirX = FloatArgumentType.getFloat(context, "Dir X")
+    val dirY = FloatArgumentType.getFloat(context, "Dir Y")
+    val dirZ = FloatArgumentType.getFloat(context, "Dir Z")
+    val force = FloatArgumentType.getFloat(context, "Force")
+
+    forceField = ForceField(
+      Vector3f(x, y, z),
+      ForceFieldShape.Cube(Vector3f(sizeX, sizeY, sizeZ), Vector3f(dirX, dirY, dirZ), force)
+    )
+  }
 
   if (forceFields != null &&  forceField != null) {
-    forceFields.array.toMutableList().apply { add(forceField) }.toTypedArray()
+    forceFields.array = forceFields.array.toMutableList().apply { add(forceField) }.toTypedArray()
     updateParam(id, access, forceFields)
     successText(access, "++ForceField", id, context)
   }
@@ -714,14 +736,20 @@ fun forceFieldRemoveArg(context: CommandContext<ServerCommandSource>,
 
   val forceFields = getEmitterDataById(id)?.forceFields
 
-  if (index == -1 && forceFields != null) {
-    forceFields.array.toMutableList().apply { removeLast() }.toTypedArray()
+  if (index == -1 && forceFields != null && forceFields.array.isNotEmpty()) {
+    forceFields.array = forceFields.array.toMutableList().apply { removeLast() }.toTypedArray()
     updateParam(id, access, forceFields)
   }
-  else if (forceFields != null) {
-    forceFields.array.toMutableList().apply { removeAt(index.coerceIn(0, forceFields.array.lastIndex)) }.toTypedArray()
+  else if (forceFields != null && forceFields.array.isNotEmpty()) {
+    forceFields.array = forceFields.array.toMutableList().apply { removeAt(index.coerceIn(0, forceFields.array.lastIndex)) }.toTypedArray()
     updateParam(id, access, forceFields)
+  }
+  else {
+    negativeFeedback("Couldn't remove ForceField. There are no ForceFields in the Emitter.", context)
+    return
   }
 
-  successText(access, "--item at $index", id, context)
+  val calcIndex = if (index == -1) { forceFields.array.size } else { index.coerceIn(0, forceFields.array.size) }
+
+  successText(access, "--ForceField at $calcIndex", id, context)
 }

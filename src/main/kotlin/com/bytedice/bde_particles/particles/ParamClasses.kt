@@ -163,6 +163,6 @@ class ParamClasses {
     fun lerp(t: Float) : String { return lerpArray(array as Array<Any>, t, curve) as String }
   }
   data class ForceFieldArray (
-    val array: Array<ForceField>
+    var array: Array<ForceField>
   )
 }

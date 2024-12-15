@@ -43,6 +43,10 @@ import org.joml.Vector2f
 import java.awt.Color
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import kotlin.reflect.full.companionObject
+import kotlin.reflect.full.companionObjectInstance
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.isAccessible
 
 
 // TODO: (future additions)
@@ -216,8 +220,10 @@ fun curveListArg(argName: String): RequiredArgumentBuilder<ServerCommandSource, 
 
 
 fun stringToCurve(curveName: String): LerpCurves? {
-  return LerpCurves::class.members
-    .filter { it.name == curveName }.firstNotNullOfOrNull { it.call(LerpCurves) as? LerpCurves }
+  val companion = LerpCurves::class.companionObjectInstance
+  val properties = LerpCurves::class.companionObject?.declaredMemberProperties
+
+  return properties?.firstOrNull { it.name == curveName }?.getter?.call(companion) as? LerpCurves
 }
 
 
