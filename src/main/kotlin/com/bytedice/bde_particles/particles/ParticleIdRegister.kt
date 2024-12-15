@@ -29,13 +29,11 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
 
   for (model in params.modelCurve.array) {
     val modelModIdRegex = ".*:".toRegex()
-    if (modelModIdRegex.containsMatchIn(model)) { break }
-    else {
-      newModels.add("minecraft:$model")
-    }
+    if (modelModIdRegex.containsMatchIn(model)) { newModels.add(model) }
+    else { newModels.add("minecraft:$model") }
   }
 
-  params.modelCurve = ParamClasses.StringCurve(newModels.toTypedArray(), params.modelCurve.curve)
+  params.modelCurve.array = newModels.toTypedArray()
 
   idRegister[id] = params
   println("BPS - Registered Emitter ID \"$newId\".")

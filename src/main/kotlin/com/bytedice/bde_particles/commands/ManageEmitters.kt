@@ -122,12 +122,14 @@ object ManageEmitters {
   }
 
   private fun createExec(context: CommandContext<ServerCommandSource>, newEmitterId: String, presetEmitterId: String) {
-    val params = getEmitterDataById(presetEmitterId)
+    val params = getEmitterDataById(presetEmitterId)?.copy()
     val usedDefault = params == null
+
+    println(params?.modelCurve?.array?.size)
 
     val result = addToRegister(
       newEmitterId,
-      if (usedDefault) { EmitterParams.DEFAULT } else { params!! },
+      params ?: EmitterParams.DEFAULT,
     )
 
     if (usedDefault && result.second) {
