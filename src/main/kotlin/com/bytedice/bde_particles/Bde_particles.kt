@@ -86,9 +86,8 @@ class Bde_particles : ModInitializer {
     }
 
     CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, _ ->
-      val registryClone = registryAccess
-      GiveEmitterTool.register(dispatcher, registryClone)
-      ManageEmitters .register(dispatcher, registryClone)
+      GiveEmitterTool.register(dispatcher, registryAccess)
+      ManageEmitters .register(dispatcher, registryAccess)
       KillAllEmitters.register(dispatcher)
       SpawnEmitter   .register(dispatcher)
     }

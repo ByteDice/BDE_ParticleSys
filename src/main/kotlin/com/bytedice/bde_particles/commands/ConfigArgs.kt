@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.bytedice.bde_particles.commands
 
 import com.bytedice.bde_particles.curveListArg
@@ -10,7 +12,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
-import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
@@ -25,32 +26,26 @@ import kotlin.reflect.*
 import kotlin.reflect.full.memberProperties
 
 
-typealias CommandArgumentBuilder = KFunction<ArgumentBuilder<ServerCommandSource, *>>
+typealias CommandArgumentBuilder = (
+  access: KProperty1<EmitterParams, *>,
+  config: LiteralArgumentBuilder<ServerCommandSource>,
+  reg: CommandRegistryAccess
+) -> LiteralArgumentBuilder<ServerCommandSource>?
 
-
-// TODO: doesn't apply shape & duration. Error applying shape other than circle
 
 fun listConfigArgs(configArgs: Array<String>,
                    rootArg: RequiredArgumentBuilder<ServerCommandSource, *>,
                    registryAccess: CommandRegistryAccess
-                  ) : RequiredArgumentBuilder<ServerCommandSource, *>
+                  ): RequiredArgumentBuilder<ServerCommandSource, *>
 {
   configArgs.forEach { arg ->
     var configArg = CommandManager.literal(arg)
 
     val argAccess = parseArgNameToAccess(arg)!!
-    val func = parseArgTypeToFunc(argAccess.returnType)
+    val func = parseArgTypeToFunc(argAccess.returnType, configArg)
 
     if (func != null) {
-      if (func.parameters.lastIndex == 0) {
-        configArg.then(func.call(argAccess))
-      }
-      else if (func.parameters.lastIndex == 1) {
-        configArg = func.call(argAccess, configArg) as LiteralArgumentBuilder<ServerCommandSource>?
-      }
-      else {
-        configArg = func.call(argAccess, configArg, registryAccess) as LiteralArgumentBuilder<ServerCommandSource>?
-      }
+      configArg = func(argAccess, configArg, registryAccess)
     }
 
     rootArg.then(configArg)
@@ -58,6 +53,7 @@ fun listConfigArgs(configArgs: Array<String>,
 
   return rootArg
 }
+
 
 
 fun dataClassToArray(dataClass: KClass<*>): Array<String> {
@@ -72,22 +68,48 @@ fun parseArgNameToAccess(name: String) : KProperty1<EmitterParams, *>? {
   return access
 }
 
-fun parseArgTypeToFunc(type: KType) : CommandArgumentBuilder? {
+fun parseArgTypeToFunc(type: KType, configArg: LiteralArgumentBuilder<ServerCommandSource>): CommandArgumentBuilder? {
   return when (type.classifier) {
-    Int::class                           -> ::intArg
-    Float::class                         -> ::floatArg
-    String::class                        -> ::stringArg
-    ParamClasses.Duration::class         -> ::durArg
-    Vector3f::class                      -> ::vec3fArg
-    ParamClasses.PairInt::class          -> ::pairIntArg
-    SpawningShape::class                 -> ::shapeArg
-    ParamClasses.PairVec3f::class        -> ::pairVec3fArg
-    ParamClasses.PairFloat::class        -> ::pairFloatArg
-    ParamClasses.TransformWithVel::class -> ::transformWithVelArg
-    ParamClasses.StringCurve::class      -> ::stringCurveArg
-    ParamClasses.LerpVal::class          -> ::lerpValArg
-    ParamClasses.ForceFieldArray::class  -> ::forceFieldArg
-    else                                 -> null
+    Int::class -> { access, _, _ ->
+      configArg.then(intArg(access as KProperty1<EmitterParams, Int>))
+    }
+    Float::class -> { access, _, _ ->
+      configArg.then(floatArg(access as KProperty1<EmitterParams, Float>))
+    }
+    String::class -> { access, _, _ ->
+      configArg.then(stringArg(access as KProperty1<EmitterParams, String>))
+    }
+    ParamClasses.Duration::class -> { access, config, _ ->
+      durArg(access as KProperty1<EmitterParams, ParamClasses.Duration>, config)
+    }
+    Vector3f::class -> { access, _, _ ->
+      configArg.then(vec3fArg(access as KProperty1<EmitterParams, Vector3f>))
+    }
+    ParamClasses.PairInt::class -> { access, _, _ ->
+      configArg.then(pairIntArg(access as KProperty1<EmitterParams, ParamClasses.PairInt>))
+    }
+    SpawningShape::class -> { access, config, _ ->
+      shapeArg(access as KProperty1<EmitterParams, SpawningShape>, config)
+    }
+    ParamClasses.PairVec3f::class -> { access, config, _ ->
+      pairVec3fArg(access as KProperty1<EmitterParams, ParamClasses.PairVec3f>, config)
+    }
+    ParamClasses.PairFloat::class -> { access, _, _ ->
+      configArg.then(pairFloatArg(access as KProperty1<EmitterParams, ParamClasses.PairFloat>))
+    }
+    ParamClasses.TransformWithVel::class -> { access, config, _ ->
+      transformWithVelArg(access as KProperty1<EmitterParams, ParamClasses.TransformWithVel>, config)
+    }
+    ParamClasses.StringCurve::class -> { access, config, reg ->
+      stringCurveArg(access as KProperty1<EmitterParams, ParamClasses.StringCurve>, config, reg)
+    }
+    ParamClasses.LerpVal::class -> { access, config, _ ->
+      lerpValArg(access as KProperty1<EmitterParams, ParamClasses.LerpVal>, config)
+    }
+    ParamClasses.ForceFieldArray::class -> { access, config, _ ->
+      forceFieldArg(access as KProperty1<EmitterParams, ParamClasses.ForceFieldArray>, config)
+    }
+    else -> null
   }
 }
 
@@ -364,7 +386,7 @@ fun pairVec3fArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
     )
 }
 
-fun pairFloatArg(access: KProperty1<EmitterParams, ParamClasses.PairInt>) : RequiredArgumentBuilder<ServerCommandSource, Float> {
+fun pairFloatArg(access: KProperty1<EmitterParams, ParamClasses.PairFloat>) : RequiredArgumentBuilder<ServerCommandSource, Float> {
   return CommandManager.argument("Min Float", FloatArgumentType.floatArg())
     .then(CommandManager.argument("Max Float", FloatArgumentType.floatArg())
       .executes { context ->
@@ -419,12 +441,12 @@ fun transformWithVelArg(access: KProperty1<EmitterParams, ParamClasses.Transform
 
 fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
                    configArg: LiteralArgumentBuilder<ServerCommandSource>,
-                   //registryAccess: CommandRegistryAccess
+                   registryAccess: CommandRegistryAccess
                   ) : LiteralArgumentBuilder<ServerCommandSource>
 {
   return configArg
     .then(CommandManager.literal("Add")
-      .then(CommandManager.argument("Item", FloatArgumentType.floatArg())//ItemStackArgumentType.itemStack(registryAccess))
+      .then(CommandManager.argument("Item", ItemStackArgumentType.itemStack(registryAccess))
         .then(CommandManager.argument("Index", IntegerArgumentType.integer())
           .executes { context ->
             val index = IntegerArgumentType.getInteger(context, "Index")
@@ -528,7 +550,7 @@ fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
   successText(access, "--$item", id, context)
 }
 
-fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
+fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.LerpVal>,
                configArg: LiteralArgumentBuilder<ServerCommandSource>
               ) : LiteralArgumentBuilder<ServerCommandSource>
 {
