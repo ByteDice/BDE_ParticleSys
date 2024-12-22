@@ -5,11 +5,13 @@ BDE_ParticleSys is a highly customizable **server-side** particle system that us
 
 If BDE_ParticleSys is used as a standalone mod, you will only be able to use it with the custom in-game commands `/GiveEmitterTool`, `/KillAllEmitters`, and `/ManageEmitters`. Any particles made, removed, or changed with those commands are **temporary** and get reverted once the server shuts down, as they are meant for quick testing.
 
-### Contents (in-game)
+### In-game commands (does not save):
 * `/GiveEmitterTool`
+* `/SpawnEmitter`
 * `/KillAllEmitters`
 * `/ManageEmitters`
 * `GlobalMaxParticles` (GameRule)
+* `ShowParticleDebug` (GameRule)
 
 # Open-source - Copyright
 
