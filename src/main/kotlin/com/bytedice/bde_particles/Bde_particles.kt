@@ -54,7 +54,9 @@ import kotlin.reflect.full.declaredMemberProperties
 // Cylinder and cone force field shape.
 // Copying particle params in-game.
 // Custom curve equation command args (parse from strings).
-// force field "config" option.
+// Force field "config" option.
+// Better particle debug tools.
+  // Use more BDEs instead of particles, and show more values than origin and velocity.
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
