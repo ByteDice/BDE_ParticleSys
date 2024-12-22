@@ -49,11 +49,13 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
       put("Tags", tagList)
 
-      put("item", NbtCompound().apply {
-        putString("id", modelName)
-        putInt("count", 1)
-        put("components", NbtCompound().apply { putInt("minecraft:custom_model_data", customModelNum) })
-      })
+      if (modelName != "none") {
+        put("item", NbtCompound().apply {
+          putString("id", modelName)
+          putInt("count", 1)
+          put("components", NbtCompound().apply { putInt("minecraft:custom_model_data", customModelNum) })
+        })
+      }
 
       put("transformation", NbtCompound().apply {
         val offsetList = NbtList().apply {

@@ -75,7 +75,7 @@ class Particle(
     val properties = DisplayEntityProperties(
       pos          = entityPos,
       rot          = entityRot,
-      model        = emitterParams.modelCurve.lerp(0.0f),
+      model        = if (emitterParams.modelCurve.array.isNotEmpty()) { emitterParams.modelCurve.lerp(0.0f) } else "none",
       translation  = newPos.add(pos),
       leftRotation = quatRot,
       scale        = Vector3f(scale).mul(emitterParams.scaleCurve.lerpToVector3f(0.0f)),
@@ -130,7 +130,7 @@ class Particle(
   private fun calcNewProperties() : DisplayEntityProperties {
     val timeAliveClamped = (timeAlive.toFloat() / lifeTime.toFloat()).coerceIn(0.0f, 1.0f)
 
-    val newModel         = emitterParams.modelCurve.lerp(timeAliveClamped)
+    val newModel         =  if (emitterParams.modelCurve.array.isNotEmpty()) { emitterParams.modelCurve.lerp(timeAliveClamped) } else "none"
     val (newVel, newPos) = calcPos()
     val newOriginOffset  = Vector3f(originOffset.mul(emitterParams.offsetCurve.lerpToVector3f(timeAliveClamped)))
 

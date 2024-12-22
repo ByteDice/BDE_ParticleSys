@@ -219,7 +219,7 @@ fun vec3fArg(access: KProperty1<EmitterParams, Vector3f>) : RequiredArgumentBuil
           val valueY = FloatArgumentType.getFloat(context, "Y")
           val valueZ = FloatArgumentType.getFloat(context, "Z")
 
-          updateParam(id, access, Vector3f(valueX, valueY, valueX))
+          updateParam(id, access, Vector3f(valueX, valueY, valueZ))
 
           successText(access, "[$valueX, $valueY, $valueZ]", id, context)
           Command.SINGLE_SUCCESS

@@ -51,7 +51,7 @@ sealed class SpawningShape() {
     }
 
     fun randomOnEdge(): Vector3f {
-      val edgeIndex = randomIntBetween(0, 11) // 12 edges
+      val edgeIndex = randomIntBetween(0, 12) // 12 edges
       val randPos = randomFloatBetween(0.0f, 1.0f)
 
       return when (edgeIndex) {

@@ -49,10 +49,12 @@ import kotlin.reflect.full.declaredMemberProperties
 
 // TODO: (future additions)
 // Allowing the use of regular Minecraft particles instead of just BDEs.
+  // Will basically require a whole new system.
+  // Most likely wont ever happen.
 // Cylinder and cone force field shape.
-// Copying particle params in-game
-// Custom curve equation command args (parse from strings)
-// force field "config" option
+// Copying particle params in-game.
+// Custom curve equation command args (parse from strings).
+// force field "config" option.
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
