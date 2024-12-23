@@ -27,10 +27,11 @@ data class EmitterParams (
   var drag:        Float,
   var minVel:      Float,
   // curves
-  var offsetCurve: ParamClasses.LerpVal,
-  var rotVelCurve: ParamClasses.LerpVal,
-  var scaleCurve:  ParamClasses.LerpVal,
-  var modelCurve:  ParamClasses.StringCurve,
+  var offsetCurve:     ParamClasses.LerpValVec3f,
+  var rotVelCurve:     ParamClasses.LerpValVec3f,
+  var scaleCurve:      ParamClasses.LerpValVec3f,
+  var modelCurve:      ParamClasses.StringCurve,
+  var brightnessCurve: ParamClasses.LerpValInt,
 )
 {
   companion object Presets {
@@ -53,9 +54,9 @@ data class EmitterParams (
       constVel = Vector3f(0.0f, 0.0f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.Null,
-      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 2.5f, LerpCurves.Linear),
+      offsetCurve = ParamClasses.LerpValVec3f.Null,
+      rotVelCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 0.0f, LerpCurves.Sqrt),
+      scaleCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 2.5f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
@@ -66,7 +67,8 @@ data class EmitterParams (
           "light_gray_stained_glass"
         ),
         LerpCurves.Sqrt
-      )
+      ),
+      brightnessCurve = ParamClasses.LerpValInt.LerpInt(15, 0, LerpCurves.Sqrt)
     )
     val DEBUG = EmitterParams(
       maxCount = 50,
@@ -87,9 +89,9 @@ data class EmitterParams (
       constVel = Vector3f(0.0f, -0.05f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.Null,
-      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.0f, LerpCurves.Linear),
+      offsetCurve = ParamClasses.LerpValVec3f.Null,
+      rotVelCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
+      scaleCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 1.0f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
@@ -100,7 +102,8 @@ data class EmitterParams (
           "light_gray_stained_glass"
         ),
         LerpCurves.Linear
-      )
+      ),
+      brightnessCurve = ParamClasses.LerpValInt.Null
     )
     val STRESS_TEST = EmitterParams(
       maxCount = 10000,
@@ -126,9 +129,9 @@ data class EmitterParams (
       constVel = Vector3f(0.0f, 0.001f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
-      offsetCurve = ParamClasses.LerpVal.Null,
-      rotVelCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
-      scaleCurve = ParamClasses.LerpVal.LerpUniform(1.0f, 1.5f, LerpCurves.Linear),
+      offsetCurve = ParamClasses.LerpValVec3f.Null,
+      rotVelCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 0.0f, LerpCurves.Linear),
+      scaleCurve = ParamClasses.LerpValVec3f.LerpUniform(1.0f, 1.5f, LerpCurves.Linear),
       modelCurve = ParamClasses.StringCurve(
         arrayOf(
           "shroomlight",
@@ -139,7 +142,8 @@ data class EmitterParams (
           "light_gray_stained_glass"
         ),
         LerpCurves.Linear
-      )
+      ),
+      brightnessCurve = ParamClasses.LerpValInt.Null
     )
   }
 }

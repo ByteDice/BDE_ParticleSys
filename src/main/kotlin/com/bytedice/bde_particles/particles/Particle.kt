@@ -73,13 +73,14 @@ class Particle(
     val (quatRot, newPos) = calcTransformOffset(this.rot, originOffset, scale)
 
     val properties = DisplayEntityProperties(
-      pos          = entityPos,
-      rot          = entityRot,
-      model        = if (emitterParams.modelCurve.array.isNotEmpty()) { emitterParams.modelCurve.lerp(0.0f) } else "none",
-      translation  = newPos.add(pos),
-      leftRotation = quatRot,
-      scale        = Vector3f(scale).mul(emitterParams.scaleCurve.lerpToVector3f(0.0f)),
-      tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
+      pos                = entityPos,
+      rot                = entityRot,
+      model              = if (emitterParams.modelCurve.array.isNotEmpty()) { emitterParams.modelCurve.lerp(0.0f) } else "none",
+      translation        = newPos.add(pos),
+      leftRotation       = quatRot,
+      scale              = Vector3f(scale).mul(emitterParams.scaleCurve.lerpToVector3f(0.0f)),
+      tags               = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString()),
+      brightnessOverride = emitterParams.brightnessCurve.lerpToInt(0.0f)
     )
 
     particleEntity = DisplayEntity(properties)
@@ -133,6 +134,7 @@ class Particle(
     val newModel         =  if (emitterParams.modelCurve.array.isNotEmpty()) { emitterParams.modelCurve.lerp(timeAliveClamped) } else "none"
     val (newVel, newPos) = calcPos()
     val newOriginOffset  = Vector3f(originOffset.mul(emitterParams.offsetCurve.lerpToVector3f(timeAliveClamped)))
+    val newBrightness    = emitterParams.brightnessCurve.lerpToInt(timeAliveClamped)
 
     val newScale: Vector3f
     val newRot: Vector3f
@@ -166,12 +168,13 @@ class Particle(
     val combinedOffset = transformOffset.add(newPos)
 
     val newProperties = DisplayEntityProperties(
-      pos          = entityPos,
-      model        = newModel,
-      translation  = combinedOffset.add(newOriginOffset),
-      leftRotation = quatRot,
-      scale        = newScale,
-      tags         = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString())
+      pos                = entityPos,
+      model              = newModel,
+      translation        = combinedOffset.add(newOriginOffset),
+      leftRotation       = quatRot,
+      scale              = newScale,
+      tags               = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString()),
+      brightnessOverride = newBrightness
     )
 
     return newProperties

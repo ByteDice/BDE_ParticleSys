@@ -38,19 +38,22 @@ class ParamClasses {
     }
     data object Null : PairVec3f()
   }
+
   class PairInt (
     private val min: Int,
     private val max: Int,
   ) {
     fun randomize() : Int { return randomIntBetween(min, max) }
   }
+
   class PairFloat(
     private val min: Float,
     private val max: Float,
   ) {
     fun randomize() : Float { return randomFloatBetween(min, max) }
   }
-  sealed class LerpVal {
+
+  sealed class LerpValVec3f {
     class LerpVec3f(
       private val fromX: Float,
       private val fromY: Float,
@@ -59,7 +62,7 @@ class ParamClasses {
       private val toY: Float,
       private val toZ: Float,
       private val curve: LerpCurves,
-    ) : LerpVal() {
+    ) : LerpValVec3f() {
       fun lerp(t: Float): Vector3f {
         val x = com.bytedice.bde_particles.lerp(fromX, toX, curve.function(t))
         val y = com.bytedice.bde_particles.lerp(fromY, toY, curve.function(t))
@@ -77,7 +80,7 @@ class ParamClasses {
       private val curveX: LerpCurves,
       private val curveY: LerpCurves,
       private val curveZ: LerpCurves
-    ) : LerpVal() {
+    ) : LerpValVec3f() {
       fun lerp(t: Float): Vector3f {
         val x = com.bytedice.bde_particles.lerp(fromX, toX, curveX.function(t))
         val y = com.bytedice.bde_particles.lerp(fromY, toY, curveY.function(t))
@@ -89,12 +92,13 @@ class ParamClasses {
       private val from: Float,
       private val to: Float,
       private val curve: LerpCurves,
-    ) : LerpVal() {
+    ) : LerpValVec3f() {
       fun lerp(t: Float) : Float {
         return com.bytedice.bde_particles.lerp(from, to, curve.function(t))
       }
     }
-    data object Null : LerpVal()
+    data class Constant(val value: Vector3f) : LerpValVec3f()
+    data object Null : LerpValVec3f()
 
     fun lerpToVector3f(t: Float) : Vector3f {
       when (this) {
@@ -104,10 +108,34 @@ class ParamClasses {
           val x = this.lerp(t)
           return Vector3f(x, x, x)
         }
+        is Constant -> return this.value
         is Null -> return Vector3f(1.0f, 1.0f, 1.0f)
       }
     }
   }
+
+  sealed class LerpValInt {
+    class LerpInt(
+      private val from: Int,
+      private val to: Int,
+      private val curve: LerpCurves,
+    ) : LerpValInt() {
+      fun lerp(t: Float): Int {
+        return Math.round(com.bytedice.bde_particles.lerp(from.toFloat(), to.toFloat(), curve.function(t)))
+      }
+    }
+    data class Constant(val value: Int) : LerpValInt()
+    data object Null: LerpValInt()
+
+    fun lerpToInt(t: Float) : Int? {
+      return when (this) {
+        is LerpInt -> this.lerp(t)
+        is Constant -> this.value
+        is Null -> null
+      }
+    }
+  }
+
   sealed class Duration {
     data class SingleBurst(
       val loopDur:        Int
@@ -122,6 +150,7 @@ class ParamClasses {
       val loopDelay:      Int
     ) : Duration()
   }
+
   sealed class TransformWithVel {
     data object RotOnly : TransformWithVel() {
       fun velToRot(velocity: Vector3f): Vector3f {
@@ -156,12 +185,14 @@ class ParamClasses {
     }
     data object None : TransformWithVel()
   }
+
   class StringCurve (
     var array: Array<String>,
     var curve: LerpCurves
   ) {
     fun lerp(t: Float) : String { return lerpArray(array as Array<Any>, t, curve) as String }
   }
+
   data class ForceFieldArray (
     var array: Array<ForceField>
   )

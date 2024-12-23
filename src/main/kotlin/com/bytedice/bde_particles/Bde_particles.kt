@@ -52,6 +52,9 @@ import kotlin.reflect.full.declaredMemberProperties
 // Copying particle params in-game.
 // Custom curve equation command args (parse from strings).
 // Force field "config" option.
+
+// TODO: (now)
+// add lerpValInt to commands
 // Better particle debug tools.
   // Use more BDEs instead of particles, and show more values than origin and velocity.
 

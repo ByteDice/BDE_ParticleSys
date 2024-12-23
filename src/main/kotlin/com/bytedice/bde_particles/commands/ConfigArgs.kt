@@ -103,11 +103,14 @@ fun parseArgTypeToFunc(type: KType, configArg: LiteralArgumentBuilder<ServerComm
     ParamClasses.StringCurve::class -> { access, config, reg ->
       stringCurveArg(access as KProperty1<EmitterParams, ParamClasses.StringCurve>, config, reg)
     }
-    ParamClasses.LerpVal::class -> { access, config, _ ->
-      lerpValArg(access as KProperty1<EmitterParams, ParamClasses.LerpVal>, config)
+    ParamClasses.LerpValVec3f::class -> { access, config, _ ->
+      lerpValVec3fArg(access as KProperty1<EmitterParams, ParamClasses.LerpValVec3f>, config)
     }
     ParamClasses.ForceFieldArray::class -> { access, config, _ ->
       forceFieldArg(access as KProperty1<EmitterParams, ParamClasses.ForceFieldArray>, config)
+    }
+    ParamClasses.LerpValInt::class -> { access, config, _ ->
+      lerpValIntArg(access as KProperty1<EmitterParams, ParamClasses.LerpValInt>, config)
     }
     else -> null
   }
@@ -550,8 +553,8 @@ fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
   successText(access, "--$item", id, context)
 }
 
-fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.LerpVal>,
-               configArg: LiteralArgumentBuilder<ServerCommandSource>
+fun lerpValVec3fArg(access: KProperty1<EmitterParams,ParamClasses.LerpValVec3f>,
+                    configArg: LiteralArgumentBuilder<ServerCommandSource>
               ) : LiteralArgumentBuilder<ServerCommandSource>
 {
   return configArg
@@ -575,7 +578,7 @@ fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.LerpVal>,
 
                       val curve = stringToCurve(curveName)
 
-                      updateParam(id, access, ParamClasses.LerpVal.LerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curve!!))
+                      updateParam(id, access, ParamClasses.LerpValVec3f.LerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curve!!))
 
                       successText(access, "LerpVec3f", id, context)
                       Command.SINGLE_SUCCESS
@@ -614,7 +617,7 @@ fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.LerpVal>,
                           val curveY = stringToCurve(curveNameY)
                           val curveZ = stringToCurve(curveNameZ)
 
-                          updateParam(id, access, ParamClasses.LerpVal.MultiLerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curveX!!, curveY!!, curveZ!!))
+                          updateParam(id, access, ParamClasses.LerpValVec3f.MultiLerpVec3f(minX, minY, minZ, maxX, maxY, maxZ, curveX!!, curveY!!, curveZ!!))
 
                           successText(access, "MultiLerpVec3f", id, context)
                           Command.SINGLE_SUCCESS
@@ -629,11 +632,51 @@ fun lerpValArg(access: KProperty1<EmitterParams,ParamClasses.LerpVal>,
         )
       )
     )
+    .then(CommandManager.literal("LerpUniform")
+      .then(CommandManager.argument("Min", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Max", FloatArgumentType.floatArg())
+          .then(curveListArg("Curve")
+            .executes { context ->
+              val id = StringArgumentType.getString(context, "Emitter ID")
+              val min = FloatArgumentType.getFloat(context, "Min")
+              val max = FloatArgumentType.getFloat(context, "Max")
+              val curveName = StringArgumentType.getString(context, "Curve")
+
+              val curve = stringToCurve(curveName)
+
+              updateParam(id, access, ParamClasses.LerpValVec3f.LerpUniform(min, max, curve!!))
+
+              successText(access, "LerpUniform", id, context)
+              Command.SINGLE_SUCCESS
+            }
+          )
+        )
+      )
+    )
+    .then(CommandManager.literal("Constant")
+      .then(CommandManager.argument("X", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Y", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Z", FloatArgumentType.floatArg())
+            .executes { context ->
+              val id = StringArgumentType.getString(context, "Emitter ID")
+              val x = FloatArgumentType.getFloat(context, "X")
+              val y = FloatArgumentType.getFloat(context, "Y")
+              val z = FloatArgumentType.getFloat(context, "Z")
+
+              updateParam(id, access, ParamClasses.LerpValVec3f.Constant(Vector3f(x, y, z)))
+
+              successText(access, "Constant", id, context)
+              Command.SINGLE_SUCCESS
+            }
+          )
+        )
+      )
+    )
     .then(CommandManager.literal("Null")
       .executes { context ->
         val id = StringArgumentType.getString(context, "Emitter ID")
 
-        updateParam(id, access, ParamClasses.LerpVal.Null)
+        updateParam(id, access, ParamClasses.LerpValVec3f.Null)
 
         successText(access, "Null", id, context)
         Command.SINGLE_SUCCESS
@@ -777,4 +820,55 @@ fun forceFieldRemoveArg(context: CommandContext<ServerCommandSource>,
   val calcIndex = if (index == -1) { forceFields.array.size } else { index.coerceIn(0, forceFields.array.size) }
 
   successText(access, "--ForceField at $calcIndex", id, context)
+}
+
+fun lerpValIntArg(access: KProperty1<EmitterParams, ParamClasses.LerpValInt>,
+               configArg: LiteralArgumentBuilder<ServerCommandSource>
+              ) : LiteralArgumentBuilder<ServerCommandSource>
+{
+  return configArg
+    .then(CommandManager.literal("LerpInt")
+      .then(CommandManager.argument("Min", IntegerArgumentType.integer())
+        .then(CommandManager.argument("Max", IntegerArgumentType.integer())
+          .then(curveListArg("Curve")
+            .executes { context ->
+              val id = StringArgumentType.getString(context, "Emitter ID")
+              val min = IntegerArgumentType.getInteger(context, "Min")
+              val max = IntegerArgumentType.getInteger(context, "Max")
+              val curveName = StringArgumentType.getString(context, "Curve")
+
+              val curve = stringToCurve(curveName)
+
+              updateParam(id, access, ParamClasses.LerpValInt.LerpInt(min, max, curve!!))
+
+              successText(access, "LerpInt", id, context)
+              Command.SINGLE_SUCCESS
+            }
+          )
+        )
+      )
+    )
+    .then(CommandManager.literal("Constant")
+      .then(CommandManager.argument("Value", IntegerArgumentType.integer())
+        .executes { context ->
+          val id = StringArgumentType.getString(context, "Emitter ID")
+          val value = IntegerArgumentType.getInteger(context, "Value")
+
+          updateParam(id, access, ParamClasses.LerpValInt.Constant(value))
+
+          successText(access, "Constant", id, context)
+          Command.SINGLE_SUCCESS
+        }
+      )
+    )
+    .then(CommandManager.literal("Null")
+      .executes { context ->
+        val id = StringArgumentType.getString(context, "Emitter ID")
+
+        updateParam(id, access, ParamClasses.LerpValInt.Null)
+
+        successText(access, "Null", id, context)
+        Command.SINGLE_SUCCESS
+      }
+    )
 }
