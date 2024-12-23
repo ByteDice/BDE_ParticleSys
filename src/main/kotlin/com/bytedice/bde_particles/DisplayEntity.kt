@@ -25,21 +25,6 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
 
   fun updateProperties(properties: DisplayEntityProperties) {
-    val customModelRegex = "^([^/]+)(?:/([0-9]+))?$".toRegex()
-    val matchResult = customModelRegex.find(properties.model)
-
-    val modelName: String
-    val customModelNum: Int
-
-    if (matchResult != null) {
-      modelName = matchResult.groupValues[1]
-      customModelNum = matchResult.groupValues[2].toIntOrNull() ?: 0
-    }
-    else {
-      modelName = properties.model
-      customModelNum = 0
-    }
-
     val nbt = NbtCompound().apply {
       val tagList = NbtList()
 
@@ -49,11 +34,11 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
       put("Tags", tagList)
 
-      if (modelName != "none") {
+      if (properties.model != "none") {
         put("item", NbtCompound().apply {
-          putString("id", modelName)
+          putString("id", properties.model)
           putInt("count", 1)
-          put("components", NbtCompound().apply { putInt("minecraft:custom_model_data", customModelNum) })
+          put("components", NbtCompound().apply { putInt("minecraft:custom_model_data", properties.customModel) })
         })
       }
 
@@ -89,9 +74,17 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
 
       putFloat("view_range", properties.viewRange)
 
-      if (properties.name != null) {
-        putString("CustomName", properties.name)
+      putString("billboard", properties.billboard)
+
+      if (properties.customName != null) {
+        putString("CustomName", properties.customName)
         putByte("CustomNameVisible", 1)
+      }
+
+      if (properties.brightnessOverride != null) {
+        put("brightness", NbtCompound().apply {
+          putInt("block", properties.brightnessOverride!!)
+        })
       }
     }
 
