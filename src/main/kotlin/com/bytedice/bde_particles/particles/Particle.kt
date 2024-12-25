@@ -13,8 +13,8 @@ import kotlin.math.*
 class Particle(
   private val emitterParams: EmitterParams,
   private var entityPos: Vec3d,
-  private val entityRot: Vector2f,
-  private var debug: Boolean
+  private var entityRot: Vector2f,
+  private val debug: Boolean = false
 ) {
   private var pos = Vector3f(0.0f, 0.0f, 0.0f)
   private var timeAlive = 0
@@ -56,6 +56,9 @@ class Particle(
 
   private lateinit var particleEntity: DisplayEntity
 
+  private val debugTool = ParticleDebug(entityRot, entityPos, pos, vel, scale)
+
+
   fun init() {
     val so = emitterParams.spawnPosOffset
     entityPos = entityPos.add(so.x.toDouble(), so.y.toDouble(), so.z.toDouble())
@@ -92,13 +95,14 @@ class Particle(
   fun spawn(world: ServerWorld) {
     if (isInit) {
       particleEntity.spawn(world)
+      if (debug) { debugTool.spawn(world) }
       LIVING_PARTICLE_COUNT += 1
     }
     else { error("Particle is not initialized before being spawned. Please use Particle.init() to initialize it.") }
   }
 
 
-  fun tick(world: ServerWorld) {
+  fun tick() {
     if (!isInit) { error("Particle is not initialized before being ticked. Please use Particle.init() to initialize it.") }
 
     val newProperties = calcNewProperties()
@@ -106,10 +110,6 @@ class Particle(
     particleEntity.updateProperties(newProperties)
 
     if (timeAlive > lifeTime) { kill() }
-
-    if (debug) {
-      tickDebug(world)
-    }
 
     timeAlive += 1
   }
@@ -166,16 +166,20 @@ class Particle(
 
     val (quatRot, transformOffset) = calcTransformOffset(newRot, originOffset, newScale)
     val combinedOffset = transformOffset.add(newPos)
+    val newTranslate = combinedOffset.add(newOriginOffset)
 
     val newProperties = DisplayEntityProperties(
       pos                = entityPos,
+      rot                = entityRot,
       model              = newModel,
-      translation        = combinedOffset.add(newOriginOffset),
+      translation        = newTranslate,
       leftRotation       = quatRot,
       scale              = newScale,
       tags               = arrayOf("BPS_Particle", "BPS_UUID", SESSION_UUID.toString()),
       brightnessOverride = newBrightness
     )
+
+    if (debug) { debugTool.update(entityRot, entityPos, newTranslate, vel, newScale) }
 
     return newProperties
   }
@@ -237,40 +241,10 @@ class Particle(
   }
 
 
-  private fun tickDebug(world: ServerWorld) {
-    // origin debug
-    val greenDustEffect = DustParticleEffect(Vector3f(0.0f, 1.0f, 0.0f), 2.0f)
-    world.spawnParticles(
-      greenDustEffect,
-      entityPos.x + pos.x,
-      entityPos.y + pos.y,
-      entityPos.z + pos.z,
-      1,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    )
-
-    // vel debug
-    val redDustEffect = DustParticleEffect(Vector3f(1.0f, 0.0f, 0.0f), 1.0f)
-    world.spawnParticles(
-      redDustEffect,
-      entityPos.x + pos.x + originOffset.x + vel.x * 10,
-      entityPos.y + pos.y + originOffset.y + vel.y * 10,
-      entityPos.z + pos.z + originOffset.z + vel.z * 10,
-      1,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    )
-  }
-
-
   fun kill() {
     if (!isDead) {
       particleEntity.kill()
+      if (debug) { debugTool.kill() }
       LIVING_PARTICLE_COUNT -= 1
       isDead = true
     }

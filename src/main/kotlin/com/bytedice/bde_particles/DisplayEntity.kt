@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
 import net.minecraft.server.world.ServerWorld
 
-class DisplayEntity(private var properties: DisplayEntityProperties?) {
+class DisplayEntity(var properties: DisplayEntityProperties?) {
   private var hasSpawned = false
   private var entity: ItemDisplayEntity? = null
 
@@ -84,6 +84,7 @@ class DisplayEntity(private var properties: DisplayEntityProperties?) {
       if (properties.brightnessOverride != null) {
         put("brightness", NbtCompound().apply {
           putInt("block", properties.brightnessOverride!!)
+          putInt("sky", properties.brightnessOverride!!)
         })
       }
     }

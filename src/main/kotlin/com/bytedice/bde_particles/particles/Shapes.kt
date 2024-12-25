@@ -8,7 +8,7 @@ import kotlin.math.*
 import kotlin.random.Random
 
 sealed class SpawningShape() {
-  class Circle(private val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
+  class Circle(val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       val randRadius = radius * sqrt(randomFloatBetween(0.0f, 1.0f))
       val randAngle = randomFloatBetween(0.0f, Math.PI.toFloat() * 2)
@@ -73,7 +73,7 @@ sealed class SpawningShape() {
     }
   }
 
-  class Sphere(private val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
+  class Sphere(val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       val randRadius = radius * Random.nextDouble().pow(1.0 / 3.0)
 

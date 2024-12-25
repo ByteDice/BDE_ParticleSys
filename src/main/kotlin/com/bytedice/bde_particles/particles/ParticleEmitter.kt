@@ -11,11 +11,11 @@ import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
 
 class ParticleEmitter(
-  private val pos: Vec3d,
-  private val rot: Vector2f,
+  private var pos: Vec3d,
+  private var rot: Vector2f,
   private val world: ServerWorld,
   private val params: EmitterParams,
-  private val debug: Boolean
+  private val debug: Boolean = false
 ) {
   private var allParticles: Array<Particle> = emptyArray()
 
@@ -34,12 +34,11 @@ class ParticleEmitter(
     if (isTicking) { addParticle() }
     if (!isTicking && allParticles.isEmpty()) { isDead = true }
 
-    processParticlesInBatches(world, 100)
+    processParticlesInBatches(100)
   }
 
 
   private suspend fun processParticlesInBatches(
-    world: ServerWorld,
     batchSize: Int
   ) = coroutineScope {
     val batches = allParticles.toMutableList().chunked(batchSize)
@@ -51,7 +50,7 @@ class ParticleEmitter(
           if (particle.isDead) {
             toRemove.add(particle)
           } else {
-            particle.tick(world)
+            particle.tick()
           }
         }
         synchronized(allParticles) {
