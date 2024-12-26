@@ -20,6 +20,7 @@ class ParticleEmitter(
   private var allParticles: Array<Particle> = emptyArray()
 
   private var timeAlive = 0
+  private var timeEmitted = 0
   private var timePaused = 0
   private var timesLooped = 0
   private var isPaused = false
@@ -28,13 +29,20 @@ class ParticleEmitter(
 
   var isDead = false
 
+  private var debugTool = EmitterDebug(rot, pos, params.spawnPosOffset, params.shape)
+
 
   suspend fun tick() {
     if (isTicking) { count() }
     if (isTicking) { addParticle() }
-    if (!isTicking && allParticles.isEmpty()) { isDead = true }
+    if (!isTicking && allParticles.isEmpty()) { isDead = true; kill() }
 
     processParticlesInBatches(100)
+
+    if (timeAlive == 0 && debug) { debugTool.spawn(world, pos, params.forceFields, params.spawnPosOffset) }
+    if (debug) { debugTool.update(rot, pos, params.spawnPosOffset) }
+
+    timeAlive += 1
   }
 
 
@@ -87,9 +95,9 @@ class ParticleEmitter(
   private fun count() {
     if (params.spawnDuration is ParamClasses.Duration.SingleBurst) {
       val loopDur = (params.spawnDuration as ParamClasses.Duration.SingleBurst).loopDur
-      if (timeAlive >= loopDur) { isTicking = false; return }
+      if (timeEmitted >= loopDur) { isTicking = false; return }
 
-      timeAlive += 1
+      timeEmitted += 1
     }
 
     else if (params.spawnDuration is ParamClasses.Duration.MultiBurst) {
@@ -97,19 +105,19 @@ class ParticleEmitter(
       val loopDelay = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopDelay
       val loopCount = (params.spawnDuration as ParamClasses.Duration.MultiBurst).loopCount
 
-      if (timeAlive >= loopDur && timesLooped + 1 >= loopCount) { isTicking = false; return }
+      if (timeEmitted >= loopDur && timesLooped + 1 >= loopCount) { isTicking = false; return }
 
       if (timePaused >= loopDelay) {
         isPaused = false
         timePaused = 0
         timesLooped += 1
       }
-      if (timeAlive >= loopDur && loopDelay > 0) {
+      if (timeEmitted >= loopDur && loopDelay > 0) {
         isPaused = true
-        timeAlive = 0
+        timeEmitted = 0
       }
 
-      if (!isPaused) { timeAlive += 1 }
+      if (!isPaused) { timeEmitted += 1 }
       else { timePaused += 1 }
     }
 
@@ -121,12 +129,12 @@ class ParticleEmitter(
         isPaused = false
         timePaused = 0
       }
-      if (timeAlive >= loopDur && loopDelay > 0) {
+      if (timeEmitted >= loopDur && loopDelay > 0) {
         isPaused = true
-        timeAlive = 0
+        timeEmitted = 0
       }
 
-      if (!isPaused) { timeAlive += 1 }
+      if (!isPaused) { timeEmitted += 1 }
       else { timePaused += 1 }
     }
   }
@@ -137,6 +145,7 @@ class ParticleEmitter(
       particle.kill()
       allParticles = allParticles.toMutableList().apply { remove(particle) }.toTypedArray()
     }
+    if (debug) { debugTool.kill() }
     isTicking = false
     isDead = true
   }

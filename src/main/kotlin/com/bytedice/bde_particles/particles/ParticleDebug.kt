@@ -49,7 +49,7 @@ class POrigin(rot: Vector2f, eOrigin: Vec3d, pOrigin: Vector3f) {
     pos = eOrigin,
     rot = rot,
     model = "minecraft:lime_concrete",
-    tags = arrayOf("DEBUG", "P_DEBUG", "pOrigin_DEBUG"),
+    tags = arrayOf("DEBUG", "P_DEBUG", "pOrigin_DEBUG", "BPS_UUID", SESSION_UUID.toString()),
     brightnessOverride = 15,
     translation = Vector3f(pOrigin),
     scale = Vector3f(0.15f, 0.15f, 0.15f)
@@ -78,7 +78,7 @@ class PVel(rot: Vector2f, eOrigin: Vec3d, pOrigin: Vector3f, pVel: Vector3f, pSc
     pos = eOrigin,
     rot = rot,
     model = "minecraft:red_nether_brick_slab", //"minecraft:red_stained_glass",
-    tags = arrayOf("DEBUG", "P_DEBUG", "pVel_DEBUG"),
+    tags = arrayOf("DEBUG", "P_DEBUG", "pVel_DEBUG", "BPS_UUID", SESSION_UUID.toString()),
     brightnessOverride = 15,
     translation = Vector3f(pOrigin),
     scale = Vector3f(0.05f, max(max(pScale.x, pScale.y), pScale.z) + (pVel.x + pVel.y + pVel.z), 0.05f)

@@ -126,7 +126,7 @@ data class EmitterParams (
           ForceFieldShape.Sphere(15.0f, Pair(0.1f, 0.2f))
         ))
       ),
-      constVel = Vector3f(0.0f, 0.001f, 0.0f),
+      constVel = Vector3f(0.0f, 0.00001f, 0.0f),
       drag = 0.075f,
       minVel = 0.0f,
       offsetCurve = ParamClasses.LerpValVec3f.Null,

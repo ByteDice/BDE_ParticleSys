@@ -43,14 +43,22 @@ class ParamClasses {
     private val min: Int,
     private val max: Int,
   ) {
-    fun randomize() : Int { return randomIntBetween(min, max) }
+    fun randomize() : Int {
+      return if (min == max) { max }
+      else if (min > max) { max }
+      else { randomIntBetween(min, max) }
+    }
   }
 
   class PairFloat(
     private val min: Float,
     private val max: Float,
   ) {
-    fun randomize() : Float { return randomFloatBetween(min, max) }
+    fun randomize() : Float {
+      return if (min == max) { max }
+      else if (min > max) { max }
+      else { randomFloatBetween(min, max) }
+    }
   }
 
   sealed class LerpValVec3f {

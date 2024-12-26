@@ -53,10 +53,6 @@ import kotlin.reflect.full.declaredMemberProperties
 // Custom curve equation command args (parse from strings).
 // Force field "config" option.
 
-// TODO: (now)
-// Better particle debug tools.
-  // Use more BDEs instead of particles, and show more values than origin and velocity.
-
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()
 var LIVING_PARTICLE_COUNT: Int = 0

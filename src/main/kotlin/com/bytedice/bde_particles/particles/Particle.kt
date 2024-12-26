@@ -60,8 +60,10 @@ class Particle(
 
 
   fun init() {
-    val so = emitterParams.spawnPosOffset
-    entityPos = entityPos.add(so.x.toDouble(), so.y.toDouble(), so.z.toDouble())
+    val so = Vector3f(emitterParams.spawnPosOffset)
+    if (so.x + so.y + so.z != 0.0f) {
+      entityPos = entityPos.add(so.x.toDouble(), so.y.toDouble(), so.z.toDouble())
+    }
 
     val shape = emitterParams.shape
     val newSpawnPos = shape.random(shape)
@@ -222,7 +224,10 @@ class Particle(
 
   private fun calcPos() : Pair<Vector3f, Vector3f> {
     var vel = Vector3f(vel)
-    vel = vel.add(emitterParams.constVel)
+    val constVel = emitterParams.constVel
+    if (constVel.x + constVel.y + constVel.z != 0.0f) {
+      vel = vel.add(emitterParams.constVel)
+    }
     vel = vel.mul(1.0f - emitterParams.drag)
 
     if (abs(vel.x) < emitterParams.minVel) { vel.x = 0.0f }
