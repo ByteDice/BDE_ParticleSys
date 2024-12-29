@@ -36,29 +36,22 @@ class ParamClasses {
         )
       }
     }
+    data class Constant(val value: Vector3f) : PairVec3f()
     data object Null : PairVec3f()
   }
 
   class PairInt (
-    private val min: Int,
-    private val max: Int,
+    val min: Int,
+    val max: Int,
   ) {
-    fun randomize() : Int {
-      return if (min == max) { max }
-      else if (min > max) { max }
-      else { randomIntBetween(min, max) }
-    }
+    fun randomize() : Int { return randomIntBetween(min, max) }
   }
 
   class PairFloat(
-    private val min: Float,
-    private val max: Float,
+    val min: Float,
+    val max: Float,
   ) {
-    fun randomize() : Float {
-      return if (min == max) { max }
-      else if (min > max) { max }
-      else { randomFloatBetween(min, max) }
-    }
+    fun randomize() : Float { return randomFloatBetween(min, max) }
   }
 
   sealed class LerpValVec3f {
@@ -191,7 +184,7 @@ class ParamClasses {
         return Vector3f(contractFactor, contractFactor, stretchFactor)
       }
     }
-    data object None : TransformWithVel()
+    data object Null : TransformWithVel()
   }
 
   class StringCurve (
@@ -199,9 +192,17 @@ class ParamClasses {
     var curve: LerpCurves
   ) {
     fun lerp(t: Float) : String { return lerpArray(array as Array<Any>, t, curve) as String }
+
+    fun deepCopy(): StringCurve {
+      return StringCurve(array.copyOf(), curve.deepCopy())
+    }
   }
 
   data class ForceFieldArray (
     var array: Array<ForceField>
-  )
+  ) {
+    fun deepCopy(): ForceFieldArray {
+      return ForceFieldArray(array.map { it.deepCopy() }.toTypedArray())
+    }
+  }
 }

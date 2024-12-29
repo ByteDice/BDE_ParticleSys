@@ -44,6 +44,10 @@ class LerpCurves(val function: (Float) -> Float) {
 
     fun custom(equation: (Float) -> Float) = LerpCurves(equation)
   }
+
+  fun deepCopy() : LerpCurves {
+    return LerpCurves(this.function)
+  }
 }
 
 
@@ -72,12 +76,16 @@ fun raycastFromPlayer(player: ServerPlayerEntity, maxDistance: Double): HitResul
 
 
 fun randomFloatBetween(min: Float, max: Float) : Float {
-  return Random.nextFloat() * (max - min) + min
+  return if (min == max) { max }
+  else if (min > max) { Random.nextFloat() * (min - max) + max }
+  else { Random.nextFloat() * (max - min) + min }
 }
 
 
 fun randomIntBetween(min: Int, max: Int) : Int {
-  return Random.nextInt(max - min) + min
+  return if (min == max) { max }
+  else if (min > max) { Random.nextInt(min - max) + max }
+  else { Random.nextInt(max - min) + min }
 }
 
 

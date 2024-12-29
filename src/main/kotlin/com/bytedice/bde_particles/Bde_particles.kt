@@ -52,6 +52,10 @@ import kotlin.reflect.full.declaredMemberProperties
 // Copying particle params in-game.
 // Custom curve equation command args (parse from strings).
 // Force field "config" option.
+// add rotation offset to transformWithVel
+
+// TODO: (now)
+// nothing lmao
 
 
 var ALL_PARTICLE_EMITTERS: Array<ParticleEmitter> = emptyArray()

@@ -33,7 +33,7 @@ fun addToRegister(id: String, params: EmitterParams) : Pair<String, Boolean> {
 
   params.modelCurve.array = newModels.toTypedArray()
 
-  idRegister[id] = params
+  idRegister[newId] = params
   println("BPS - Registered Emitter ID \"$newId\".")
   return Pair(newId, true)
 }

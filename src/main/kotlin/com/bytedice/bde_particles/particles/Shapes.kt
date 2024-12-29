@@ -7,7 +7,7 @@ import org.joml.Vector3f
 import kotlin.math.*
 import kotlin.random.Random
 
-sealed class SpawningShape() {
+sealed class SpawningShape {
   class Circle(val radius: Float, val spawnOnEdge: Boolean) : SpawningShape() {
     fun randomWithin(): Vector3f {
       val randRadius = radius * sqrt(randomFloatBetween(0.0f, 1.0f))
@@ -121,9 +121,16 @@ sealed class ForceFieldShape {
     val radius: Float,
     val force: Pair<Float, Float>,
   ) : ForceFieldShape()
+
   data class Cube(
     val size: Vector3f,
-    val dir: Vector3f,
-    val force: Float
+    val force: Vector3f
   ) : ForceFieldShape()
+
+  fun deepCopy() : ForceFieldShape {
+    return when (this) {
+      is Sphere -> Sphere(this.radius, this.force)
+      is Cube   -> Cube(Vector3f(this.size), Vector3f(this.force))
+    }
+  }
 }

@@ -74,8 +74,8 @@ class EOrigin(rot: Vector2f, eOrigin: Vec3d) {
 
 class ShapeDebug(eOrigin: Vec3d, spawnPosOffset: Vector3f, shape: SpawningShape) {
   val shapeScale: Vector3f? = when (shape) {
-    is SpawningShape.Circle -> Vector3f(shape.radius * 1.75f * 2, shape.radius * 1.75f * 2, 0.0001f)
-    is SpawningShape.Sphere -> Vector3f(shape.radius * 1.75f * 2, shape.radius * 1.75f * 2, 0.0001f)
+    is SpawningShape.Circle -> Vector3f(shape.radius * 2 * 2, shape.radius * 2 * 2, 0.0001f)
+    is SpawningShape.Sphere -> Vector3f(shape.radius * 2 * 2, shape.radius * 2 * 2, 0.0001f)
     is SpawningShape.Rect   -> Vector3f(shape.size.x, 0.0001f, shape.size.y)
     is SpawningShape.Cube   -> Vector3f(shape.size.x, shape.size.y, shape.size.z)
     else -> null
@@ -135,7 +135,7 @@ class ForceFieldDebug {
   var FFDEArray: Array<DisplayEntity> = emptyArray()
 
   fun makeArray(eOrigin: Vec3d, forceFieldArray: ParamClasses.ForceFieldArray, spawnPosOffset: Vector3f) {
-    forceFieldArray.array.forEach {
+    forceFieldArray.array.forEachIndexed { index, it ->
       val shapeScale = when (it.shape) {
         is ForceFieldShape.Sphere -> Vector3f(1.333f * it.shape.radius * 2, 1.333f * it.shape.radius * 2, 0.0001f)
         is ForceFieldShape.Cube   -> it.shape.size
@@ -143,14 +143,14 @@ class ForceFieldDebug {
 
       val newOffset = Vector3f(spawnPosOffset).add(it.pos)
 
-      val displayEntity = DisplayEntity(
-        DisplayEntityProperties(
-          pos = eOrigin.add(newOffset.x.toDouble(), newOffset.y.toDouble(), newOffset.z.toDouble()),
-          model = if (it.shape is ForceFieldShape.Sphere) { "minecraft:snowball" } else { "minecraft:white_stained_glass" },
-          tags = arrayOf("DEBUG", "E_DEBUG", "eOrigin_DEBUG", "BPS_UUID", SESSION_UUID.toString()),
-          brightnessOverride = 15,
-          billboard = if (it.shape is ForceFieldShape.Sphere) { Billboard.CENTER } else { Billboard.FIXED },
-          scale = shapeScale
+      val displayEntity = DisplayEntity(DisplayEntityProperties(
+        pos = eOrigin.add(newOffset.x.toDouble(), newOffset.y.toDouble(), newOffset.z.toDouble()),
+        model = if (it.shape is ForceFieldShape.Sphere) { "minecraft:snowball" } else { "minecraft:white_stained_glass" },
+        tags = arrayOf("DEBUG", "E_DEBUG", "eOrigin_DEBUG", "BPS_UUID", SESSION_UUID.toString()),
+        customName = "forceField index: $index",
+        brightnessOverride = 15,
+        billboard = if (it.shape is ForceFieldShape.Sphere) { Billboard.CENTER } else { Billboard.FIXED },
+        scale = shapeScale
       ))
 
       FFDEArray += displayEntity

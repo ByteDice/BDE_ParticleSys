@@ -11,10 +11,10 @@ import net.minecraft.util.math.Vec3d
 import org.joml.Vector2f
 
 class ParticleEmitter(
-  private var pos: Vec3d,
-  private var rot: Vector2f,
-  private val world: ServerWorld,
-  private val params: EmitterParams,
+  var pos: Vec3d,
+  var rot: Vector2f,
+  val world: ServerWorld,
+  val params: EmitterParams,
   private val debug: Boolean = false
 ) {
   private var allParticles: Array<Particle> = emptyArray()

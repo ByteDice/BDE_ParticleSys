@@ -122,19 +122,18 @@ object ManageEmitters {
   }
 
   private fun createExec(context: CommandContext<ServerCommandSource>, newEmitterId: String, presetEmitterId: String) {
-    val params = getEmitterDataById(presetEmitterId)?.copy()
+    val params = getEmitterDataById(presetEmitterId)
     val usedDefault = params == null
-
-    println(params?.modelCurve?.array?.size)
 
     val result = addToRegister(
       newEmitterId,
-      params ?: EmitterParams.DEFAULT,
+      (params ?: EmitterParams.DEFAULT).deepCopy(),
     )
 
     if (usedDefault && result.second) {
       positiveFeedback(
-        "Successfully added new Emitter with ID \"${result.first}\" to register.\n(DEFAULT params were used as a preset because the specified Preset Emitter ID wasn't valid.)",
+        "Successfully added new Emitter with ID \"${result.first}\" to register.\n" +
+                "(DEFAULT preset was used because the specified Preset Emitter ID wasn't valid.)",
         context
       )
     }
@@ -146,7 +145,8 @@ object ManageEmitters {
     }
     else {
       negativeFeedback(
-        "Failed to add new Emitter with ID \"${result.first}\" to register.\nThe provided Emitter ID is either reserved for system use or already in use.",
+        "Failed to add new Emitter with ID \"${result.first}\" to register.\n" +
+                "The provided Emitter ID is either reserved for system use or already in use.",
         context
       )
     }

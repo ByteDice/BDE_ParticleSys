@@ -34,6 +34,16 @@ data class EmitterParams (
   var brightnessCurve: ParamClasses.LerpValInt,
 )
 {
+  fun deepCopy() : EmitterParams {
+    val cModelCurveArray = this.modelCurve.deepCopy()
+    val cForceFieldArray = this.forceFields.deepCopy()
+    val cParams = this.copy()
+
+    cParams.modelCurve = cModelCurveArray
+    cParams.forceFields = cForceFieldArray
+    return cParams
+  }
+
   companion object Presets {
     val DEFAULT = EmitterParams(
       maxCount = 200,
@@ -49,7 +59,7 @@ data class EmitterParams (
       initVel = ParamClasses.PairVec3f.Null,
       initCenterVel = ParamClasses.PairFloat(0.4f, 0.5f),
       initScale = ParamClasses.PairVec3f.Uniform(0.5f, 1.5f),
-      transformWithVel = ParamClasses.TransformWithVel.None,
+      transformWithVel = ParamClasses.TransformWithVel.Null,
       forceFields = ParamClasses.ForceFieldArray(emptyArray()),
       constVel = Vector3f(0.0f, 0.0f, 0.0f),
       drag = 0.075f,
@@ -68,7 +78,7 @@ data class EmitterParams (
         ),
         LerpCurves.Sqrt
       ),
-      brightnessCurve = ParamClasses.LerpValInt.LerpInt(15, 0, LerpCurves.Sqrt)
+      brightnessCurve = ParamClasses.LerpValInt.LerpInt(15, 5, LerpCurves.Sqrt)
     )
     val DEBUG = EmitterParams(
       maxCount = 50,
@@ -103,7 +113,7 @@ data class EmitterParams (
         ),
         LerpCurves.Linear
       ),
-      brightnessCurve = ParamClasses.LerpValInt.Null
+      brightnessCurve = ParamClasses.LerpValInt.LerpInt(15, 5, LerpCurves.Sqrt)
     )
     val STRESS_TEST = EmitterParams(
       maxCount = 10000,
@@ -119,7 +129,7 @@ data class EmitterParams (
       initVel = ParamClasses.PairVec3f.NonUniform(0.0f, 4.0f, 0.0f, 0.0f, 8.0f, 0.0f),
       initCenterVel = ParamClasses.PairFloat(-1.5f, -1.5f),
       initScale = ParamClasses.PairVec3f.Uniform(10.0f, 15.0f),
-      transformWithVel = ParamClasses.TransformWithVel.None,
+      transformWithVel = ParamClasses.TransformWithVel.Null,
       forceFields = ParamClasses.ForceFieldArray(
         arrayOf(ForceField(
           Vector3f(0.0f, 75.0f, 0.0f),

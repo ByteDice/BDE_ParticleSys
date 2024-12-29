@@ -25,31 +25,36 @@ class Particle(
   private val originOffset = when (val offset = emitterParams.offset) {
     is ParamClasses.PairVec3f.Uniform -> offset.randomize()
     is ParamClasses.PairVec3f.NonUniform -> offset.randomize()
-    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+    is ParamClasses.PairVec3f.Constant -> offset.value
+    is ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
 
   private var rot = when (val initRot = emitterParams.initRot) {
     is ParamClasses.PairVec3f.Uniform -> initRot.randomize()
     is ParamClasses.PairVec3f.NonUniform -> initRot.randomize()
-    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+    is ParamClasses.PairVec3f.Constant -> initRot.value
+    is ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
 
   private var rotVel = when (val initRotVel = emitterParams.rotVel) {
     is ParamClasses.PairVec3f.Uniform -> initRotVel.randomize()
     is ParamClasses.PairVec3f.NonUniform -> initRotVel.randomize()
-    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+    is ParamClasses.PairVec3f.Constant -> initRotVel.value
+    is ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
 
   private var vel = when (val initVel = emitterParams.initVel) {
     is ParamClasses.PairVec3f.Uniform -> initVel.randomize()
     is ParamClasses.PairVec3f.NonUniform -> initVel.randomize()
-    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+    is ParamClasses.PairVec3f.Constant -> initVel.value
+    is ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
 
   private var scale = when (val initScale = emitterParams.initScale) {
     is ParamClasses.PairVec3f.Uniform -> initScale.randomize()
     is ParamClasses.PairVec3f.NonUniform -> initScale.randomize()
-    ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
+    is ParamClasses.PairVec3f.Constant -> initScale.value
+    is ParamClasses.PairVec3f.Null -> Vector3f(0.0f, 0.0f, 0.0f)
   }
 
   private var lifeTime = emitterParams.lifeTime.randomize()
@@ -138,28 +143,31 @@ class Particle(
     val newOriginOffset  = Vector3f(originOffset.mul(emitterParams.offsetCurve.lerpToVector3f(timeAliveClamped)))
     val newBrightness    = emitterParams.brightnessCurve.lerpToInt(timeAliveClamped)
 
-    val newScale: Vector3f
+    val TWVScale: Vector3f
+    //val TWVRot: Vector3f
     val newRot: Vector3f
 
     when (emitterParams.transformWithVel) {
       is ParamClasses.TransformWithVel.RotOnly -> {
-        newScale = calcScale(timeAliveClamped)
+        TWVScale = Vector3f(1.0f, 1.0f, 1.0f)
         newRot = (emitterParams.transformWithVel as ParamClasses.TransformWithVel.RotOnly).velToRot(vel)
       }
       is ParamClasses.TransformWithVel.ScaleAndRot -> {
-        newScale = Vector3f(scale).mul((emitterParams.transformWithVel as ParamClasses.TransformWithVel.ScaleAndRot).velToScale(vel))
+        TWVScale = (emitterParams.transformWithVel as ParamClasses.TransformWithVel.ScaleAndRot).velToScale(vel)
         newRot = (emitterParams.transformWithVel as ParamClasses.TransformWithVel.ScaleAndRot).velToRot(vel)
       }
       else -> {
-        newScale = calcScale(timeAliveClamped)
+        TWVScale = Vector3f(1.0f, 1.0f, 1.0f)
         newRot = calcRot(timeAliveClamped)
-        rot = newRot
       }
     }
 
+    val newScale = TWVScale.mul(calcScale(timeAliveClamped))
+    //val newRot = TWVRot.add(calcRot(timeAliveClamped))
+    rot = newRot
+
     vel = newVel
     pos = newPos
-
 
     for (forceField in emitterParams.forceFields.array) {
       if (forceField.shape is ForceFieldShape.Sphere) { vel.add(sphereSdfVel(forceField)) }
@@ -206,8 +214,8 @@ class Particle(
     val shape = forceField.shape
 
     val sdfVal = sdfCube(forceField.pos, shape.size, pos)
-    val velDir = if (sdfVal < 0) { shape.dir.mul(shape.force) }
-    else { Vector3f(0.0f, 0.0f, 0.0f) }
+    val velDir = if (sdfVal < 0) { shape.force }
+                 else { Vector3f(0.0f, 0.0f, 0.0f) }
 
     return velDir
   }

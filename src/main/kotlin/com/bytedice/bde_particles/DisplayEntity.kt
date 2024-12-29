@@ -77,7 +77,7 @@ class DisplayEntity(var properties: DisplayEntityProperties?) {
       putString("billboard", properties.billboard)
 
       if (properties.customName != null) {
-        putString("CustomName", properties.customName)
+        putString("CustomName", "{\"text\":\"${properties.customName}\"}")
         putByte("CustomNameVisible", 1)
       }
 

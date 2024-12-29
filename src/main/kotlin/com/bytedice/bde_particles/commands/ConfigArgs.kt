@@ -377,6 +377,25 @@ fun pairVec3fArg(access: KProperty1<EmitterParams,ParamClasses.PairVec3f>,
         )
       )
     )
+    .then(CommandManager.literal("Constant")
+      .then(CommandManager.argument("X", FloatArgumentType.floatArg())
+        .then(CommandManager.argument("Y", FloatArgumentType.floatArg())
+          .then(CommandManager.argument("Z", FloatArgumentType.floatArg())
+            .executes { context ->
+              val id = StringArgumentType.getString(context, "Emitter ID")
+              val x = FloatArgumentType.getFloat(context, "X")
+              val y = FloatArgumentType.getFloat(context, "Y")
+              val z = FloatArgumentType.getFloat(context, "Z")
+
+              updateParam(id, access, ParamClasses.PairVec3f.Constant(Vector3f(x, y, z)))
+
+              successText(access, "Constant", id, context)
+              Command.SINGLE_SUCCESS
+            }
+          )
+        )
+      )
+    )
     .then(CommandManager.literal("Null")
       .executes { context ->
         val id = StringArgumentType.getString(context, "Emitter ID")
@@ -430,12 +449,12 @@ fun transformWithVelArg(access: KProperty1<EmitterParams, ParamClasses.Transform
         }
       )
     )
-    .then(CommandManager.literal("None")
+    .then(CommandManager.literal("Null")
       .executes { context ->
         val id = StringArgumentType.getString(context, "Emitter ID")
 
-        updateParam(id, access, ParamClasses.TransformWithVel.None)
-        successText(access, "None", id, context)
+        updateParam(id, access, ParamClasses.TransformWithVel.Null)
+        successText(access, "Null", id, context)
         Command.SINGLE_SUCCESS
       }
     )
@@ -458,7 +477,7 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
           }
         )
         .executes { context ->
-          stringCurveAddArg(context, access, -1)
+          stringCurveAddArg(context, access, null)
           Command.SINGLE_SUCCESS
         }
       )
@@ -472,7 +491,7 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
         }
       )
       .executes { context ->
-        stringCurveRemoveArg(context, access, -1)
+        stringCurveRemoveArg(context, access, null)
         Command.SINGLE_SUCCESS
       }
     )
@@ -492,7 +511,6 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
             Command.SINGLE_SUCCESS
           }
           else {
-            println("$modelCurve, $curve, $curveName")
             negativeFeedback("Failed to update param \"modelCurve.curve\"! The curve is invalid!", context)
             Command.SINGLE_SUCCESS
           }
@@ -505,7 +523,7 @@ fun stringCurveArg(access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
 
 fun stringCurveAddArg(context: CommandContext<ServerCommandSource>,
                       access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
-                      index: Int
+                      index: Int?
 ) {
   val id = StringArgumentType.getString(context, "Emitter ID")
   val item = ItemStackArgumentType.getItemStackArgument(context, "Item").item
@@ -513,12 +531,12 @@ fun stringCurveAddArg(context: CommandContext<ServerCommandSource>,
 
   val modelCurve = getEmitterDataById(id)?.modelCurve
 
-  if (index == -1 && modelCurve != null) {
+  if (index == null && modelCurve != null) {
     modelCurve.array = modelCurve.array.toMutableList().apply { add(itemId) }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
   else if (modelCurve != null) {
-    modelCurve.array = modelCurve.array.toMutableList().apply { add(index.coerceIn(0, modelCurve.array.lastIndex), itemId) }.toTypedArray()
+    modelCurve.array = modelCurve.array.toMutableList().apply { add(index!!.coerceIn(0, modelCurve.array.lastIndex), itemId) }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
 
@@ -527,7 +545,7 @@ fun stringCurveAddArg(context: CommandContext<ServerCommandSource>,
 
 fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
                       access: KProperty1<EmitterParams, ParamClasses.StringCurve>,
-                      index: Int
+                      index: Int?
 ) {
   val id = StringArgumentType.getString(context, "Emitter ID")
 
@@ -535,13 +553,13 @@ fun stringCurveRemoveArg(context: CommandContext<ServerCommandSource>,
 
   val item: String
 
-  if (index == -1 && modelCurve != null && modelCurve.array.isNotEmpty()) {
+  if (index == null && modelCurve != null && modelCurve.array.isNotEmpty()) {
     item = modelCurve.array.last()
     modelCurve.array = modelCurve.array.toMutableList().apply { removeLast() }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
   else if (modelCurve != null && modelCurve.array.isNotEmpty()) {
-    item = modelCurve.array[index.coerceIn(0, modelCurve.array.lastIndex)]
+    item = modelCurve.array[index!!.coerceIn(0, modelCurve.array.lastIndex)]
     modelCurve.array = modelCurve.array.toMutableList().apply { removeAt(index.coerceIn(0, modelCurve.array.lastIndex)) }.toTypedArray()
     updateParam(id, access, modelCurve)
   }
@@ -698,8 +716,15 @@ fun forceFieldArg(access: KProperty1<EmitterParams,ParamClasses.ForceFieldArray>
               .then(CommandManager.argument("Radius", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Min Force", FloatArgumentType.floatArg())
                   .then(CommandManager.argument("Max Force", FloatArgumentType.floatArg())
+                    .then(CommandManager.argument("Index", IntegerArgumentType.integer())
+                      .executes { context ->
+                        val index = IntegerArgumentType.getInteger(context, "Index")
+                        forceFieldAddArg(context, access, "Sphere", index)
+                        Command.SINGLE_SUCCESS
+                      }
+                    )
                     .executes { context ->
-                      forceFieldAddArg(context, access, "Sphere")
+                      forceFieldAddArg(context, access, "Sphere", null)
                       Command.SINGLE_SUCCESS
                     }
                   )
@@ -710,15 +735,20 @@ fun forceFieldArg(access: KProperty1<EmitterParams,ParamClasses.ForceFieldArray>
               .then(CommandManager.argument("Size X", FloatArgumentType.floatArg())
                 .then(CommandManager.argument("Size Y", FloatArgumentType.floatArg())
                   .then(CommandManager.argument("Size Z", FloatArgumentType.floatArg())
-                    .then(CommandManager.argument("Dir X", FloatArgumentType.floatArg())
-                      .then(CommandManager.argument("Dir Y", FloatArgumentType.floatArg())
-                        .then(CommandManager.argument("Dir Z", FloatArgumentType.floatArg())
-                          .then(CommandManager.argument("Force", FloatArgumentType.floatArg())
+                    .then(CommandManager.argument("Force X", FloatArgumentType.floatArg())
+                      .then(CommandManager.argument("Force Y", FloatArgumentType.floatArg())
+                        .then(CommandManager.argument("Force Z", FloatArgumentType.floatArg())
+                          .then(CommandManager.argument("Index", IntegerArgumentType.integer())
                             .executes { context ->
-                              forceFieldAddArg(context, access, "Cube")
+                              val index = IntegerArgumentType.getInteger(context, "Index")
+                              forceFieldAddArg(context, access, "Cube", index)
                               Command.SINGLE_SUCCESS
                             }
                           )
+                          .executes { context ->
+                            forceFieldAddArg(context, access, "Cube", null)
+                            Command.SINGLE_SUCCESS
+                          }
                         )
                       )
                     )
@@ -742,7 +772,7 @@ fun forceFieldArg(access: KProperty1<EmitterParams,ParamClasses.ForceFieldArray>
         }
       )
       .executes { context ->
-        forceFieldRemoveArg(context, access, -1)
+        forceFieldRemoveArg(context, access, null)
         Command.SINGLE_SUCCESS
       }
     )
@@ -750,7 +780,8 @@ fun forceFieldArg(access: KProperty1<EmitterParams,ParamClasses.ForceFieldArray>
 
 fun forceFieldAddArg(context: CommandContext<ServerCommandSource>,
                      access: KProperty1<EmitterParams, ParamClasses.ForceFieldArray>,
-                     shape: String
+                     shape: String,
+                     index: Int?
 ) {
   val id = StringArgumentType.getString(context, "Emitter ID")
   val x = FloatArgumentType.getFloat(context, "X")
@@ -775,21 +806,29 @@ fun forceFieldAddArg(context: CommandContext<ServerCommandSource>,
     val sizeX = FloatArgumentType.getFloat(context, "Size X")
     val sizeY = FloatArgumentType.getFloat(context, "Size Y")
     val sizeZ = FloatArgumentType.getFloat(context, "Size Z")
-    val dirX = FloatArgumentType.getFloat(context, "Dir X")
-    val dirY = FloatArgumentType.getFloat(context, "Dir Y")
-    val dirZ = FloatArgumentType.getFloat(context, "Dir Z")
-    val force = FloatArgumentType.getFloat(context, "Force")
+    val forceX = FloatArgumentType.getFloat(context, "Force X")
+    val forceY = FloatArgumentType.getFloat(context, "Force Y")
+    val forceZ = FloatArgumentType.getFloat(context, "Force Z")
 
     forceField = ForceField(
       Vector3f(x, y, z),
-      ForceFieldShape.Cube(Vector3f(sizeX, sizeY, sizeZ), Vector3f(dirX, dirY, dirZ), force)
+      ForceFieldShape.Cube(Vector3f(sizeX, sizeY, sizeZ), Vector3f(forceX, forceY, forceZ))
     )
   }
 
-  if (forceFields != null &&  forceField != null) {
-    forceFields.array = forceFields.array.toMutableList().apply { add(forceField) }.toTypedArray()
+  if (forceFields != null && forceField != null) {
+    if (index == null) {
+      forceFields.array = forceFields.array.toMutableList().apply { add(forceField) }.toTypedArray()
+    }
+    else {
+      val newIndex = index.coerceIn(0, forceFields.array.size)
+      forceFields.array = forceFields.array.toMutableList().apply { add(newIndex, forceField) }.toTypedArray()
+    }
+
+    val calcIndex = index?.coerceIn(0, forceFields.array.size)
+
     updateParam(id, access, forceFields)
-    successText(access, "++ForceField", id, context)
+    successText(access, "++ForceField at $calcIndex", id, context)
   }
   else {
     negativeFeedback("Failed to update param \"forceFields\"! The Emitter ID is most likely invalid!", context)
@@ -798,18 +837,19 @@ fun forceFieldAddArg(context: CommandContext<ServerCommandSource>,
 
 fun forceFieldRemoveArg(context: CommandContext<ServerCommandSource>,
                          access: KProperty1<EmitterParams, ParamClasses.ForceFieldArray>,
-                         index: Int
+                         index: Int?
 ) {
   val id = StringArgumentType.getString(context, "Emitter ID")
 
   val forceFields = getEmitterDataById(id)?.forceFields
 
-  if (index == -1 && forceFields != null && forceFields.array.isNotEmpty()) {
+  if (index == null && forceFields != null && forceFields.array.isNotEmpty()) {
     forceFields.array = forceFields.array.toMutableList().apply { removeLast() }.toTypedArray()
     updateParam(id, access, forceFields)
   }
   else if (forceFields != null && forceFields.array.isNotEmpty()) {
-    forceFields.array = forceFields.array.toMutableList().apply { removeAt(index.coerceIn(0, forceFields.array.lastIndex)) }.toTypedArray()
+    val newIndex = index?.coerceIn(0, forceFields.array.lastIndex) ?: forceFields.array.lastIndex
+    forceFields.array = forceFields.array.toMutableList().apply { removeAt(newIndex) }.toTypedArray()
     updateParam(id, access, forceFields)
   }
   else {
@@ -817,7 +857,7 @@ fun forceFieldRemoveArg(context: CommandContext<ServerCommandSource>,
     return
   }
 
-  val calcIndex = if (index == -1) { forceFields.array.size } else { index.coerceIn(0, forceFields.array.size) }
+  val calcIndex = index?.coerceIn(0, forceFields.array.size) ?: forceFields.array.size
 
   successText(access, "--ForceField at $calcIndex", id, context)
 }
@@ -828,18 +868,18 @@ fun lerpValIntArg(access: KProperty1<EmitterParams, ParamClasses.LerpValInt>,
 {
   return configArg
     .then(CommandManager.literal("LerpInt")
-      .then(CommandManager.argument("Min", IntegerArgumentType.integer())
-        .then(CommandManager.argument("Max", IntegerArgumentType.integer())
+      .then(CommandManager.argument("From", IntegerArgumentType.integer())
+        .then(CommandManager.argument("To", IntegerArgumentType.integer())
           .then(curveListArg("Curve")
             .executes { context ->
               val id = StringArgumentType.getString(context, "Emitter ID")
-              val min = IntegerArgumentType.getInteger(context, "Min")
-              val max = IntegerArgumentType.getInteger(context, "Max")
+              val from = IntegerArgumentType.getInteger(context, "From")
+              val to = IntegerArgumentType.getInteger(context, "To")
               val curveName = StringArgumentType.getString(context, "Curve")
 
               val curve = stringToCurve(curveName)
 
-              updateParam(id, access, ParamClasses.LerpValInt.LerpInt(min, max, curve!!))
+              updateParam(id, access, ParamClasses.LerpValInt.LerpInt(from, to, curve!!))
 
               successText(access, "LerpInt", id, context)
               Command.SINGLE_SUCCESS
